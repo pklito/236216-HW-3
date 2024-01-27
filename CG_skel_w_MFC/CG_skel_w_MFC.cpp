@@ -166,6 +166,9 @@ int my_main( int argc, char **argv )
 	initMenu();
 	
 
+	renderer->Init();
+	renderer->SetDemoBuffer();
+	renderer->SwapBuffers();
 	glutMainLoop();
 	delete scene;
 	delete renderer;
