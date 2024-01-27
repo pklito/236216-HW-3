@@ -49,22 +49,7 @@ void Renderer::SetDemoBuffer()
 
 void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals = NULL)
 {
-	if ( !vertices || vertices->size() % 3 != 0) {
-		std::cerr << "Error: Number of vertices must be a multiple of 3 for triangles." << std::endl;
-		return;
-	}
-
-	glBegin(GL_TRIANGLES);
-
-	for (size_t i = 0; i < vertices->size(); ++i) {
-		if (normals) {
-			glNormal3f((*normals)[i].x, (*normals)[i].y, (*normals)[i].z);
-		}
-
-		glVertex3f((*vertices)[i].x, (*vertices)[i].y, (*vertices)[i].z);
-	}
-
-	glEnd();
+	
 }
 
 
