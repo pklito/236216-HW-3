@@ -192,3 +192,51 @@ void MeshModel::normalToFace()
 	draw();
 
 }
+
+void MeshModel::calculateBoundingBox()
+{
+	GLfloat max_x = vertex_positions[0].x;
+	GLfloat min_x = vertex_positions[0].x;
+
+	GLfloat max_y = vertex_positions[0].y;
+	GLfloat min_y = vertex_positions[0].y;
+
+	GLfloat max_z = vertex_positions[0].z;
+	GLfloat min_z = vertex_positions[0].z;
+
+	int i = 0;
+	while (i != sizeof(vertex_positions) / sizeof(vec3)) {
+		if (vertex_positions[i].x > max_x)
+		{
+			max_x = vertex_positions[i].x;
+		}
+		if (vertex_positions[i].x < min_x)
+		{
+			min_x = vertex_positions[i].x;
+		}
+		if (vertex_positions[i].y > max_y)
+		{
+			max_y = vertex_positions[i].y;
+		}
+		if (vertex_positions[i].y < min_y)
+		{
+			min_y = vertex_positions[i].y;
+		}
+		if (vertex_positions[i].z > max_z)
+		{
+			max_z = vertex_positions[i].z;
+		}
+		if (vertex_positions[i].z < min_z)
+		{
+			min_z = vertex_positions[i].z;
+		}
+	}
+	bounding_box[0] = vec3(max_x, max_y, max_z);
+	bounding_box[1] = vec3(max_x, max_y, min_z);
+	bounding_box[2] = vec3(max_x, min_y, max_z);
+	bounding_box[3] = vec3(max_x, min_y, min_z);
+	bounding_box[4] = vec3(min_x, max_y, max_z);
+	bounding_box[5] = vec3(min_x, max_y, min_z);
+	bounding_box[6] = vec3(min_x, min_y, max_z);
+	bounding_box[7] = vec3(min_x, min_y, min_z);
+}
