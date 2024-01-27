@@ -126,3 +126,69 @@ void MeshModel::draw()
 {
 	
 }
+
+void MeshModel::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans) 
+{
+	int i = 0;
+	while (i != sizeof(vertex_positions) / sizeof(vec3)) {
+		vec3 current_vertex = vertex_positions[i];
+
+		current_vertex[0] += x_trans;
+		current_vertex[1] += y_trans;
+		current_vertex[2] += z_trans;
+		i++;
+	}
+}
+
+void MeshModel::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale)
+{
+	if (x_scale == 0 || y_scale == 0 || z_scale == 0) {
+		return;
+	}
+
+	int i = 0;
+	while (i != sizeof(vertex_positions) / sizeof(vec3)) {
+		vec3 current_vertex = vertex_positions[i];
+
+		current_vertex[0] *= x_scale;
+		current_vertex[1] *= y_scale;
+		current_vertex[2] *= z_scale;
+		i++;
+	}
+}
+
+void MeshModel::rotate(GLfloat theta_angle)
+{
+	int i = 0;
+	while (i != sizeof(vertex_positions) / sizeof(vec3)) {
+		vec3 current_vertex = vertex_positions[i];
+		mat4 rotation_matrixX = RotateX(theta_angle);
+		vec3 rotated_point = vec3(rotation_matrixX * vec4(current_vertex, 1.0f));
+		vertex_positions[i] = rotated_point;
+		i++;
+	}
+	
+}
+
+vec3 calculateNormal(vec3 first_point, vec3 second_point, vec3 third_point)
+{
+	vec3 a = third_point - first_point;
+	vec3 b = second_point - first_point;
+
+	vec3 c = cross(a, b);
+	
+	return normalize(c);
+}
+
+void MeshModel::normalToFace() 
+{
+	int i = 0;
+	while (i != sizeof(vertex_positions) / sizeof(vec3)) {
+		vec3 curr_normal = calculateNormal(vertex_positions[i], vertex_positions[i+1], vertex_positions[i+2]);
+		normals[2*i/3] = curr_normal;
+		normals[(2 * i / 3) + 1] = (vertex_positions[i] + vertex_positions[i + 1] + vertex_positions[i + 2]) / 3;
+		i += 3;
+	}
+	draw();
+
+}
