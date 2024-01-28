@@ -11,6 +11,7 @@ class MeshModel : public Model
 protected :
 	MeshModel() {}
 	vec3 *vertex_positions;
+	int face_count;
 	//add more attributes
 	mat4 _world_transform;
 	mat3 _normal_transform;
