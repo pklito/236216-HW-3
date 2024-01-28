@@ -20,6 +20,7 @@
 #include "InitShader.h"
 #include "Scene.h"
 #include "Renderer.h"
+#include "MeshModel.h"
 #include <string>
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
@@ -155,6 +156,10 @@ int my_main( int argc, char **argv )
 	
 	renderer = new Renderer(512,512);
 	scene = new Scene(renderer);
+	
+	std::cout << "start";
+	MeshModel* demo_object = new MeshModel("obj_example.obj");
+	std::cout << " end" << std::endl;
 	//----------------------------------------------------------------------------
 	// Initialize Callbacks
 
@@ -165,9 +170,9 @@ int my_main( int argc, char **argv )
 	glutReshapeFunc( reshape );
 	initMenu();
 	
-
 	renderer->Init();
 	renderer->SetDemoBuffer();
+	demo_object->draw();
 	renderer->SwapBuffers();
 	glutMainLoop();
 	delete scene;
