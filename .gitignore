@@ -35,3 +35,4 @@
 *.ipdb
 *.tlog
 *.log
+CG_skel_w_MFC/Release/*
