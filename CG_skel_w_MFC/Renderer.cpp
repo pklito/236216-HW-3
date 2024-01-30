@@ -47,6 +47,9 @@ void Renderer::SetDemoBuffer()
 	}
 }
 
+void Renderer::Init(){
+	CreateBuffers(m_width,m_height);
+}
 
 
 
