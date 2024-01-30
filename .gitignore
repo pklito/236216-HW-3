@@ -31,3 +31,7 @@
 *.out
 *.app
 .vs/*
+*.iobj
+*.ipdb
+*.tlog
+*.log
