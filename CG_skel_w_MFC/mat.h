@@ -22,9 +22,9 @@ class mat2 {
     mat2( const vec2& a, const vec2& b )
 	{ _m[0] = a;  _m[1] = b;  }
 
-	/*BUG*/
+	/*this BUG we are not sure about yet*/
     mat2( GLfloat m00, GLfloat m10, GLfloat m01, GLfloat m11 )
-	{ _m[0] = vec2( 0, 0 ); _m[1] = vec2( 0, 0 ); }
+	{ _m[0] = vec2( m00, m01 ); _m[1] = vec2( m10, m11 ); }
 
     mat2( const mat2& m ) {
 	if ( *this != m ) {
@@ -49,7 +49,7 @@ class mat2 {
 
 	
     mat2 operator - ( const mat2& m ) const
-	{ return mat2( 0, 0 ); } /*BUG*/
+	{ return mat2(_m[0] - m[0], _m[1] - m[1]); } /*there was a BUG here*/
 
     mat2 operator * ( const GLfloat s ) const 
 	{ return mat2( s*_m[0], s*_m[1] ); }
@@ -64,11 +64,12 @@ class mat2 {
 	{ return m * s; }
 	
     mat2 operator * ( const mat2& m ) const {
-	mat2  a( 0.0 );
+        vec2 a = _m[0] * m[0];
+        vec2 b = _m[1] * m[1];
 
-	/*BUG*/
+	/*there was a BUG here*/
 
-	return a;
+	return mat2(a, b);
     }
 
     //
@@ -81,7 +82,7 @@ class mat2 {
     }
 
     mat2& operator -= ( const mat2& m ) {
-	_m[0] -= 0;  _m[1] -= 0;  /*BUG*/
+	_m[0] -= m[0];  _m[1] -= m[1];  /*there was a BUG here*/
 	return *this;
     }
 
@@ -91,11 +92,12 @@ class mat2 {
     }
 
     mat2& operator *= ( const mat2& m ) {
-	mat2  a( 0.0 );
+        _m[0] *= m[0];
+        _m[1] *= m[1];
 
-	/*BUG*/
+	/*there was a BUG here*/
 
-	return *this = a;
+	return *this;
     }
     
     mat2& operator /= ( const GLfloat s ) {
@@ -278,9 +280,9 @@ class mat3 {
     //
 
     vec3 operator * ( const vec3& v ) const {  // m * v
-	return vec3( 0,
-		     0, /*BUG*/
-		     0 );
+	return vec3( _m[0].x*v.x + _m[0].y*v.y + _m[0].z*v.z,
+        _m[1].x * v.x + _m[1].y * v.y + _m[1].z * v.z, /*there was a BUG here*/
+        _m[2].x * v.x + _m[2].y * v.y + _m[2].z * v.z);
     }
 	
     //
@@ -321,7 +323,7 @@ mat3 matrixCompMult( const mat3& A, const mat3& B ) {
 
 inline
 mat3 transpose( const mat3& A ) {
-    return mat3( 0,0,0,0,0,0,0,0,0); /*BUG*/
+    return mat3( vec3(A[0][0],A[1][0],A[2][0]),vec3(A[0][1],A[1][1],A[2][1]),vec3(A[0][2],A[1][2],A[2][2])); /*there was a BUG here*/
 }
 
 //----------------------------------------------------------------------------
@@ -558,9 +560,9 @@ inline
 mat4 Translate( const GLfloat x, const GLfloat y, const GLfloat z )
 {
     mat4 c;
-    c[0][0] = x;
-    c[0][0] = y;  /*BUG*/
-    c[0][0] = z;
+    c[0] += x;
+    c[1] += y;  /*there was a BUG here*/
+    c[2] += z;
     return c;
 }
 
@@ -585,9 +587,9 @@ inline
 mat4 Scale( const GLfloat x, const GLfloat y, const GLfloat z )
 {
     mat4 c;
-    c[0][0] = x;
-    c[0][0] = y; /*BUG*/
-    c[0][0] = z;
+    c[0] *= x;
+    c[1] *= y; /*there was a BUG*/
+    c[2] *= z;
     return c;
 }
 
