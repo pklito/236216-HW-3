@@ -107,7 +107,7 @@ void MeshModel::loadFile(string fileName)
 	//f 1 3 4
 	//Then vertex_positions should contain:
 	//vertex_positions={v1,v2,v3,v1,v3,v4}
-
+	face_count = faces.size();
 	vertex_positions = new vec3[3 * faces.size()]; //In our project every face is a triangle. BUG FIXED
 	// iterate through all stored faces and create triangles
 	int k=0;
@@ -124,6 +124,14 @@ void MeshModel::loadFile(string fileName)
 
 void MeshModel::draw()
 {
+	std::cout << "Writing " << face_count << " faces:" << std::endl;
+	for(int i = 0; i < 3*face_count; i++){
+		std::cout << vertex_positions[i] << " ";
+		if(i%3 == 2)
+			std::cout << std::endl;
+	}	
+
+		std::cout << std::endl;
 	
 }
 

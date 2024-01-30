@@ -11,6 +11,7 @@ class MeshModel : public Model
 protected :
 	MeshModel() {}
 	vec3 *vertex_positions;
+	int face_count;
 	vec3* normals;
 	vec3 bounding_box[8];
 	//add more attributes
