@@ -126,3 +126,117 @@ void MeshModel::draw()
 {
 	
 }
+
+void MeshModel::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans) 
+{
+	int i = 0;
+	while (i != sizeof(vertex_positions) / sizeof(vec3)) {
+		vec3 current_vertex = vertex_positions[i];
+
+		current_vertex[0] += x_trans;
+		current_vertex[1] += y_trans;
+		current_vertex[2] += z_trans;
+		i++;
+	}
+}
+
+void MeshModel::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale)
+{
+	if (x_scale == 0 || y_scale == 0 || z_scale == 0) {
+		return;
+	}
+
+	int i = 0;
+	while (i != sizeof(vertex_positions) / sizeof(vec3)) {
+		vec3 current_vertex = vertex_positions[i];
+
+		current_vertex[0] *= x_scale;
+		current_vertex[1] *= y_scale;
+		current_vertex[2] *= z_scale;
+		i++;
+	}
+}
+
+void MeshModel::rotate(GLfloat theta_angle)
+{
+	int i = 0;
+	while (i != sizeof(vertex_positions) / sizeof(vec3)) {
+		vec3 current_vertex = vertex_positions[i];
+		mat4 rotation_matrixX = RotateX(theta_angle);
+		vec3 rotated_point = vec3(rotation_matrixX * vec4(current_vertex, 1.0f));
+		vertex_positions[i] = rotated_point;
+		i++;
+	}
+	
+}
+
+vec3 calculateNormal(vec3 first_point, vec3 second_point, vec3 third_point)
+{
+	vec3 a = third_point - first_point;
+	vec3 b = second_point - first_point;
+
+	vec3 c = cross(a, b);
+	
+	return normalize(c);
+}
+
+void MeshModel::normalToFace() 
+{
+	int i = 0;
+	while (i != sizeof(vertex_positions) / sizeof(vec3)) {
+		vec3 curr_normal = calculateNormal(vertex_positions[i], vertex_positions[i+1], vertex_positions[i+2]);
+		normals[2*i/3] = curr_normal;
+		normals[(2 * i / 3) + 1] = (vertex_positions[i] + vertex_positions[i + 1] + vertex_positions[i + 2]) / 3;
+		i += 3;
+	}
+	draw();
+
+}
+
+void MeshModel::calculateBoundingBox()
+{
+	GLfloat max_x = vertex_positions[0].x;
+	GLfloat min_x = vertex_positions[0].x;
+
+	GLfloat max_y = vertex_positions[0].y;
+	GLfloat min_y = vertex_positions[0].y;
+
+	GLfloat max_z = vertex_positions[0].z;
+	GLfloat min_z = vertex_positions[0].z;
+
+	int i = 0;
+	while (i != sizeof(vertex_positions) / sizeof(vec3)) {
+		if (vertex_positions[i].x > max_x)
+		{
+			max_x = vertex_positions[i].x;
+		}
+		if (vertex_positions[i].x < min_x)
+		{
+			min_x = vertex_positions[i].x;
+		}
+		if (vertex_positions[i].y > max_y)
+		{
+			max_y = vertex_positions[i].y;
+		}
+		if (vertex_positions[i].y < min_y)
+		{
+			min_y = vertex_positions[i].y;
+		}
+		if (vertex_positions[i].z > max_z)
+		{
+			max_z = vertex_positions[i].z;
+		}
+		if (vertex_positions[i].z < min_z)
+		{
+			min_z = vertex_positions[i].z;
+		}
+	}
+	bounding_box[0] = vec3(max_x, max_y, max_z);
+	bounding_box[1] = vec3(max_x, max_y, min_z);
+	bounding_box[2] = vec3(max_x, min_y, max_z);
+	bounding_box[3] = vec3(max_x, min_y, min_z);
+	bounding_box[4] = vec3(min_x, max_y, max_z);
+	bounding_box[5] = vec3(min_x, max_y, min_z);
+	bounding_box[6] = vec3(min_x, min_y, max_z);
+	bounding_box[7] = vec3(min_x, min_y, min_z);
+}
