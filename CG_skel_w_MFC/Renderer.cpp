@@ -47,6 +47,10 @@ void Renderer::SetDemoBuffer()
 	}
 }
 
+void Renderer::DrawLine(const vec3 edge1, const vec3 edge2, vec3 normal){
+	
+}
+
 void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals = NULL)
 {
 	
