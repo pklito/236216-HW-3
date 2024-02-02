@@ -47,10 +47,26 @@ void Renderer::SetDemoBuffer()
 	}
 }
 
-void Renderer::DrawLine(const vec3 edge1, const vec3 edge2, vec3 normal){
+/*
+ This function gets two pixels on screen and draws the line between them (rasterization)
+ vert1 + vert2 = ends of the edge
+ normal = direction of normal.
+*/
+void Renderer::DrawLine(const vec2 vert1, const vec2 vert2, vec2 normal){
 	
 }
 
+/**
+ * This function takes a world space object, and draws it's triangles on screen.
+ * 
+ * This function
+ * - converts object space to camera space (CameraTransform)
+ * - converts camera space to screen space (3D to 2D)
+ * - calls `DrawLine` to set the pixels on screen.
+ * Parameters:
+ * vertices: vector of the world space vertices
+ * normals: directions of the respective world space normals.
+ */
 void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals = NULL)
 {
 	
