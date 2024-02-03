@@ -52,7 +52,7 @@ void Renderer::SetDemoBuffer()
  vert1 + vert2 = ends of the edge
  normal = direction of normal.
 */
-void Renderer::DrawLine(const vec2 vert1, const vec2 vert2, vec2 normal){
+void Renderer::DrawLine(const vec2 vert1, const vec2 vert2){
 	
 }
 
@@ -69,7 +69,23 @@ void Renderer::DrawLine(const vec2 vert1, const vec2 vert2, vec2 normal){
  */
 void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals = NULL)
 {
-	
+	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
+	vector<vec3>::const_iterator normal = normals != NULL ? normals->begin() : vertices->begin();
+	for(auto it = vertices->begin(); it != vertices->end(); ++it, ++normal){
+		/*
+		TRANSFORMATIONS
+		*/
+		/*
+		PROJECTIONS
+		*/
+
+		if(normals){
+			//DrawLine(vert1, vert2, normal);
+		}
+		else{
+			//DrawLine(vert1,vert2);
+		}
+	}
 }
 
 void Renderer::Init(){

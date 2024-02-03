@@ -28,7 +28,7 @@ public:
 	Renderer(int width, int height);
 	~Renderer(void);
 	void Init();
-	void DrawLine(const vec2 edge1, const vec2 edge2, const vec2 normal);
+	void DrawLine(const vec2 vert1, const vec2 vert2);
 	void DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals=NULL);
 	void SetCameraTransform(const mat4& cTransform);
 	void SetProjection(const mat4& projection);
