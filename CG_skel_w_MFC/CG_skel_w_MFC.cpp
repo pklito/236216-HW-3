@@ -173,6 +173,7 @@ int my_main( int argc, char **argv )
 	renderer->Init();
 	renderer->SetDemoBuffer();
 	demo_object->draw();
+	renderer->DrawLine(vec2(25,25),vec2(50,50));
 	renderer->SwapBuffers();
 	glutMainLoop();
 	delete scene;
