@@ -132,6 +132,13 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 	}
 }
 
+void Renderer::DrawPoints(const vec3 vertex)
+{
+    m_outBuffer[INDEX(m_width, toupper(vertices->x), toupper(vertices->y), 0)] = 0;
+    m_outBuffer[INDEX(m_width, toupper(vertices->x), toupper(vertices->y), 1)] = 1;
+    m_outBuffer[INDEX(m_width, toupper(vertices->x), toupper(vertices->y), 2)] = 0;
+}
+
 void Renderer::Init(){
 	CreateBuffers(m_width,m_height);
 }

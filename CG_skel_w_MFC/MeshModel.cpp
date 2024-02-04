@@ -124,14 +124,8 @@ void MeshModel::loadFile(string fileName)
 
 void MeshModel::draw(Renderer* renderer)
 {
-	std::cout << "Writing " << face_count << " faces:" << std::endl;
-	for(int i = 0; i < 3*face_count; i++){
-		std::cout << vertex_positions[i] << " ";
-		if(i%3 == 2)
-			std::cout << std::endl;
-	}	
-
-		std::cout << std::endl;
+	vector<vec3> vec(vertex_positions,vertex_positions + 3*face_count);
+	renderer->DrawTriangles(&vec);
 	
 }
 
