@@ -30,7 +30,7 @@ public:
 	void Init();
 	void DrawLine(vec2 vert1, vec2 vert2);
 	void DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals=NULL);
-	void DrawPoints(const vec3 vertex);
+	void DrawPoint(const vec3 vertex);
 	void SetCameraTransform(const mat4& cTransform);
 	void SetProjection(const mat4& projection);
 	void SetObjectMatrices(const mat4& oTransform, const mat3& nTransform);

@@ -124,9 +124,9 @@ void MeshModel::loadFile(string fileName)
 
 void MeshModel::draw(Renderer* renderer)
 {
-	vector<vec3> vec(vertex_positions,vertex_positions + 3*face_count);
-	renderer->DrawTriangles(&vec);
-	
+    for (int i = 0; i < 3 * face_count; i++) {
+        renderer->DrawPoint(vertex_positions[i]);
+    }
 }
 
 void MeshModel::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans) 
