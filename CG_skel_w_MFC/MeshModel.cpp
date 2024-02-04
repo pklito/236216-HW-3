@@ -122,7 +122,7 @@ void MeshModel::loadFile(string fileName)
 
 
 
-void MeshModel::draw()
+void MeshModel::draw(Renderer* renderer)
 {
 	std::cout << "Writing " << face_count << " faces:" << std::endl;
 	for(int i = 0; i < 3*face_count; i++){

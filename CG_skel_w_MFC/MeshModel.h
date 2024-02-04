@@ -23,7 +23,7 @@ public:
 	MeshModel(string fileName);
 	~MeshModel(void);
 	void loadFile(string fileName);
-	void draw();
+	void draw(Renderer* renderer);
 
 	void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans);
 	void rotate(GLfloat theta_angle);
