@@ -106,7 +106,7 @@ void Renderer::DrawLine(vec2 vert1, vec2 vert2){
  * vertices: vector of the world space vertices
  * normals: directions of the respective world space normals.
  */
-void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals = NULL)
+void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals)
 {
 	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
 	vector<vec3>::const_iterator normal = normals != NULL ? normals->begin() : vertices->begin();

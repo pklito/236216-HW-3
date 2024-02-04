@@ -171,8 +171,8 @@ void MeshModel::rotate(GLfloat theta_angle)
 	while (i != sizeof(vertex_positions) / sizeof(vec3)) {
 		vec3 current_vertex = vertex_positions[i];
 		mat4 rotation_matrixX = RotateX(theta_angle);
-		vec3 rotated_point = vec3(rotation_matrixX * vec4(current_vertex, 1.0f));
-		vertex_positions[i] = rotated_point;
+		vec4 rotated_point = vec4(rotation_matrixX * vec4(current_vertex, 1.0f));
+		vertex_positions[i] = vec3(rotated_point.x,rotated_point.y,rotated_point.z);
 		i++;
 	}
 	
