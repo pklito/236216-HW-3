@@ -56,8 +56,13 @@ void Renderer::DrawLine(vec2 vert1, vec2 vert2){
 	//flip the axis so that slope is -1 <= m <= 1
 	bool flipped = false;
 	if(abs(vert1.y-vert2.y) > abs(vert1.x - vert2.x)){
+		auto temp = vert1.y;
 		vert1.y = vert1.x;
+		vert1.x = temp;
+
+		temp = vert2.y;
 		vert2.y = vert2.x;
+		vert2.x = temp;
 		flipped = true;
 	}
 	//swap the order so that vert1 is left of vert2
