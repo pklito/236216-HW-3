@@ -47,7 +47,7 @@ void Renderer::SetDemoBuffer()
 	}
 }
 
-void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals = NULL)
+void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals)
 {
 	
 }
