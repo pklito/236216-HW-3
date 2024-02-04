@@ -191,7 +191,7 @@ void MeshModel::normalToFace()
 		normals[(2 * i / 3) + 1] = (vertex_positions[i] + vertex_positions[i + 1] + vertex_positions[i + 2]) / 3;
 		i += 3;
 	}
-	draw();
+	//draw();
 
 }
 

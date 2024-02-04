@@ -172,7 +172,7 @@ int my_main( int argc, char **argv )
 	
 	renderer->Init();
 	renderer->SetDemoBuffer();
-	demo_object->draw();
+	demo_object->draw(renderer);
 	renderer->DrawLine(vec2(25,25),vec2(50,25));
 	renderer->DrawLine(vec2(250,25),vec2(270,100));
 	renderer->DrawLine(vec2(250,25),vec2(270,30));
