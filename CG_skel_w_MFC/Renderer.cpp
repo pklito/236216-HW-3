@@ -132,8 +132,9 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 	}
 }
 
-void Renderer::DrawPoint(const vec3 vertex)
+void Renderer::DrawPoint(const vec3& vertex)
 {
+	std::cout << vertex << std::endl;
    m_outBuffer[INDEX(m_width, CLAMP(toupper(100*vertex.x),0,m_width), CLAMP(toupper(100*vertex.y),0,m_height),0)] = 0;
    m_outBuffer[INDEX(m_width, CLAMP(toupper(100*vertex.x),0,m_width), CLAMP(toupper(100*vertex.y),0,m_height),1)] = 1;
    //m_outBuffer[INDEX(m_width, toupper(100*vertex.x), toupper(100*vertex.y), 2)] = 0;
