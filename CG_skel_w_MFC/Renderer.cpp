@@ -116,9 +116,18 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
 	vector<vec3>::const_iterator normal = normals != NULL ? normals->begin() : vertices->begin();
 	for(auto it = vertices->begin(); it != vertices->end(); ++it, ++normal){
+		//get the next face
+		vec4 vert1 = vec4(*it);
+		vec4 vert2 = vec4(*(++it));
+		vec4 vert3 = vec4(*(++it));
+		
 		/*
 		TRANSFORMATIONS
 		*/
+		vert1 = mat_transform * vert1;
+		vert2 = mat_transform * vert2;
+		vert3 = mat_transform * vert3;
+
 		/*
 		PROJECTIONS
 		*/
@@ -138,6 +147,14 @@ void Renderer::DrawPoint(const vec3& vertex)
    m_outBuffer[INDEX(m_width, CLAMP(toupper(100*vertex.x),0,m_width), CLAMP(toupper(100*vertex.y),0,m_height),0)] = 0;
    m_outBuffer[INDEX(m_width, CLAMP(toupper(100*vertex.x),0,m_width), CLAMP(toupper(100*vertex.y),0,m_height),1)] = 1;
    //m_outBuffer[INDEX(m_width, toupper(100*vertex.x), toupper(100*vertex.y), 2)] = 0;
+}
+
+
+void Renderer::SetCameraTransform(const mat4& cTransform){
+	mat_transform = cTransform;
+}
+void Renderer::SetProjection(const mat4& projection){
+	mat_project = projection;
 }
 
 void Renderer::Init(){

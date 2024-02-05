@@ -11,6 +11,8 @@ class Renderer
 	float *m_outBuffer; // 3*width*height
 	float *m_zbuffer; // width*height
 	int m_width, m_height;
+	mat4 mat_transform;
+	mat4 mat_project;
 
 	void CreateBuffers(int width, int height);
 	void CreateLocalBuffer();
