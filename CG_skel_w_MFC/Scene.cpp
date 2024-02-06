@@ -23,3 +23,33 @@ void Scene::drawDemo()
 	m_renderer->SetDemoBuffer();
 	m_renderer->SwapBuffers();
 }
+
+
+void Camera::setTransformation(const mat4& transform){
+
+}
+void Camera::setProjection(const mat4& perspective){
+
+}
+mat4 Camera::getProjection(){
+	return projection;
+}
+mat4 Camera::getTransform(){
+	return cTransform;
+}
+
+void Camera::LookAt(const vec4& eye, const vec4& at, const vec4& up ){
+
+}
+void Camera::Ortho( const float left, const float right, const float bottom, const float top, const float zNear, const float zFar ){
+
+}
+
+void Camera::Frustum( const float left, const float right, const float bottom, const float top, const float zNear, const float zFar ){
+
+}
+
+void Camera::Perspective( const float fovy, const float aspect,
+	const float zNear, const float zFar){
+
+}
