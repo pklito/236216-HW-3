@@ -31,6 +31,7 @@
 
 Scene *scene;
 Renderer *renderer;
+Camera *camera;
 
 int last_x,last_y;
 bool lb_down,rb_down,mb_down;
@@ -156,6 +157,7 @@ int my_main( int argc, char **argv )
 	
 	renderer = new Renderer(512,512);
 	scene = new Scene(renderer);
+	camera = new Camera();
 	
 	std::cout << "start";
 	MeshModel* demo_object = new MeshModel("obj_example.obj");
@@ -170,8 +172,16 @@ int my_main( int argc, char **argv )
 	glutReshapeFunc( reshape );
 	initMenu();
 	
+	//Init the renderer
 	renderer->Init();
-	renderer->SetDemoBuffer();
+	
+	//Set the camera projection we want and send it to renderer (vec3 cast to vec4)
+	//camera->LookAt(vec3(1,0,0),vec3(-1,0,-2),vec3(0,1,0));
+
+	renderer->SetCameraTransformInverse(camera->getTransformInverse());
+	renderer->SetProjection(camera->getProjection());
+
+
 	demo_object->draw(renderer);
 	renderer->SwapBuffers();
 	glutMainLoop();

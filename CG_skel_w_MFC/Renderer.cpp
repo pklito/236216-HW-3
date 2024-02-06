@@ -124,9 +124,9 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		/*
 		TRANSFORMATIONS + PROJECTION ( P * Tc-1 * v)
 		*/
-		vert1 = toEuclidian(mat_project * (mat_transform * vert1));
-		vert2 = toEuclidian(mat_project * (mat_transform * vert2));
-		vert3 = toEuclidian(mat_project * (mat_transform * vert3));
+		vert1 = toEuclidian(mat_project * (mat_transform_inverse * vert1));
+		vert2 = toEuclidian(mat_project * (mat_transform_inverse * vert2));
+		vert3 = toEuclidian(mat_project * (mat_transform_inverse * vert3));
 
 		/*
 		Clipspace coordinates to screenspace coordinates
@@ -156,8 +156,8 @@ void Renderer::DrawPoint(const vec3& vertex)
 }
 
 
-void Renderer::SetCameraTransform(const mat4& cTransform){
-	mat_transform = cTransform;
+void Renderer::SetCameraTransformInverse(const mat4& cTransform){
+	mat_transform_inverse = cTransform;
 }
 void Renderer::SetProjection(const mat4& projection){
 	mat_project = projection;
