@@ -411,9 +411,12 @@ vec3 cross(const vec4& a, const vec4& b )
 		 a.x * b.y - a.y * b.x );
 }
 
+inline vec3 toVec3(const vec4& v){
+    return vec3(v.x,v.y,v.z);
+}
+
 inline vec3 toEuclidian(const vec4& v){
-    //return vec3(v.x/v.w, v.y/v.w, v.z/v.w);   more proper result
-    return vec3(v.x, v.y, v.z); //for now i'd rather no floating point errors or issues
+    return vec3(v.x/v.w, v.y/v.w, v.z/v.w);
 }
 
 //----------------------------------------------------------------------------

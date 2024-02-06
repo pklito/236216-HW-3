@@ -44,7 +44,7 @@ mat4 Camera::getTransformInverse(){
 
 void Camera::LookAt(const vec4& eye, const vec4& at, const vec4& up ){
 	/* Create 3 directional vectors (Tut 3: slide 9)*/
-	vec4 n = vec4(normalize(toEuclidian(eye - at)));	//I make it euclidian because normalize includes W, which is 1.
+	vec4 n = vec4(normalize(toVec3(eye - at)));	//I make it Vec3 because normalizing with W would be wrong
 	vec4 u = vec4(cross(up, n),0);
 	vec4 v = vec4(cross(n, u),0);
 

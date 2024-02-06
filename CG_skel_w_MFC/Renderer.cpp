@@ -108,7 +108,7 @@ void Renderer::DrawLine(vec2 vert1, vec2 vert2){
  * - converts camera space to screen space (3D to 2D)
  * - calls `DrawLine` to set the pixels on screen.
  * Parameters:
- * vertices: vector of the world space vertices
+ * vertices: vector of the camera space vertices
  * normals: directions of the respective world space normals.
  */
 void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals)
@@ -122,20 +122,26 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		vec4 vert3 = vec4(*(++it));
 		
 		/*
-		TRANSFORMATIONS
+		TRANSFORMATIONS + PROJECTION ( P * Tc-1 * v)
 		*/
-		vert1 = mat_transform * vert1;
-		vert2 = mat_transform * vert2;
-		vert3 = mat_transform * vert3;
+		vert1 = toEuclidian(mat_project * (mat_transform * vert1));
+		vert2 = toEuclidian(mat_project * (mat_transform * vert2));
+		vert3 = toEuclidian(mat_project * (mat_transform * vert3));
 
 		/*
-		PROJECTIONS
+		Clipspace coordinates to screenspace coordinates
 		*/
-
+		vec2 p1 = vec2(RANGE(vert1.x,-1,1,0,m_width), RANGE(vert1.y,-1,1,0,m_height));
+		vec2 p2 = vec2(RANGE(vert2.x,-1,1,0,m_width), RANGE(vert2.y,-1,1,0,m_height));
+		vec2 p3 = vec2(RANGE(vert3.x,-1,1,0,m_width), RANGE(vert3.y,-1,1,0,m_height));
+	
 		if(normals){
 			//DrawLine(vert1, vert2, normal);
 		}
 		else{
+			DrawLine(p1, p2);
+			DrawLine(p2, p3);
+			DrawLine(p3, p1);
 			//DrawLine(vert1,vert2);
 		}
 	}
