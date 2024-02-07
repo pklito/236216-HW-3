@@ -53,6 +53,11 @@ void Renderer::SetDemoBuffer()
  normal = direction of normal.
 */
 void Renderer::DrawLine(vec2 vert1, vec2 vert2){
+	//Temp solution. drawing a line out of bounds crashes the code!
+	if(vert1.x < 0 || vert2.x < 0 || vert1.x >= m_width-1 || vert2.x >= m_width-1 ||
+	   vert1.y < 0 || vert2.y < 0 || vert2.y >= m_height-1 || vert1.y >= m_height-1){
+		return;
+	   }
 	//flip the axis so that slope is -1 <= m <= 1
 	bool flipped = false;
 	if(abs(vert1.y-vert2.y) > abs(vert1.x - vert2.x)){
@@ -120,6 +125,8 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		vec4 vert1 = vec4(*it);
 		vec4 vert2 = vec4(*(++it));
 		vec4 vert3 = vec4(*(++it));
+
+		std::cout << vert1 << " " << vert2 << " " << vert3 << std::endl;
 		
 		/*
 		TRANSFORMATIONS + PROJECTION ( P * Tc-1 * v)
@@ -135,16 +142,21 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		vec2 p2 = vec2(RANGE(vert2.x,-1,1,0,m_width), RANGE(vert2.y,-1,1,0,m_height));
 		vec2 p3 = vec2(RANGE(vert3.x,-1,1,0,m_width), RANGE(vert3.y,-1,1,0,m_height));
 	
+		std::cout << "not here" << std::endl;
 		if(normals){
 			//DrawLine(vert1, vert2, normal);
 		}
 		else{
+			std::cout << p1 << " " << p2 << " " << p3 << std::endl;
 			DrawLine(p1, p2);
+			
+		std::cout << "or here" << std::endl;
 			DrawLine(p2, p3);
 			DrawLine(p3, p1);
 			//DrawLine(vert1,vert2);
 		}
 	}
+	std::cout << "DONE!" << std::endl;
 }
 
 void Renderer::DrawPoint(const vec3& vertex)

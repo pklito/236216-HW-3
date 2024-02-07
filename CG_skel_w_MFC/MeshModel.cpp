@@ -92,6 +92,12 @@ void MeshModel::loadFile(string fileName)
 			vertices.push_back(vec3fFromStream(issLine));
 		else if (lineType == "f")	//BUG FIXED
 			faces.push_back(issLine);
+		else if (lineType == "vn"){
+			//normal
+		}
+		else if (lineType == "vt"){
+			//texture
+		}
 		else if (lineType == "#" || lineType == "")
 		{
 			// comment / empty line
