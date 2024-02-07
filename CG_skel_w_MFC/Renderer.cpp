@@ -54,8 +54,8 @@ void Renderer::SetDemoBuffer()
 */
 void Renderer::DrawLine(vec2 vert1, vec2 vert2){
 	//Temp solution. drawing a line out of bounds crashes the code!
-	if(vert1.x < 0 || vert2.x < 0 || vert1.x >= m_width-1 || vert2.x >= m_width-1 ||
-	   vert1.y < 0 || vert2.y < 0 || vert2.y >= m_height-1 || vert1.y >= m_height-1){
+	if(vert1.x < 1 || vert2.x < 1 || vert1.x >= m_width-1 || vert2.x >= m_width-1 ||
+	   vert1.y < 1 || vert2.y < 1 || vert2.y >= m_height-1 || vert1.y >= m_height-1){
 		return;
 	   }
 	//flip the axis so that slope is -1 <= m <= 1
