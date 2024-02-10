@@ -32,6 +32,7 @@
 Scene *scene;
 Renderer *renderer;
 Camera *camera;
+float m_time;
 
 int last_x,last_y;
 bool lb_down,rb_down,mb_down;
@@ -41,7 +42,15 @@ bool lb_down,rb_down,mb_down;
 
 void display( void )
 {
+	std::cout << "<FRAME>" << std::endl;
+	m_time += 0.1;
+	camera->LookAt(vec3(1,m_time,1),vec3(-1,0,0),vec3(0,1,0));
+
+	renderer->SetCameraTransformInverse(camera->getTransformInverse());
+	renderer->SetProjection(camera->getProjection());
+
 	scene->draw();
+	std::cout << "<FRAME END>" << ::std::endl;
 }
 
 void reshape( int width, int height )
