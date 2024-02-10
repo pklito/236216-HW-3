@@ -560,9 +560,9 @@ inline
 mat4 Translate( const GLfloat x, const GLfloat y, const GLfloat z )
 {
     mat4 c;
-    c[0] += x;
-    c[1] += y;  /*there was a BUG here*/
-    c[2] += z;
+    c[0][3] += x;
+    c[1][3] += y;  /*there was a BUG here*/
+    c[2][3] += z;
     return c;
 }
 
