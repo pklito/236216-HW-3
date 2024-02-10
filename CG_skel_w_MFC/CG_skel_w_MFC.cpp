@@ -31,6 +31,8 @@
 
 Scene *scene;
 Renderer *renderer;
+Camera *camera;
+float m_time;
 
 int last_x,last_y;
 bool lb_down,rb_down,mb_down;
@@ -40,7 +42,15 @@ bool lb_down,rb_down,mb_down;
 
 void display( void )
 {
-//Call the scene and ask it to draw itself
+	std::cout << "<FRAME>" << std::endl;
+	m_time += 0.1;
+	//camera->LookAt(vec3(1,m_time,1),vec3(-1,0,0),vec3(0,1,0));
+
+	renderer->SetCameraTransformInverse(camera->getTransformInverse());
+	renderer->SetProjection(camera->getProjection());
+
+	scene->draw();
+	std::cout << "<FRAME END>" << ::std::endl;
 }
 
 void reshape( int width, int height )
@@ -156,10 +166,11 @@ int my_main( int argc, char **argv )
 	
 	renderer = new Renderer(512,512);
 	scene = new Scene(renderer);
+	camera = new Camera();
 	
-	std::cout << "start";
-	MeshModel* demo_object = new MeshModel("obj_example.obj");
-	std::cout << " end" << std::endl;
+	std::cout << "[ ] Started Reading objects...";
+	scene->loadOBJModel("meshes/obj_example.obj");
+	std::cout << " Done!" << std::endl;
 	//----------------------------------------------------------------------------
 	// Initialize Callbacks
 
@@ -170,15 +181,18 @@ int my_main( int argc, char **argv )
 	glutReshapeFunc( reshape );
 	initMenu();
 	
+	//Init the renderer
 	renderer->Init();
-	renderer->SetDemoBuffer();
-	demo_object->draw(renderer);
-	renderer->DrawLine(vec2(25,25),vec2(50,25));
-	renderer->DrawLine(vec2(250,25),vec2(270,100));
-	renderer->DrawLine(vec2(250,25),vec2(270,30));
 	
-	renderer->DrawLine(vec2(200,25),vec2(230,20));
-	renderer->SwapBuffers();
+	//Set the camera projection we want and send it to renderer (vec3 cast to vec4)
+	//camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
+	std::cout << "[ ] Camera transform: " << std::endl;
+	std::cout << camera->getTransformInverse() << std::endl;
+	//camera->Ortho(-2,2,0,4,0,8); 
+	renderer->SetCameraTransformInverse(camera->getTransformInverse());
+	renderer->SetProjection(camera->getProjection());
+
+	std::cout << "[V] Done with the initialization! " << std::endl;
 	glutMainLoop();
 	delete scene;
 	delete renderer;
