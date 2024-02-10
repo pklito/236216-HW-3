@@ -3,6 +3,7 @@
 #include "CG_skel_w_MFC.h"
 #include "InitShader.h"
 #include "GL\freeglut.h"
+//#include "imgui.h"
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 
@@ -52,7 +53,7 @@ void Renderer::SetDemoBuffer()
  vert1 + vert2 = ends of the edge
  normal = direction of normal.
 */
-void Renderer::DrawLine(vec2 vert1, vec2 vert2){
+void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor){
 	//Temp solution. drawing a line out of bounds crashes the code!
 
 	//flip the axis so that slope is -1 <= m <= 1
@@ -93,13 +94,12 @@ void Renderer::DrawLine(vec2 vert1, vec2 vert2){
 
 		//light the pixel
 		if(flipped){
-			//inverted y and x (because we swapped them in the beginning)
-			
-			DrawPixel(CLAMP(y,0,m_height-1), CLAMP(x,0,m_width-1), 1, 1, 1);
+			DrawPixel(CLAMP(y,0,m_height-1), CLAMP(x,0,m_width-1), 1, specialColor != 1, specialColor != 2);
 		}
 		else{
-			DrawPixel(CLAMP(x,0,m_width-1), CLAMP(y,0,m_height-1), 1, 1, 1);
+			DrawPixel(CLAMP(x,0,m_width-1), CLAMP(y,0,m_height-1), 1, specialColor != 1, specialColor != 2);
 		}
+			
 	}
 }
 
@@ -126,9 +126,17 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 	for(auto it = vertices->begin(); it != vertices->end(); ++it, ++normal){
 		//get the next face
 		vec4 vert1 = vec4(*it);
-		vec4 vert2 = vec4(*(++it));
-		vec4 vert3 = vec4(*(++it));
+		vec4 vert2 = vec4(*(it+1));
+		vec4 vert3 = vec4(*(it+2));
+		it = it + 2;
 
+		if (normals) {
+			std::cout << "NORMALS IS: " << *normal << std::endl;
+		}
+		vec4 normCoor1 = vec4(*normal);
+		vec4 normCoor2 = normCoor1 + vec4(*(normal + 1));
+		
+		normal = normal + 2;
 		
 		/*
 		TRANSFORMATIONS + PROJECTION ( P * Tc-1 * v)
@@ -137,16 +145,25 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		vert2 = toEuclidian(mat_project * (mat_transform_inverse * vert2));
 		vert3 = toEuclidian(mat_project * (mat_transform_inverse * vert3));
 
-		//std::cout << "face: " << vert1 << " " << vert2 << " " << vert3 << std::endl;
-
+		normCoor1 = toEuclidian(mat_project * (mat_transform_inverse * normCoor1));
+		normCoor2 = toEuclidian(mat_project * (mat_transform_inverse * normCoor2));
 		/*
 		Clipspace coordinates to screenspace coordinates
 		*/
 		vec2 p1 = vec2(RANGE(vert1.x,-1,1,0,m_width), RANGE(vert1.y,-1,1,0,m_height));
 		vec2 p2 = vec2(RANGE(vert2.x,-1,1,0,m_width), RANGE(vert2.y,-1,1,0,m_height));
 		vec2 p3 = vec2(RANGE(vert3.x,-1,1,0,m_width), RANGE(vert3.y,-1,1,0,m_height));
-	
+
+		vec2 n1 = vec2(RANGE(normCoor1.x, -1, 1, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height));
+		vec2 n2 = vec2(RANGE(normCoor2.x, -1, 1, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height));
+
 		if(normals){
+			DrawLine(n1, n2, 1);
+			DrawLine(p1, p2);
+
+			DrawLine(p2, p3);
+			DrawLine(p3, p1);
+			//DrawLine(vert1,vert2);
 			//DrawLine(vert1, vert2, normal);
 		}
 		else{
@@ -156,6 +173,46 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 			//DrawLine(vert1,vert2);
 		}
 	}
+}
+
+void Renderer::DrawBoundingBox(const vec3* bounding_box) 
+{
+	if (!bounding_box) {
+		return;
+	}
+	
+	for (int i = 0; i < 8; i++) {
+		std::cout << "BEFORE TRANSFORMATION " << i << ": " << bounding_box[i] << std::endl;
+	}
+	vec4 new_bounding_box[8];
+	vec2 bounding_box_in_vectwo[8];
+	for (int i = 0; i < 8; i++) {
+		// Convert 3D point to homogeneous coordinates
+		vec4 homogeneous_point = vec4(bounding_box[i], 1.0f);
+
+		// Apply transformations
+		new_bounding_box[i] = toEuclidian(mat_project * (mat_transform_inverse * homogeneous_point));
+		bounding_box_in_vectwo[i] = vec2(RANGE(new_bounding_box[i].x, -1, 1, 0, m_width), RANGE(new_bounding_box[i].y, -1, 1, 0, m_height));
+		//bounding_box_in_vectwo[i] = vec2(new_bounding_box[i].x, new_bounding_box[i].y);
+		std::cout << "TRYING TO DRAW THE STUPID BOX! 1 bounding box in vectwo i:" << i << " --- " << bounding_box_in_vectwo[i] << std::endl;
+	}
+	for (int i = 0; i < 8; i++) {
+		std::cout << "Transformed Point " << i << ": " << new_bounding_box[i] << std::endl;
+	}
+	std::cout << "TRYING TO DRAW THE STUPID BOX! 2" << std::endl;
+	std::cout << "bounding_box at 1 is: " << bounding_box_in_vectwo[1] << "bounding_box at 5 is: " << bounding_box_in_vectwo[5] << std::endl;
+	DrawLine(bounding_box_in_vectwo[1], bounding_box_in_vectwo[5], 2);
+	DrawLine(bounding_box_in_vectwo[1], bounding_box_in_vectwo[0], 2);
+	DrawLine(bounding_box_in_vectwo[1], bounding_box_in_vectwo[3], 2);
+	DrawLine(bounding_box_in_vectwo[2], bounding_box_in_vectwo[0], 2);
+	DrawLine(bounding_box_in_vectwo[2], bounding_box_in_vectwo[6], 2);
+	DrawLine(bounding_box_in_vectwo[2], bounding_box_in_vectwo[3], 2);
+	DrawLine(bounding_box_in_vectwo[3], bounding_box_in_vectwo[7], 2);
+	DrawLine(bounding_box_in_vectwo[4], bounding_box_in_vectwo[5], 2);
+	DrawLine(bounding_box_in_vectwo[4], bounding_box_in_vectwo[6], 2);
+	DrawLine(bounding_box_in_vectwo[4], bounding_box_in_vectwo[0], 2);
+	DrawLine(bounding_box_in_vectwo[5], bounding_box_in_vectwo[7], 2);
+	DrawLine(bounding_box_in_vectwo[6], bounding_box_in_vectwo[7], 2);
 }
 
 void Renderer::DrawPoint(const vec3& vertex)
@@ -176,7 +233,31 @@ void Renderer::SetProjection(const mat4& projection){
 
 void Renderer::Init(){
 	CreateBuffers(m_width,m_height);
+
+	/*// Initialize ImGui
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	(void)io;
+
+	// Setup ImGui style
+	//ImGui::StyleColorsDark();*/
 }
+
+/*void Renderer::Render() {
+	// Your rendering code goes here
+
+	// Render ImGui
+	ImGui::Render();
+}
+
+void Renderer::HandleInput() {
+	// Your input handling code goes here
+
+	// Example: Check if the left arrow button is pressed
+	if (ImGui::ArrowButton("RotateLeft", ImGuiDir_Left)) {
+		// Code to rotate the object left goes here
+	}
+}*/
 
 
 

@@ -8,9 +8,10 @@ using namespace std;
 
 class MeshModel : public Model
 {
-protected :
+protected:
 	MeshModel() {}
-	vec3 *vertex_positions;
+	vec3* vertex_positions;
+	int vertex_count;
 	int face_count;
 	vec3* normals;
 	vec3 bounding_box[8];
@@ -30,6 +31,6 @@ public:
 	void scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale);
 	void calculateBoundingBox();
 	void normalToFace();
-	
-	
+
+
 };
