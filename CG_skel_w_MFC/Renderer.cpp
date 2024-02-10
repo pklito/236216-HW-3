@@ -130,13 +130,13 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		vec4 vert3 = vec4(*(it+2));
 		it = it + 2;
 
+		vec4 normCoor1, normCoor2;
 		if (normals) {
 			std::cout << "NORMALS IS: " << *normal << std::endl;
+			normCoor1 = vec4(*normal);
+			normCoor2 = normCoor1 + vec4(*(normal + 1));
+			normal = normal + 2;
 		}
-		vec4 normCoor1 = vec4(*normal);
-		vec4 normCoor2 = normCoor1 + vec4(*(normal + 1));
-		
-		normal = normal + 2;
 		
 		/*
 		TRANSFORMATIONS + PROJECTION ( P * Tc-1 * v)
@@ -159,19 +159,11 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 
 		if(normals){
 			DrawLine(n1, n2, 1);
-			DrawLine(p1, p2);
-
-			DrawLine(p2, p3);
-			DrawLine(p3, p1);
-			//DrawLine(vert1,vert2);
-			//DrawLine(vert1, vert2, normal);
 		}
-		else{
-			DrawLine(p1, p2);
-			DrawLine(p2, p3);
-			DrawLine(p3, p1);
-			//DrawLine(vert1,vert2);
-		}
+		
+		DrawLine(p1, p2);
+		DrawLine(p2, p3);
+		DrawLine(p3, p1);
 	}
 }
 
