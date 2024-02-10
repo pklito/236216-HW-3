@@ -54,10 +54,7 @@ void Renderer::SetDemoBuffer()
 */
 void Renderer::DrawLine(vec2 vert1, vec2 vert2){
 	//Temp solution. drawing a line out of bounds crashes the code!
-	if(vert1.x < 1 || vert2.x < 1 || vert1.x >= m_width-1 || vert2.x >= m_width-1 ||
-	   vert1.y < 1 || vert2.y < 1 || vert2.y >= m_height-1 || vert1.y >= m_height-1){
-		return;
-	   }
+		
 	//flip the axis so that slope is -1 <= m <= 1
 	bool flipped = false;
 	if(abs(vert1.y-vert2.y) > abs(vert1.x - vert2.x)){
@@ -97,12 +94,18 @@ void Renderer::DrawLine(vec2 vert1, vec2 vert2){
 		//light the pixel
 		if(flipped){
 			//inverted y and x (because we swapped them in the beginning)
-			m_outBuffer[INDEX(m_width,y,x,0)]=1;	m_outBuffer[INDEX(m_width,y,x,1)]=1;	m_outBuffer[INDEX(m_width,y,x,2)]=1;
+			
+			DrawPixel(CLAMP(y,0,m_height-1), CLAMP(x,0,m_width-1), 1, 1, 1);
 		}
 		else{
-			m_outBuffer[INDEX(m_width,x,y,0)]=1;	m_outBuffer[INDEX(m_width,x,y,1)]=1;	m_outBuffer[INDEX(m_width,x,y,2)]=1;
+			DrawPixel(CLAMP(x,0,m_width-1), CLAMP(y,0,m_height-1), 1, 1, 1);
 		}
 	}
+}
+
+void Renderer::DrawPixel(int x, int y, float r, float g, float b){
+	m_outBuffer[INDEX(m_width,x,y,0)]=r;	m_outBuffer[INDEX(m_width,x,y,1)]=g;	m_outBuffer[INDEX(m_width,x,y,2)]=b;
+		
 }
 
 /**
@@ -126,7 +129,6 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		vec4 vert2 = vec4(*(++it));
 		vec4 vert3 = vec4(*(++it));
 
-		std::cout << vert1 << " " << vert2 << " " << vert3 << std::endl;
 		
 		/*
 		TRANSFORMATIONS + PROJECTION ( P * Tc-1 * v)
@@ -135,6 +137,8 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		vert2 = toEuclidian(mat_project * (mat_transform_inverse * vert2));
 		vert3 = toEuclidian(mat_project * (mat_transform_inverse * vert3));
 
+		std::cout << "face: " << vert1 << " " << vert2 << " " << vert3 << std::endl;
+
 		/*
 		Clipspace coordinates to screenspace coordinates
 		*/
@@ -142,21 +146,16 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		vec2 p2 = vec2(RANGE(vert2.x,-1,1,0,m_width), RANGE(vert2.y,-1,1,0,m_height));
 		vec2 p3 = vec2(RANGE(vert3.x,-1,1,0,m_width), RANGE(vert3.y,-1,1,0,m_height));
 	
-		std::cout << "not here" << std::endl;
 		if(normals){
 			//DrawLine(vert1, vert2, normal);
 		}
 		else{
-			std::cout << p1 << " " << p2 << " " << p3 << std::endl;
 			DrawLine(p1, p2);
-			
-		std::cout << "or here" << std::endl;
 			DrawLine(p2, p3);
 			DrawLine(p3, p1);
 			//DrawLine(vert1,vert2);
 		}
 	}
-	std::cout << "DONE!" << std::endl;
 }
 
 void Renderer::DrawPoint(const vec3& vertex)
