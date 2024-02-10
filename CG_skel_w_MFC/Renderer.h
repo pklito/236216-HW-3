@@ -37,6 +37,7 @@ public:
 	void DrawPoint(const vec3& vertex);
 	void SetCameraTransformInverse(const mat4& cTransform);
 	void SetProjection(const mat4& projection);
+	void setCameraMatrixes(const mat4& cTransform, const mat4& Projection);
 	void SetObjectMatrices(const mat4& oTransform, const mat3& nTransform);
 	void SwapBuffers();
 	void ClearColorBuffer();

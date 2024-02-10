@@ -231,6 +231,11 @@ void Renderer::SetProjection(const mat4& projection){
 	mat_project = projection;
 }
 
+void Renderer::setCameraMatrixes(const mat4& cTransform, const mat4& Projection){
+	SetCameraTransformInverse(cTransform);
+	SetProjection(Projection);
+}
+
 void Renderer::Init(){
 	CreateBuffers(m_width,m_height);
 
