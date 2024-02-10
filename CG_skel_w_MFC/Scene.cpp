@@ -4,17 +4,64 @@
 #include <string>
 
 using namespace std;
+
+void Model::setShowNormals(bool show) {
+	return;
+}
+
 void Scene::loadOBJModel(string fileName)
 {
 	MeshModel* model = new MeshModel(fileName);
 	models.push_back(model);
+	num_of_models++;
+}
+
+void Scene::addMeshModel(Model* model)
+{
+	MeshModel* model_to_push = dynamic_cast<MeshModel*>(model);
+	if (model_to_push) {
+		models.push_back(model_to_push);
+		num_of_models++;
+	}
+}
+
+// Iterate over the models and call setShowNormals for MeshModels
+void Scene::setShowNormalsForMeshModels(bool change) {
+	for (Model* model : models) {
+		// Check if the model is of type MeshModel
+		MeshModel* meshModel = dynamic_cast<MeshModel*>(model);
+		if (meshModel != nullptr) {
+			// It's a MeshModel, call setShowNormals
+			meshModel->setShowNormals(change);
+		}
+		// You can handle other types of models here if needed
+	}
+}
+
+void Scene::setShowBoxForMeshModels(bool change) {
+	for (Model* model : models) {
+		// Check if the model is of type MeshModel
+		MeshModel* meshModel = dynamic_cast<MeshModel*>(model);
+		if (meshModel != nullptr) {
+			// It's a MeshModel, call setShowBox
+			meshModel->setShowBox(change);
+		}
+		// You can handle other types of models here if needed
+	}
 }
 
 void Scene::draw()
 {
 	// 1. Send the renderer the current camera transform and the projection
 	// 2. Tell all models to draw themselves
-
+	for (Model* model : models) {
+		// Check if the model is of type MeshModel
+		MeshModel* meshModel = dynamic_cast<MeshModel*>(model);
+		if (meshModel != nullptr) {
+			meshModel->draw(m_renderer);
+		}
+		// You can handle other types of models here if needed
+	}
 	m_renderer->SwapBuffers();
 }
 

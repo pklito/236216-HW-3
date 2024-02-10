@@ -64,6 +64,7 @@ MeshModel::MeshModel(string fileName)
 {
 	vertex_count = 0;
 	loadFile(fileName);
+	show_normals = false;
 }
 
 MeshModel::~MeshModel(void)
@@ -140,9 +141,16 @@ void MeshModel::loadFile(string fileName)
 void MeshModel::draw(Renderer* renderer)
 {
 	std::vector<vec3> vec(vertex_positions, vertex_positions + (3 * face_count));
-	std::vector<vec3> norm(normals, normals + (3 * face_count));
-	renderer->DrawTriangles(&vec, &norm);
-	renderer->DrawBoundingBox(bounding_box);
+
+	if (show_normals == true) {
+		std::vector<vec3> norm(normals, normals + (3 * face_count));
+		renderer->DrawTriangles(&vec, &norm, true);
+	}
+	else {
+		renderer->DrawTriangles(&vec);
+	}
+	
+	renderer->DrawBoundingBox(bounding_box, show_box);
 }
 
 void MeshModel::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
@@ -190,12 +198,15 @@ void MeshModel::rotate(GLfloat theta_angle)
 
 vec3 calculateNormal(vec3 first_point, vec3 second_point, vec3 third_point)
 {
-	vec3 normal_sized_first_point = vec3(100.0f * first_point.x, 100.0f * first_point.y, 100.0f * first_point.z);
-	vec3 normal_sized_second_point = vec3(100.0f * second_point.x, 100.0f * second_point.y, 100.0f * second_point.z);
-	vec3 normal_sized_third_point = vec3(100.0f * third_point.x, 100.0f * third_point.y, 100.0f * third_point.z);
+	//vec3 normal_sized_first_point = vec3(100.0f * first_point.x, 100.0f * first_point.y, 100.0f * first_point.z);
+	//vec3 normal_sized_second_point = vec3(100.0f * second_point.x, 100.0f * second_point.y, 100.0f * second_point.z);
+	//vec3 normal_sized_third_point = vec3(100.0f * third_point.x, 100.0f * third_point.y, 100.0f * third_point.z);
 
-	vec3 a = normal_sized_third_point - normal_sized_first_point;
-	vec3 b = normal_sized_second_point - normal_sized_first_point;
+	//vec3 a = normal_sized_third_point - normal_sized_first_point;
+	//vec3 b = normal_sized_second_point - normal_sized_first_point;
+
+	vec3 a = third_point - first_point;
+	vec3 b = second_point - first_point;
 
 	vec3 c = cross(a, b);
 
@@ -260,4 +271,14 @@ void MeshModel::calculateBoundingBox()
 	bounding_box[5] = vec3(min_x, max_y, min_z);
 	bounding_box[6] = vec3(min_x, min_y, max_z);
 	bounding_box[7] = vec3(min_x, min_y, min_z);
+}
+
+void MeshModel::setShowNormals(bool change) 
+{
+	show_normals = change;
+}
+
+void MeshModel::setShowBox(bool change)
+{
+	show_box = change;
 }

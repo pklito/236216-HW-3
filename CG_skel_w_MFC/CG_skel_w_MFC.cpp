@@ -26,12 +26,20 @@
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
 #define FILE_OPEN 1
-#define MAIN_DEMO 1
-#define MAIN_ABOUT 2
+#define MAIN_DEMO 2
+#define MAIN_ABOUT 3
+
+#define RESCALE_WINDOW_MENU_ITEM_UP 4
+#define RESCALE_WINDOW_MENU_ITEM_DOWN 5
+#define DRAW_NORMALS 1
+#define HIDE_NORMALS 2
+#define DRAW_BOUNDING_BOX 3
+#define HIDE_BOUNDING_BOX 4
 
 Scene* scene;
 Renderer* renderer;
 Camera* camera;
+float m_time;
 
 int last_x, last_y;
 bool lb_down, rb_down, mb_down;
@@ -42,6 +50,15 @@ bool lb_down, rb_down, mb_down;
 void display(void)
 {
 	//Call the scene and ask it to draw itself
+	std::cout << "<FRAME>" << std::endl;
+	m_time += 0.1;
+	//camera->LookAt(vec3(1,m_time,1),vec3(-1,0,0),vec3(0,1,0));
+
+	renderer->SetCameraTransformInverse(camera->getTransformInverse());
+	renderer->SetProjection(camera->getProjection());
+
+	scene->draw();
+	std::cout << "<FRAME END>" << ::std::endl;
 }
 
 void reshape(int width, int height)
@@ -104,6 +121,33 @@ void fileMenu(int id)
 	}
 }
 
+void optionMenu(int id)
+{
+	if (scene) {
+		switch (id)
+		{
+		case DRAW_NORMALS:
+			// Logic to draw normals (turn on)
+			scene->setShowNormalsForMeshModels(true);
+			break;
+		case HIDE_NORMALS:
+			// Logic to hide normals (turn off)
+			scene->setShowNormalsForMeshModels(false);
+			break;
+		case DRAW_BOUNDING_BOX:
+			// Logic to draw bounding box (turn on)
+			scene->setShowBoxForMeshModels(true);
+			break;
+		case HIDE_BOUNDING_BOX:
+			// Logic to hide bounding box (turn off)
+			scene->setShowBoxForMeshModels(false);
+			break;
+		}
+	}
+	std::cout << "WE GET HERE IN TURNING ON AND OFF THE NORMALS" << std::endl;
+	glutPostRedisplay();
+}
+
 void mainMenu(int id)
 {
 	switch (id)
@@ -117,19 +161,63 @@ void mainMenu(int id)
 	}
 }
 
+void rescaleWindow(bool up_or_down) 
+{
+	// Your code to rescale the window goes here
+	// For example, you might use GLUT functions to reshape the window
+	if (up_or_down)
+		glutReshapeWindow(2048, 2048);
+	else {
+		glutReshapeWindow(512, 512);
+	}
+	glutPostRedisplay();
+}
+
+void menuCallback(int menuItem) 
+{
+	switch (menuItem) {
+	case RESCALE_WINDOW_MENU_ITEM_UP:
+		// Call a function to rescale the window
+		rescaleWindow(true);
+		break;
+		// Add more cases for additional menu items if needed
+	case RESCALE_WINDOW_MENU_ITEM_DOWN:
+		rescaleWindow(false);
+		break;
+	}
+
+}
+
 void initMenu()
 {
-
 	int menuFile = glutCreateMenu(fileMenu);
 	glutAddMenuEntry("Open..", FILE_OPEN);
+	
+	// Create the "Normal" submenu
+	int optionsSubMenu = glutCreateMenu(optionMenu);
+	// Attach the "Normal" submenu to the main menu
+	glutAddMenuEntry("Draw Normals", DRAW_NORMALS);
+	glutAddMenuEntry("Hide Normals", HIDE_NORMALS);
+	glutAddMenuEntry("Draw Bounding Box", DRAW_BOUNDING_BOX);
+	glutAddMenuEntry("Hide Bounding Box", HIDE_BOUNDING_BOX);
+
+	int rescaleMenu = glutCreateMenu(menuCallback);
+	glutAddMenuEntry("Rescale Window Up", RESCALE_WINDOW_MENU_ITEM_UP);
+	glutAddMenuEntry("Rescale Window Down", RESCALE_WINDOW_MENU_ITEM_DOWN);
+
 	glutCreateMenu(mainMenu);
 	glutAddSubMenu("File", menuFile);
+	glutAddSubMenu("Options", optionsSubMenu);
+	glutAddSubMenu("Rescaling Window", rescaleMenu);
 	glutAddMenuEntry("Demo", MAIN_DEMO);
 	glutAddMenuEntry("About", MAIN_ABOUT);
+	
+	glutAttachMenu(GLUT_RIGHT_BUTTON);
+
+	// Attach the menu to a mouse button
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 //----------------------------------------------------------------------------
-
 
 
 int my_main(int argc, char** argv)
@@ -160,8 +248,10 @@ int my_main(int argc, char** argv)
 
 	std::cout << "start";
 	MeshModel* demo_object = new MeshModel("bunny.obj");
+	scene->addMeshModel(demo_object);
 	std::cout << " end" << std::endl;
 	//----------------------------------------------------------------------------
+
 	// Initialize Callbacks
 
 	glutDisplayFunc(display);
@@ -175,7 +265,7 @@ int my_main(int argc, char** argv)
 	renderer->Init();
 
 	//Set the camera projection we want and send it to renderer (vec3 cast to vec4)
-	//camera->LookAt(vec3(1,0,0),vec3(-1,0,-2),vec3(0,1,0));
+	//camera->LookAt(vec3(1,0,0),vec3(0,0,0),vec3(0,1,0));
 
 	renderer->SetCameraTransformInverse(camera->getTransformInverse());
 	renderer->SetProjection(camera->getProjection());

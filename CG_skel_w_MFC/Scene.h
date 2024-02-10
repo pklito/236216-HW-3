@@ -10,6 +10,8 @@ class Model {
 protected:
 	virtual ~Model() {}
 	void virtual draw(Renderer* renderer) = 0;
+	virtual void setShowNormals(bool change);
+	virtual void setShowBox(bool change) = 0;
 };
 
 
@@ -44,6 +46,7 @@ public:
 class Scene {
 
 	vector<Model*> models;
+	int num_of_models;
 	vector<Light*> lights;
 	vector<Camera*> cameras;
 	Renderer* m_renderer;
@@ -52,9 +55,12 @@ public:
 	Scene() {};
 	Scene(Renderer* renderer) : m_renderer(renderer) {};
 	void loadOBJModel(string fileName);
+	void addMeshModel(Model* model);
 	void draw();
 	void drawDemo();
 
+	void setShowNormalsForMeshModels(bool change);
+	void setShowBoxForMeshModels(bool change);
 	int activeModel;
 	int activeLight;
 	int activeCamera;

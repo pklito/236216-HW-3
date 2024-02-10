@@ -13,6 +13,10 @@ protected:
 	vec3* vertex_positions;
 	int vertex_count;
 	int face_count;
+
+	bool show_normals;
+	bool show_box;
+
 	vec3* normals;
 	vec3 bounding_box[8];
 	//add more attributes
@@ -24,7 +28,7 @@ public:
 	MeshModel(string fileName);
 	~MeshModel(void);
 	void loadFile(string fileName);
-	void draw(Renderer* renderer);
+	void draw(Renderer* renderer) override;
 
 	void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans);
 	void rotate(GLfloat theta_angle);
@@ -32,5 +36,6 @@ public:
 	void calculateBoundingBox();
 	void normalToFace();
 
-
+	void setShowNormals(bool change) override;
+	void setShowBox(bool change) override;
 };

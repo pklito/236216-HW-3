@@ -48,12 +48,29 @@ void Renderer::SetDemoBuffer()
 	}
 }
 
+void Renderer::ClearBuffer()
+{
+	// Assuming you have a background color (adjust the values accordingly)
+	vec3 background_color = vec3(0.0, 0.0, 0.0);
+
+	// Fill the buffer with the background color
+	for (int y = 0; y < m_height; y++)
+	{
+		for (int x = 0; x < m_width; x++)
+		{
+			m_outBuffer[INDEX(m_width, x, y, 0)] = background_color.x;
+			m_outBuffer[INDEX(m_width, x, y, 1)] = background_color.y;
+			m_outBuffer[INDEX(m_width, x, y, 2)] = background_color.z;
+		}
+	}
+}
+
 /*
  This function gets two pixels on screen and draws the line between them (rasterization)
  vert1 + vert2 = ends of the edge
  normal = direction of normal.
 */
-void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor){
+void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor, bool clear){
 	//Temp solution. drawing a line out of bounds crashes the code!
 	if(vert1.x < 1 || vert2.x < 1 || vert1.x >= m_width-1 || vert2.x >= m_width-1 ||
 	   vert1.y < 1 || vert2.y < 1 || vert2.y >= m_height-1 || vert1.y >= m_height-1){
@@ -101,9 +118,16 @@ void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor){
 				m_outBuffer[INDEX(m_width, y, x, 0)] = 0;	m_outBuffer[INDEX(m_width, y, x, 1)] = 1;	m_outBuffer[INDEX(m_width, y, x, 2)] = 1;
 			}else if (specialColor == 2) {
 				m_outBuffer[INDEX(m_width, y, x, 0)] = 1;	m_outBuffer[INDEX(m_width, y, x, 1)] = 0;	m_outBuffer[INDEX(m_width, y, x, 2)] = 0;
-			}
-			else {
+			} else {
 				m_outBuffer[INDEX(m_width, y, x, 0)] = 1;	m_outBuffer[INDEX(m_width, y, x, 1)] = 1;	m_outBuffer[INDEX(m_width, y, x, 2)] = 1;
+			}
+
+			// clear the pixel if specified
+			if (clear)
+			{
+				m_outBuffer[INDEX(m_width, y, x, 0)] = 0; // set to background color
+				m_outBuffer[INDEX(m_width, y, x, 1)] = 0;
+				m_outBuffer[INDEX(m_width, y, x, 2)] = 0;
 			}
 			//inverted y and x (because we swapped them in the beginning)
 		}
@@ -112,9 +136,15 @@ void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor){
 				m_outBuffer[INDEX(m_width, x, y, 0)] = 0;	m_outBuffer[INDEX(m_width, x, y, 1)] = 1;	m_outBuffer[INDEX(m_width, x, y, 2)] = 1;
 			} else if (specialColor == 2) {
 				m_outBuffer[INDEX(m_width, x, y, 0)] = 1;	m_outBuffer[INDEX(m_width, x, y, 1)] = 0;	m_outBuffer[INDEX(m_width, x, y, 2)] = 0;
-			}
-			else {
+			} else {
 				m_outBuffer[INDEX(m_width, x, y, 0)] = 1;	m_outBuffer[INDEX(m_width, x, y, 1)] = 1;	m_outBuffer[INDEX(m_width, x, y, 2)] = 1;
+			}
+			// clear the pixel if specified
+			if (clear)
+			{
+				m_outBuffer[INDEX(m_width, x, y, 0)] = 0; // set to background color
+				m_outBuffer[INDEX(m_width, x, y, 1)] = 0;
+				m_outBuffer[INDEX(m_width, x, y, 2)] = 0;
 			}
 		}
 			
@@ -132,8 +162,10 @@ void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor){
  * vertices: vector of the camera space vertices
  * normals: directions of the respective world space normals.
  */
-void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals)
+void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals, bool draw_normals)
 {
+	// Clear the buffer before drawing new content
+	ClearBuffer();
 	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
 	vector<vec3>::const_iterator normal = normals != NULL ? normals->begin() : vertices->begin();
 	for(auto it = vertices->begin(); it != vertices->end(); ++it, ++normal){
@@ -172,32 +204,37 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 
 		std::cout << "not here" << std::endl;
 		if(normals){
+			if (draw_normals) {
+				DrawLine(n1, n2, 1, false);
+			} else {
+				DrawLine(n1, n2, 1, true);
+			}
 			std::cout << p1 << " " << p2 << " " << p3 << std::endl;
-			DrawLine(n1, n2, 1);
-			DrawLine(p1, p2);
+			DrawLine(p1, p2, 0, false);
 
 			std::cout << "or here" << std::endl;
-			DrawLine(p2, p3);
-			DrawLine(p3, p1);
+			DrawLine(p2, p3, 0, false);
+			DrawLine(p3, p1, 0, false);
 			//DrawLine(vert1,vert2);
 			//DrawLine(vert1, vert2, normal);
 		}
 		else{
 			std::cout << p1 << " " << p2 << " " << p3 << std::endl;
-			DrawLine(p1, p2);
+			DrawLine(p1, p2, 0, false);
 			
 		std::cout << "or here" << std::endl;
-			DrawLine(p2, p3);
-			DrawLine(p3, p1);
+			DrawLine(p2, p3, 0, false);
+			DrawLine(p3, p1, 0, false);
 			//DrawLine(vert1,vert2);
 		}
 	}
+
 	std::cout << "DONE!" << std::endl;
 }
 
-void Renderer::DrawBoundingBox(const vec3* bounding_box) 
+void Renderer::DrawBoundingBox(const vec3* bounding_box, bool draw_box) 
 {
-	if (!bounding_box) {
+	if (!bounding_box || draw_box == false) {
 		return;
 	}
 	
