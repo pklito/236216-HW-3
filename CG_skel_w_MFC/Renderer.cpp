@@ -256,4 +256,7 @@ void Renderer::SwapBuffers()
 	a = glGetError();
 	glutSwapBuffers();
 	a = glGetError();
+
+	//clear the new buffer
+	std::fill(m_outBuffer,m_outBuffer+(m_width*m_height*3),0);
 }
