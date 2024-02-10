@@ -14,7 +14,9 @@ void Scene::draw()
 {
 	// 1. Send the renderer the current camera transform and the projection
 	// 2. Tell all models to draw themselves
-
+	for(auto it = models.begin(); it != models.end(); it++){
+		(*(it))->draw(m_renderer);
+	}
 	m_renderer->SwapBuffers();
 }
 
@@ -44,12 +46,13 @@ mat4 Camera::getTransformInverse(){
 
 void Camera::LookAt(const vec4& eye, const vec4& at, const vec4& up ){
 	/* Create 3 directional vectors (Tut 3: slide 9)*/
-	vec4 n = vec4(normalize(toVec3(eye - at)));	//I make it Vec3 because normalizing with W would be wrong
+	vec4 n = vec4(normalize(toVec3(eye - at)),0);	//I make it Vec3 because normalizing with W would be wrong
 	vec4 u = vec4(cross(up, n),0);
 	vec4 v = vec4(cross(n, u),0);
-
+	std::cout << "n u v: " << n << u << v << std::endl;
 	mat4 rotate_inv = mat4(u,v,n,vec4(0,0,0,1));
-
+	std::cout << "Rot Matrix: " << rotate_inv << std::endl;
+	std::cout << "Transform Matrix: " << Translate(-eye) << std::endl;
 	// set the matrixes stored.
 	cTransformInverse = rotate_inv * Translate(-eye);
 	cTransform = Translate(eye) * transpose(rotate_inv);

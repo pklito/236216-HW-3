@@ -41,7 +41,7 @@ bool lb_down,rb_down,mb_down;
 
 void display( void )
 {
-//Call the scene and ask it to draw itself
+	scene->draw();
 }
 
 void reshape( int width, int height )
@@ -159,9 +159,9 @@ int my_main( int argc, char **argv )
 	scene = new Scene(renderer);
 	camera = new Camera();
 	
-	std::cout << "start";
-	MeshModel* demo_object = new MeshModel("obj_example.obj");
-	std::cout << " end" << std::endl;
+	std::cout << "[ ] Started Reading objects...";
+	scene->loadOBJModel("meshes/fox.obj");
+	std::cout << " Done!" << std::endl;
 	//----------------------------------------------------------------------------
 	// Initialize Callbacks
 
@@ -176,14 +176,14 @@ int my_main( int argc, char **argv )
 	renderer->Init();
 	
 	//Set the camera projection we want and send it to renderer (vec3 cast to vec4)
-	//camera->LookAt(vec3(1,0,0),vec3(-1,0,-2),vec3(0,1,0));
-
+	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
+	std::cout << "[ ] Camera transform: " << std::endl;
+	std::cout << camera->getTransformInverse() << std::endl;
+	//camera->Ortho(-2,2,0,4,0,8); 
 	renderer->SetCameraTransformInverse(camera->getTransformInverse());
 	renderer->SetProjection(camera->getProjection());
 
-
-	demo_object->draw(renderer);
-	renderer->SwapBuffers();
+	std::cout << "[V] Done with the initialization! " << std::endl;
 	glutMainLoop();
 	delete scene;
 	delete renderer;

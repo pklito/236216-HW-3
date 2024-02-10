@@ -54,7 +54,7 @@ void Renderer::SetDemoBuffer()
 */
 void Renderer::DrawLine(vec2 vert1, vec2 vert2){
 	//Temp solution. drawing a line out of bounds crashes the code!
-		
+
 	//flip the axis so that slope is -1 <= m <= 1
 	bool flipped = false;
 	if(abs(vert1.y-vert2.y) > abs(vert1.x - vert2.x)){
@@ -137,7 +137,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		vert2 = toEuclidian(mat_project * (mat_transform_inverse * vert2));
 		vert3 = toEuclidian(mat_project * (mat_transform_inverse * vert3));
 
-		std::cout << "face: " << vert1 << " " << vert2 << " " << vert3 << std::endl;
+		//std::cout << "face: " << vert1 << " " << vert2 << " " << vert3 << std::endl;
 
 		/*
 		Clipspace coordinates to screenspace coordinates

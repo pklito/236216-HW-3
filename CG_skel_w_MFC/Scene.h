@@ -7,7 +7,7 @@
 using namespace std;
 
 class Model {
-protected:
+public:
 	virtual ~Model() {}
 	void virtual draw(Renderer* renderer)=0;
 };
