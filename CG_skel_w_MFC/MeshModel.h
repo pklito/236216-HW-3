@@ -34,3 +34,5 @@ public:
 
 
 };
+
+vec3 calculateNormal(vec3 first_point, vec3 second_point, vec3 third_point);

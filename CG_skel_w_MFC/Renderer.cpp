@@ -4,6 +4,7 @@
 #include "InitShader.h"
 #include "GL\freeglut.h"
 //#include "imgui.h"
+#include "MeshModel.h"
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 
@@ -131,12 +132,6 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		it = it + 2;
 
 		vec4 normCoor1, normCoor2;
-		if (normals) {
-			std::cout << "NORMALS IS: " << *normal << std::endl;
-			normCoor1 = vec4(*normal);
-			normCoor2 = normCoor1 + vec4(*(normal + 1));
-			normal = normal + 2;
-		}
 		
 		/*
 		TRANSFORMATIONS + PROJECTION ( P * Tc-1 * v)
@@ -145,8 +140,9 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		vert2 = toEuclidian(mat_project * (mat_transform_inverse * vert2));
 		vert3 = toEuclidian(mat_project * (mat_transform_inverse * vert3));
 
-		normCoor1 = toEuclidian(mat_project * (mat_transform_inverse * normCoor1));
-		normCoor2 = toEuclidian(mat_project * (mat_transform_inverse * normCoor2));
+		vec3 norm_dir = calculateNormal(toVec3(vert1),toVec3(vert2),toVec3(vert3))/5.f;
+		normCoor1 = (vert1 + vert2 + vert3) / 3;
+		normCoor2 = normCoor1 - norm_dir;
 		/*
 		Clipspace coordinates to screenspace coordinates
 		*/
@@ -157,13 +153,14 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		vec2 n1 = vec2(RANGE(normCoor1.x, -1, 1, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height));
 		vec2 n2 = vec2(RANGE(normCoor2.x, -1, 1, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height));
 
-		if(normals){
-			DrawLine(n1, n2, 1);
-		}
 		
 		DrawLine(p1, p2);
 		DrawLine(p2, p3);
 		DrawLine(p3, p1);
+
+		//Normal:
+		
+		DrawLine(n1, n2, 1);
 	}
 }
 

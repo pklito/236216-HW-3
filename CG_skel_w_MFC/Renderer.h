@@ -4,7 +4,6 @@
 #include "vec.h"
 #include "mat.h"
 #include "GL/glew.h"
-
 using namespace std;
 class Renderer
 {
