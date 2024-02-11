@@ -44,7 +44,7 @@ void display( void )
 {
 	std::cout << "<FRAME>" << std::endl;
 	m_time += 0.1;
-	//camera->LookAt(vec3(1,m_time,1),vec3(-1,0,0),vec3(0,1,0));
+	camera->LookAt(vec3(cos(m_time),0,sin(m_time)),vec3(0,1,0),vec3(0,1,0));
 
 	renderer->SetCameraTransformInverse(camera->getTransformInverse());
 	renderer->SetProjection(camera->getProjection());
@@ -185,7 +185,7 @@ int my_main( int argc, char **argv )
 	renderer->Init();
 	
 	//Set the camera projection we want and send it to renderer (vec3 cast to vec4)
-	//camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
+	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
 	std::cout << "[ ] Camera transform: " << std::endl;
 	std::cout << camera->getTransformInverse() << std::endl;
 	//camera->Ortho(-2,2,0,4,0,8); 
