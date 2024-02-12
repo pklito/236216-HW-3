@@ -78,9 +78,7 @@ void Renderer::FillBuffer(float r, float g, float b)
 	{
 		for (int x = 0; x < m_width; x++)
 		{
-			m_outBuffer[INDEX(m_width, x, y, 0)] = r;
-			m_outBuffer[INDEX(m_width, x, y, 1)] = g;
-			m_outBuffer[INDEX(m_width, x, y, 2)] = b;
+			DrawPixel(x,y,r,g,b);
 		}
 	}
 }
@@ -131,10 +129,10 @@ void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor, bool clear)
 
 		//light the pixel
 		if(flipped){
-			DrawPixel(CLAMP(y,0,m_height-1), CLAMP(x,0,m_width-1), !clear, !clear*(specialColor != 1), !clear*(specialColor != 2));
+			DrawPixelSafe(y,x, !clear, !clear*(specialColor != 1), !clear*(specialColor != 2));
 		}
 		else{
-			DrawPixel(CLAMP(x,0,m_width-1), CLAMP(y,0,m_height-1), !clear, !clear*(specialColor != 1), !clear*(specialColor != 2));
+			DrawPixelSafe(x,y, !clear, !clear*(specialColor != 1), !clear*(specialColor != 2));
 		}
 
 	}
