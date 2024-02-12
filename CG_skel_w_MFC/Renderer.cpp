@@ -66,19 +66,21 @@ void Renderer::ResizeBuffers(int new_width, int new_height) {
 	}
 }
 
-void Renderer::ClearBuffer()
+void Renderer::ClearBuffer(){
+	std::fill(m_outBuffer,m_outBuffer+(m_width*m_height*3),0);
+}
+
+void Renderer::FillBuffer(float r, float g, float b)
 {
-	// Assuming you have a background color (adjust the values accordingly)
-	vec3 background_color = vec3(0.0, 0.0, 0.0);
 
 	// Fill the buffer with the background color
 	for (int y = 0; y < m_height; y++)
 	{
 		for (int x = 0; x < m_width; x++)
 		{
-			m_outBuffer[INDEX(m_width, x, y, 0)] = background_color.x;
-			m_outBuffer[INDEX(m_width, x, y, 1)] = background_color.y;
-			m_outBuffer[INDEX(m_width, x, y, 2)] = background_color.z;
+			m_outBuffer[INDEX(m_width, x, y, 0)] = r;
+			m_outBuffer[INDEX(m_width, x, y, 1)] = g;
+			m_outBuffer[INDEX(m_width, x, y, 2)] = b;
 		}
 	}
 }
@@ -90,12 +92,6 @@ void Renderer::ClearBuffer()
 */
 void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor, bool clear)
 {
-	if (vert1.x < 1 || vert2.x < 1 || vert1.x >= m_width - 1 || vert2.x >= m_width - 1 ||
-		vert1.y < 1 || vert2.y < 1 || vert2.y >= m_height - 1 || vert1.y >= m_height - 1)
-	{
-		std::cout <<"line error" << vert1 << " " << vert2 << " : " << specialColor << clear << " (" <<m_width << "," <<m_height << ")" << std::endl;
-		return;
-	}
 	//flip the axis so that slope is -1 <= m <= 1
 	bool flipped = false;
 	if (abs(vert1.y - vert2.y) > abs(vert1.x - vert2.x)) {
@@ -344,5 +340,5 @@ void Renderer::SwapBuffers()
 	a = glGetError();
 
 	//clear the new buffer
-	std::fill(m_outBuffer,m_outBuffer+(m_width*m_height*3),0);
+	ClearBuffer();
 }

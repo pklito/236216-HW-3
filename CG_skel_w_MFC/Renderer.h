@@ -31,6 +31,7 @@ public:
 	~Renderer(void);
 
 	void ClearBuffer();
+	void FillBuffer(float r, float g, float b);
 	void ResizeBuffers(int new_width, int new_height);
 	void Init();
 	void DrawLine(vec2 vert1, vec2 vert2, int special_color = 0, bool clear = false);
