@@ -90,6 +90,12 @@ void Renderer::ClearBuffer()
 */
 void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor, bool clear)
 {
+	if (vert1.x < 1 || vert2.x < 1 || vert1.x >= m_width - 1 || vert2.x >= m_width - 1 ||
+		vert1.y < 1 || vert2.y < 1 || vert2.y >= m_height - 1 || vert1.y >= m_height - 1)
+	{
+		std::cout <<"line error" << vert1 << " " << vert2 << " : " << specialColor << clear << " (" <<m_width << "," <<m_height << ")" << std::endl;
+		return;
+	}
 	//flip the axis so that slope is -1 <= m <= 1
 	bool flipped = false;
 	if (abs(vert1.y - vert2.y) > abs(vert1.x - vert2.x)) {
@@ -157,7 +163,6 @@ void Renderer::DrawPixel(int x, int y, float r, float g, float b){
 void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals, bool draw_normals)
 {
 	// Clear the buffer before drawing new content
-	ClearBuffer();
 	
 	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
 	vector<vec3>::const_iterator normal = normals != NULL ? normals->begin() : vertices->begin();
