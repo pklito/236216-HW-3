@@ -36,3 +36,7 @@
 *.tlog
 *.log
 CG_skel_w_MFC/Release/*
+CG_skel_w_MFC/Debug/*
+Debug/*
+freeglut/Debug/*
+glew/Debug/*

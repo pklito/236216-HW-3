@@ -66,19 +66,19 @@ void Renderer::ResizeBuffers(int new_width, int new_height) {
 	}
 }
 
-void Renderer::ClearBuffer()
+void Renderer::ClearBuffer(){
+	std::fill(m_outBuffer,m_outBuffer+(m_width*m_height*3),0);
+}
+
+void Renderer::FillBuffer(float r, float g, float b)
 {
-	// Assuming you have a background color (adjust the values accordingly)
-	vec3 background_color = vec3(0.0, 0.0, 0.0);
 
 	// Fill the buffer with the background color
 	for (int y = 0; y < m_height; y++)
 	{
 		for (int x = 0; x < m_width; x++)
 		{
-			m_outBuffer[INDEX(m_width, x, y, 0)] = background_color.x;
-			m_outBuffer[INDEX(m_width, x, y, 1)] = background_color.y;
-			m_outBuffer[INDEX(m_width, x, y, 2)] = background_color.z;
+			DrawPixel(x,y,r,g,b);
 		}
 	}
 }
@@ -129,10 +129,10 @@ void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor, bool clear)
 
 		//light the pixel
 		if(flipped){
-			DrawPixel(CLAMP(y,0,m_height-1), CLAMP(x,0,m_width-1), !clear, !clear*(specialColor != 1), !clear*(specialColor != 2));
+			DrawPixelSafe(y,x, !clear, !clear*(specialColor != 1), !clear*(specialColor != 2));
 		}
 		else{
-			DrawPixel(CLAMP(x,0,m_width-1), CLAMP(y,0,m_height-1), !clear, !clear*(specialColor != 1), !clear*(specialColor != 2));
+			DrawPixelSafe(x,y, !clear, !clear*(specialColor != 1), !clear*(specialColor != 2));
 		}
 
 	}
@@ -141,6 +141,12 @@ void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor, bool clear)
 void Renderer::DrawPixel(int x, int y, float r, float g, float b){
 	m_outBuffer[INDEX(m_width,x,y,0)]=r;	m_outBuffer[INDEX(m_width,x,y,1)]=g;	m_outBuffer[INDEX(m_width,x,y,2)]=b;
 		
+}
+
+void Renderer::DrawPixelSafe(int x, int y, float r, float g, float b){
+	if(x < 0 || x >= m_width || y < 0 || y >= m_height)
+		return;
+	DrawPixel(x,y,r,g,b);
 }
 
 /**
@@ -157,7 +163,6 @@ void Renderer::DrawPixel(int x, int y, float r, float g, float b){
 void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals, bool draw_normals)
 {
 	// Clear the buffer before drawing new content
-	ClearBuffer();
 	
 	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
 	vector<vec3>::const_iterator normal = normals != NULL ? normals->begin() : vertices->begin();
@@ -339,5 +344,5 @@ void Renderer::SwapBuffers()
 	a = glGetError();
 
 	//clear the new buffer
-	std::fill(m_outBuffer,m_outBuffer+(m_width*m_height*3),0);
+	ClearBuffer();
 }
