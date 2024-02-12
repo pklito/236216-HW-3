@@ -47,17 +47,12 @@ bool lb_down,rb_down,mb_down;
 //----------------------------------------------------------------------------
 // Callbacks
 
-void display( void )
-{
-	std::cout << "<FRAME>" << std::endl;
-	m_time += 0.1;
-	camera->LookAt(vec3(cos(m_time),0,sin(m_time)),vec3(0,1,0),vec3(0,1,0));
+void display( void ){
 
 	renderer->SetCameraTransformInverse(camera->getTransformInverse());
 	renderer->SetProjection(camera->getProjection());
 
 	scene->draw();
-	std::cout << "<FRAME END>" << ::std::endl;
 }
 
 void reshape( int width, int height )
