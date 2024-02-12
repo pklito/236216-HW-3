@@ -145,6 +145,12 @@ void Renderer::DrawPixel(int x, int y, float r, float g, float b){
 		
 }
 
+void Renderer::DrawPixelSafe(int x, int y, float r, float g, float b){
+	if(x < 0 || x >= m_width || y < 0 || y > m_height)
+		return;
+	DrawPixel(x,y,r,g,b);
+}
+
 /**
  * This function takes a world space object, and draws it's triangles on screen.
  * 

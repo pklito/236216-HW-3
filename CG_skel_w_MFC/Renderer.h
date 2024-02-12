@@ -38,6 +38,7 @@ public:
 	void DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals = NULL, bool draw_normals = false);
 	void DrawBoundingBox(const vec3* bounding_box, bool draw_box = false);
 	void DrawPixel(int x, int y, float r, float g, float b);
+	void DrawPixelSafe(int x, int y, float r, float g, float b);
 	void DrawPoint(const vec3& vertex);
 	void SetCameraTransformInverse(const mat4& cTransform);
 	void SetProjection(const mat4& projection);
