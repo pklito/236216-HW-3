@@ -15,6 +15,7 @@ class Renderer
 	mat4 mat_project;
 
 	void CreateBuffers(int width, int height);
+	void ReleaseBuffers();
 	void CreateLocalBuffer();
 
 	//////////////////////////////
@@ -31,6 +32,7 @@ public:
 	~Renderer(void);
 
 	void ClearBuffer();
+	void ResizeBuffers(int new_width, int new_height);
 	void Init();
 	void DrawLine(vec2 vert1, vec2 vert2, int special_color = 0, bool clear = false);
 	void DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals = NULL, bool draw_normals = false);

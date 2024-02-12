@@ -12,6 +12,8 @@ protected:
 	void virtual draw(Renderer* renderer) = 0;
 	virtual void setShowNormals(bool change);
 	virtual void setShowBox(bool change) = 0;
+	virtual void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans) = 0;
+	virtual void rotate(GLfloat theta_angle, int mode) = 0;
 };
 
 
@@ -24,9 +26,15 @@ class Camera {
 	mat4 cTransformInverse;
 	mat4 projection;
 
+	// Constants for perspective projection
+	static constexpr float FOV = 60.0f; // Field of View in degrees
+	static constexpr float NEAR_CLIPPING_PLANE = 0.1f;
+	static constexpr float FAR_CLIPPING_PLANE = 100.0f;
+
 public:
 	void setTransformation(const mat4& transform);
 	void setProjection(const mat4& perspective);
+	void UpdateProjectionMatrix(float aspect_ratio);
 	mat4 getProjection();
 	mat4 getTransform();
 	mat4 getTransformInverse();
@@ -61,6 +69,9 @@ public:
 
 	void setShowNormalsForMeshModels(bool change);
 	void setShowBoxForMeshModels(bool change);
+	void translateObjects(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans);
+	void rescaleModels(GLfloat scale);
+	void rotateModels(GLfloat theta_angle, int mode);
 	int activeModel;
 	int activeLight;
 	int activeCamera;

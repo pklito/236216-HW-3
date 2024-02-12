@@ -26,10 +26,19 @@ Renderer::~Renderer(void)
 
 void Renderer::CreateBuffers(int width, int height)
 {
+	//ReleaseBuffers();
 	m_width=width;
 	m_height=height;	
 	CreateOpenGLBuffer(); //Do not remove this line.
 	m_outBuffer = new float[3*m_width*m_height];
+}
+
+void Renderer::ReleaseBuffers() {
+	delete[] m_outBuffer;
+	//delete[] m_zbuffer;
+
+	m_outBuffer = nullptr;
+	m_zbuffer = nullptr;
 }
 
 void Renderer::SetDemoBuffer()
@@ -45,6 +54,14 @@ void Renderer::SetDemoBuffer()
 	{
 		m_outBuffer[INDEX(m_width,i,256,0)]=1;	m_outBuffer[INDEX(m_width,i,256,1)]=0;	m_outBuffer[INDEX(m_width,i,256,2)]=1;
 
+	}
+}
+
+
+void Renderer::ResizeBuffers(int new_width, int new_height) {
+	if (new_width != m_width || new_height != m_height) {
+		ReleaseBuffers();
+		CreateBuffers(new_width, new_height);
 	}
 }
 
@@ -70,15 +87,18 @@ void Renderer::ClearBuffer()
  vert1 + vert2 = ends of the edge
  normal = direction of normal.
 */
-void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor, bool clear){
+void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor, bool clear)
+{
 	//Temp solution. drawing a line out of bounds crashes the code!
-	if(vert1.x < 1 || vert2.x < 1 || vert1.x >= m_width-1 || vert2.x >= m_width-1 ||
-	   vert1.y < 1 || vert2.y < 1 || vert2.y >= m_height-1 || vert1.y >= m_height-1){
+	if (vert1.x < 1 || vert2.x < 1 || vert1.x >= m_width - 1 || vert2.x >= m_width - 1 ||
+		vert1.y < 1 || vert2.y < 1 || vert2.y >= m_height - 1 || vert1.y >= m_height - 1)
+	{
 		return;
-	   }
+	}
+
 	//flip the axis so that slope is -1 <= m <= 1
 	bool flipped = false;
-	if(abs(vert1.y-vert2.y) > abs(vert1.x - vert2.x)){
+	if (abs(vert1.y - vert2.y) > abs(vert1.x - vert2.x)) {
 		auto temp = vert1.y;
 		vert1.y = vert1.x;
 		vert1.x = temp;
@@ -89,7 +109,7 @@ void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor, bool clear){
 		flipped = true;
 	}
 	//swap the order so that vert1 is left of vert2
-	if(vert1.x > vert2.x){
+	if (vert1.x > vert2.x) {
 		vec2 temp = vert1;
 		vert1 = vert2;
 		vert2 = temp;
@@ -99,55 +119,69 @@ void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor, bool clear){
 	int y = vert1.x <= vert2.x ? vert1.y : vert2.y;
 	int dy = abs(vert2.y - vert1.y);
 	int dx = vert2.x - vert1.x;
-	int d = 2*dy - dx;
+	int d = 2 * dy - dx;
 	//increase or decrease y on move.
 	int slope_direction = vert2.y >= vert1.y ? 1 : -1;
 
-	for(int x = vert1.x; x <= vert2.x; x++){
-		if(d < 0){
-			d+=2*dy;
+	for (int x = vert1.x; x <= vert2.x; x++)
+	{
+		if (d < 0) {
+			d += 2 * dy;
 		}
-		else{
+		else {
 			y += slope_direction;
-			d+=2*dy - 2*dx;
+			d += 2 * dy - 2 * dx;
 		}
 
 		//light the pixel
-		if(flipped){
+		if (flipped) {
 			if (specialColor == 1) {
 				m_outBuffer[INDEX(m_width, y, x, 0)] = 0;	m_outBuffer[INDEX(m_width, y, x, 1)] = 1;	m_outBuffer[INDEX(m_width, y, x, 2)] = 1;
-			}else if (specialColor == 2) {
+			}
+			else if (specialColor == 2) {
 				m_outBuffer[INDEX(m_width, y, x, 0)] = 1;	m_outBuffer[INDEX(m_width, y, x, 1)] = 0;	m_outBuffer[INDEX(m_width, y, x, 2)] = 0;
-			} else {
+			}
+			else {
 				m_outBuffer[INDEX(m_width, y, x, 0)] = 1;	m_outBuffer[INDEX(m_width, y, x, 1)] = 1;	m_outBuffer[INDEX(m_width, y, x, 2)] = 1;
 			}
 
 			// clear the pixel if specified
 			if (clear)
 			{
-				m_outBuffer[INDEX(m_width, y, x, 0)] = 0; // set to background color
-				m_outBuffer[INDEX(m_width, y, x, 1)] = 0;
-				m_outBuffer[INDEX(m_width, y, x, 2)] = 0;
+				if (specialColor == 2) {
+					if (m_outBuffer[INDEX(m_width, y, x, 0)] != 0 && m_outBuffer[INDEX(m_width, y, x, 1)] != 1 && m_outBuffer[INDEX(m_width, y, x, 2)] != 1) {
+						m_outBuffer[INDEX(m_width, y, x, 0)] = 0; // set to background color
+						m_outBuffer[INDEX(m_width, y, x, 1)] = 0;
+						m_outBuffer[INDEX(m_width, y, x, 2)] = 0;
+					}
+				}
+				
 			}
 			//inverted y and x (because we swapped them in the beginning)
 		}
-		else{
+		else {
 			if (specialColor == 1) {
 				m_outBuffer[INDEX(m_width, x, y, 0)] = 0;	m_outBuffer[INDEX(m_width, x, y, 1)] = 1;	m_outBuffer[INDEX(m_width, x, y, 2)] = 1;
-			} else if (specialColor == 2) {
+			}
+			else if (specialColor == 2) {
 				m_outBuffer[INDEX(m_width, x, y, 0)] = 1;	m_outBuffer[INDEX(m_width, x, y, 1)] = 0;	m_outBuffer[INDEX(m_width, x, y, 2)] = 0;
-			} else {
+			}
+			else {
 				m_outBuffer[INDEX(m_width, x, y, 0)] = 1;	m_outBuffer[INDEX(m_width, x, y, 1)] = 1;	m_outBuffer[INDEX(m_width, x, y, 2)] = 1;
 			}
 			// clear the pixel if specified
 			if (clear)
 			{
-				m_outBuffer[INDEX(m_width, x, y, 0)] = 0; // set to background color
-				m_outBuffer[INDEX(m_width, x, y, 1)] = 0;
-				m_outBuffer[INDEX(m_width, x, y, 2)] = 0;
+				if (specialColor == 2) {
+					if (m_outBuffer[INDEX(m_width, x, y, 0)] != 0 && m_outBuffer[INDEX(m_width, x, y, 1)] != 1 && m_outBuffer[INDEX(m_width, x, y, 2)] != 1) {
+						m_outBuffer[INDEX(m_width, x, y, 0)] = 0; // set to background color
+						m_outBuffer[INDEX(m_width, x, y, 1)] = 0;
+						m_outBuffer[INDEX(m_width, x, y, 2)] = 0;
+					}
+				}
 			}
 		}
-			
+
 	}
 }
 
@@ -166,6 +200,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 {
 	// Clear the buffer before drawing new content
 	ClearBuffer();
+	
 	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
 	vector<vec3>::const_iterator normal = normals != NULL ? normals->begin() : vertices->begin();
 	for(auto it = vertices->begin(); it != vertices->end(); ++it, ++normal){
@@ -175,9 +210,6 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		vec4 vert3 = vec4(*(it+2));
 		it = it + 2;
 
-		if (normals) {
-			std::cout << "NORMALS IS: " << *normal << std::endl;
-		}
 		vec4 normCoor1 = vec4(*normal);
 		vec4 normCoor2 = normCoor1 + vec4(*(normal + 1));
 		
@@ -202,45 +234,30 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		vec2 n1 = vec2(RANGE(normCoor1.x, -1, 1, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height));
 		vec2 n2 = vec2(RANGE(normCoor2.x, -1, 1, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height));
 
-		std::cout << "not here" << std::endl;
 		if(normals){
 			if (draw_normals) {
 				DrawLine(n1, n2, 1, false);
-			} else {
-				DrawLine(n1, n2, 1, true);
 			}
-			std::cout << p1 << " " << p2 << " " << p3 << std::endl;
 			DrawLine(p1, p2, 0, false);
-
-			std::cout << "or here" << std::endl;
 			DrawLine(p2, p3, 0, false);
 			DrawLine(p3, p1, 0, false);
-			//DrawLine(vert1,vert2);
-			//DrawLine(vert1, vert2, normal);
+			
 		}
 		else{
-			std::cout << p1 << " " << p2 << " " << p3 << std::endl;
 			DrawLine(p1, p2, 0, false);
-			
-		std::cout << "or here" << std::endl;
 			DrawLine(p2, p3, 0, false);
 			DrawLine(p3, p1, 0, false);
 			//DrawLine(vert1,vert2);
 		}
 	}
-
-	std::cout << "DONE!" << std::endl;
 }
 
 void Renderer::DrawBoundingBox(const vec3* bounding_box, bool draw_box) 
 {
-	if (!bounding_box || draw_box == false) {
+	if (!bounding_box) {
 		return;
 	}
 	
-	for (int i = 0; i < 8; i++) {
-		std::cout << "BEFORE TRANSFORMATION " << i << ": " << bounding_box[i] << std::endl;
-	}
 	vec4 new_bounding_box[8];
 	vec2 bounding_box_in_vectwo[8];
 	for (int i = 0; i < 8; i++) {
@@ -251,25 +268,21 @@ void Renderer::DrawBoundingBox(const vec3* bounding_box, bool draw_box)
 		new_bounding_box[i] = toEuclidian(mat_project * (mat_transform_inverse * homogeneous_point));
 		bounding_box_in_vectwo[i] = vec2(RANGE(new_bounding_box[i].x, -1, 1, 0, m_width), RANGE(new_bounding_box[i].y, -1, 1, 0, m_height));
 		//bounding_box_in_vectwo[i] = vec2(new_bounding_box[i].x, new_bounding_box[i].y);
-		std::cout << "TRYING TO DRAW THE STUPID BOX! 1 bounding box in vectwo i:" << i << " --- " << bounding_box_in_vectwo[i] << std::endl;
+
 	}
-	for (int i = 0; i < 8; i++) {
-		std::cout << "Transformed Point " << i << ": " << new_bounding_box[i] << std::endl;
-	}
-	std::cout << "TRYING TO DRAW THE STUPID BOX! 2" << std::endl;
-	std::cout << "bounding_box at 1 is: " << bounding_box_in_vectwo[1] << "bounding_box at 5 is: " << bounding_box_in_vectwo[5] << std::endl;
-	DrawLine(bounding_box_in_vectwo[1], bounding_box_in_vectwo[5], 2);
-	DrawLine(bounding_box_in_vectwo[1], bounding_box_in_vectwo[0], 2);
-	DrawLine(bounding_box_in_vectwo[1], bounding_box_in_vectwo[3], 2);
-	DrawLine(bounding_box_in_vectwo[2], bounding_box_in_vectwo[0], 2);
-	DrawLine(bounding_box_in_vectwo[2], bounding_box_in_vectwo[6], 2);
-	DrawLine(bounding_box_in_vectwo[2], bounding_box_in_vectwo[3], 2);
-	DrawLine(bounding_box_in_vectwo[3], bounding_box_in_vectwo[7], 2);
-	DrawLine(bounding_box_in_vectwo[4], bounding_box_in_vectwo[5], 2);
-	DrawLine(bounding_box_in_vectwo[4], bounding_box_in_vectwo[6], 2);
-	DrawLine(bounding_box_in_vectwo[4], bounding_box_in_vectwo[0], 2);
-	DrawLine(bounding_box_in_vectwo[5], bounding_box_in_vectwo[7], 2);
-	DrawLine(bounding_box_in_vectwo[6], bounding_box_in_vectwo[7], 2);
+
+	DrawLine(bounding_box_in_vectwo[1], bounding_box_in_vectwo[5], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[1], bounding_box_in_vectwo[0], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[1], bounding_box_in_vectwo[3], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[2], bounding_box_in_vectwo[0], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[2], bounding_box_in_vectwo[6], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[2], bounding_box_in_vectwo[3], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[3], bounding_box_in_vectwo[7], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[4], bounding_box_in_vectwo[5], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[4], bounding_box_in_vectwo[6], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[4], bounding_box_in_vectwo[0], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[5], bounding_box_in_vectwo[7], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[6], bounding_box_in_vectwo[7], 2, !draw_box);
 }
 
 void Renderer::DrawPoint(const vec3& vertex)
@@ -291,32 +304,7 @@ void Renderer::SetProjection(const mat4& projection){
 void Renderer::Init(){
 	CreateBuffers(m_width,m_height);
 
-	/*// Initialize ImGui
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	(void)io;
-
-	// Setup ImGui style
-	//ImGui::StyleColorsDark();*/
 }
-
-/*void Renderer::Render() {
-	// Your rendering code goes here
-
-	// Render ImGui
-	ImGui::Render();
-}
-
-void Renderer::HandleInput() {
-	// Your input handling code goes here
-
-	// Example: Check if the left arrow button is pressed
-	if (ImGui::ArrowButton("RotateLeft", ImGuiDir_Left)) {
-		// Code to rotate the object left goes here
-	}
-}*/
-
-
 
 
 /////////////////////////////////////////////////////

@@ -5,8 +5,29 @@
 
 using namespace std;
 
+float radians(float degrees) {
+	return degrees * (M_PI / 180.0f);
+}
+
 void Model::setShowNormals(bool show) {
 	return;
+}
+
+void Camera::Perspective(float fovy, float aspect, float zNear, float zFar) {
+	float tanHalfFovy = tan(fovy / 2.0f);
+
+	projection = mat4(
+		1.0f / (tanHalfFovy * aspect), 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f / tanHalfFovy, 0.0f, 0.0f,
+		0.0f, 0.0f, -(zFar + zNear) / (zFar - zNear), -2.0f * zFar * zNear / (zFar - zNear),
+		0.0f, 0.0f, -1.0f, 0.0f
+	);
+}
+
+void Camera::UpdateProjectionMatrix(float aspect_ratio)
+{
+	// Assuming you have member variables like fov, near_clip, and far_clip
+	Perspective(radians(FOV), aspect_ratio, NEAR_CLIPPING_PLANE, FAR_CLIPPING_PLANE);
 }
 
 void Scene::loadOBJModel(string fileName)
@@ -50,6 +71,44 @@ void Scene::setShowBoxForMeshModels(bool change) {
 	}
 }
 
+void Scene::translateObjects(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
+{
+	for (Model* model : models) {
+		// Check if the model is of type MeshModel
+		MeshModel* meshModel = dynamic_cast<MeshModel*>(model);
+		if (meshModel != nullptr) {
+			// It's a MeshModel, call setShowBox
+			meshModel->translate(x_trans, y_trans, z_trans);
+		}
+		// You can handle other types of models here if needed
+	}
+}
+
+void Scene::rescaleModels(GLfloat scale)
+{
+	for (Model* model : models) {
+		// Check if the model is of type MeshModel
+		MeshModel* meshModel = dynamic_cast<MeshModel*>(model);
+		if (meshModel != nullptr) {
+			// It's a MeshModel, call scale
+			meshModel->scale(scale, scale, scale);
+		}
+		// You can handle other types of models here if needed
+	}
+}
+void Scene::rotateModels(GLfloat theta_angle, int mode)
+{
+	for (Model* model : models) {
+		// Check if the model is of type MeshModel
+		MeshModel* meshModel = dynamic_cast<MeshModel*>(model);
+		if (meshModel != nullptr) {
+			// It's a MeshModel, call rotate
+			meshModel->rotate(theta_angle, mode);
+		}
+		// You can handle other types of models here if needed
+	}
+}
+
 void Scene::draw()
 {
 	// 1. Send the renderer the current camera transform and the projection
@@ -73,10 +132,10 @@ void Scene::drawDemo()
 
 
 void Camera::setTransformation(const mat4& transform) {
-
+	cTransform = transform;
 }
 void Camera::setProjection(const mat4& perspective) {
-
+	projection = perspective;
 }
 mat4 Camera::getProjection() {
 	return projection;
@@ -101,6 +160,7 @@ void Camera::LookAt(const vec4& eye, const vec4& at, const vec4& up) {
 	cTransformInverse = rotate_inv * Translate(-eye);
 	cTransform = Translate(eye) * transpose(rotate_inv);
 }
+
 void Camera::Ortho(const float left, const float right, const float bottom, const float top, const float zNear, const float zFar) {
 	projection = mat4(2 / (right - left), 0, 0, -(left + right) / (right - left),
 		0, 2 / (top - bottom), 0, -(top + bottom) / (top - bottom),
@@ -109,10 +169,5 @@ void Camera::Ortho(const float left, const float right, const float bottom, cons
 }
 
 void Camera::Frustum(const float left, const float right, const float bottom, const float top, const float zNear, const float zFar) {
-
-}
-
-void Camera::Perspective(const float fovy, const float aspect,
-	const float zNear, const float zFar) {
 
 }

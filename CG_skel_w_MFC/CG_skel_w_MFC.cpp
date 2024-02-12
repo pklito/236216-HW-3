@@ -52,7 +52,8 @@ void display(void)
 	//Call the scene and ask it to draw itself
 	std::cout << "<FRAME>" << std::endl;
 	m_time += 0.1;
-	//camera->LookAt(vec3(1,m_time,1),vec3(-1,0,0),vec3(0,1,0));
+	//camera->LookAt(vec3(1, m_time, 1), vec3(-1, 0, 0), vec3(0, 1, 0));
+	//camera->LookAt(vec3(cos(m_time), 0, sin(m_time)), vec3(0, 1, 0), vec3(0, 1, 0));
 
 	renderer->SetCameraTransformInverse(camera->getTransformInverse());
 	renderer->SetProjection(camera->getProjection());
@@ -63,7 +64,18 @@ void display(void)
 
 void reshape(int width, int height)
 {
-	//update the renderer's buffers
+	// Update the renderer's buffers
+	renderer->ResizeBuffers(width, height);
+
+	// Set the viewport to the entire window
+	glViewport(0, 0, width, height);
+
+	// Update the camera's projection matrix
+	//float aspect_ratio = static_cast<float>(width) / height;
+	//camera->UpdateProjectionMatrix(aspect_ratio);
+
+	// Redraw the scene
+	glutPostRedisplay();
 }
 
 void keyboard(unsigned char key, int x, int y)
@@ -72,7 +84,32 @@ void keyboard(unsigned char key, int x, int y)
 	case 033:
 		exit(EXIT_SUCCESS);
 		break;
+	case 'r':
+		scene->rescaleModels(1.3f); // Increase scale by 30%
+		glutPostRedisplay();
+		break;
+	case 't':
+		scene->rescaleModels(0.7f); // Decrease scale by 30%
+		glutPostRedisplay();
+		break;
+	case 'a':
+		scene->rotateModels(-30, 1);
+		glutPostRedisplay();
+		break;
+	case 'd':
+		scene->rotateModels(30, 1);
+		glutPostRedisplay();
+		break;
+	case 'w':
+		scene->rotateModels(30, 0);
+		glutPostRedisplay();
+		break;
+	case 's':
+		scene->rotateModels(-30, 0);
+		glutPostRedisplay();
+		break;
 	}
+
 }
 
 void mouse(int button, int state, int x, int y)
@@ -161,15 +198,29 @@ void mainMenu(int id)
 	}
 }
 
-void rescaleWindow(bool up_or_down) 
+void rescaleWindow(bool up_or_down)
 {
 	// Your code to rescale the window goes here
 	// For example, you might use GLUT functions to reshape the window
-	if (up_or_down)
-		glutReshapeWindow(2048, 2048);
-	else {
-		glutReshapeWindow(512, 512);
+	
+	int newWidth, newHeight;
+
+	if (up_or_down) {
+		newWidth = 2048;
+		newHeight = 2048;
 	}
+	else {
+		newWidth = 512;
+		newHeight = 512;
+	}
+
+	if (newWidth == glutGet(GLUT_WINDOW_WIDTH) && newHeight == glutGet(GLUT_WINDOW_HEIGHT)) {
+		return;
+	}
+
+	//scene->translateObjects((newWidth - glutGet(GLUT_WINDOW_WIDTH)) / 2, (newHeight - glutGet(GLUT_WINDOW_HEIGHT)) / 2, 0);
+
+	glutReshapeWindow(newWidth, newHeight);
 	glutPostRedisplay();
 }
 
@@ -226,10 +277,10 @@ int my_main(int argc, char** argv)
 	// Initialize window
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
-	glutInitWindowSize(512, 512);
+	glutInitWindowSize(1024, 1024);
 	glutInitContextVersion(3, 2);
 	glutInitContextProfile(GLUT_CORE_PROFILE);
-	glutCreateWindow("CG");
+	glutCreateWindow("CG - press r/t to rescale, a,d,w,s to rotate");
 	glewExperimental = GL_TRUE;
 	glewInit();
 	GLenum err = glewInit();
@@ -242,7 +293,7 @@ int my_main(int argc, char** argv)
 	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
 
-	renderer = new Renderer(512, 512);
+	renderer = new Renderer(1024, 1024);
 	scene = new Scene(renderer);
 	camera = new Camera();
 
@@ -265,7 +316,9 @@ int my_main(int argc, char** argv)
 	renderer->Init();
 
 	//Set the camera projection we want and send it to renderer (vec3 cast to vec4)
-	//camera->LookAt(vec3(1,0,0),vec3(0,0,0),vec3(0,1,0));
+	//camera->LookAt(vec3(1, 1, 1), vec3(-1, 0, 0), vec3(0, 1, 0));
+	//std::cout << "[ ] Camera transform: " << std::endl;
+	//std::cout << camera->getTransformInverse() << std::endl;
 
 	renderer->SetCameraTransformInverse(camera->getTransformInverse());
 	renderer->SetProjection(camera->getProjection());
