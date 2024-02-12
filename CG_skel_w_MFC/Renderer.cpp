@@ -27,10 +27,19 @@ Renderer::~Renderer(void)
 
 void Renderer::CreateBuffers(int width, int height)
 {
+	//ReleaseBuffers();
 	m_width=width;
 	m_height=height;	
 	CreateOpenGLBuffer(); //Do not remove this line.
 	m_outBuffer = new float[3*m_width*m_height];
+}
+
+void Renderer::ReleaseBuffers() {
+	delete[] m_outBuffer;
+	//delete[] m_zbuffer;
+
+	m_outBuffer = nullptr;
+	m_zbuffer = nullptr;
 }
 
 void Renderer::SetDemoBuffer()
@@ -49,17 +58,41 @@ void Renderer::SetDemoBuffer()
 	}
 }
 
+
+void Renderer::ResizeBuffers(int new_width, int new_height) {
+	if (new_width != m_width || new_height != m_height) {
+		ReleaseBuffers();
+		CreateBuffers(new_width, new_height);
+	}
+}
+
+void Renderer::ClearBuffer()
+{
+	// Assuming you have a background color (adjust the values accordingly)
+	vec3 background_color = vec3(0.0, 0.0, 0.0);
+
+	// Fill the buffer with the background color
+	for (int y = 0; y < m_height; y++)
+	{
+		for (int x = 0; x < m_width; x++)
+		{
+			m_outBuffer[INDEX(m_width, x, y, 0)] = background_color.x;
+			m_outBuffer[INDEX(m_width, x, y, 1)] = background_color.y;
+			m_outBuffer[INDEX(m_width, x, y, 2)] = background_color.z;
+		}
+	}
+}
+
 /*
  This function gets two pixels on screen and draws the line between them (rasterization)
  vert1 + vert2 = ends of the edge
  normal = direction of normal.
 */
-void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor){
-	//Temp solution. drawing a line out of bounds crashes the code!
-
+void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor, bool clear)
+{
 	//flip the axis so that slope is -1 <= m <= 1
 	bool flipped = false;
-	if(abs(vert1.y-vert2.y) > abs(vert1.x - vert2.x)){
+	if (abs(vert1.y - vert2.y) > abs(vert1.x - vert2.x)) {
 		auto temp = vert1.y;
 		vert1.y = vert1.x;
 		vert1.x = temp;
@@ -70,7 +103,7 @@ void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor){
 		flipped = true;
 	}
 	//swap the order so that vert1 is left of vert2
-	if(vert1.x > vert2.x){
+	if (vert1.x > vert2.x) {
 		vec2 temp = vert1;
 		vert1 = vert2;
 		vert2 = temp;
@@ -80,27 +113,28 @@ void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor){
 	int y = vert1.x <= vert2.x ? vert1.y : vert2.y;
 	int dy = abs(vert2.y - vert1.y);
 	int dx = vert2.x - vert1.x;
-	int d = 2*dy - dx;
+	int d = 2 * dy - dx;
 	//increase or decrease y on move.
 	int slope_direction = vert2.y >= vert1.y ? 1 : -1;
 
-	for(int x = vert1.x; x <= vert2.x; x++){
-		if(d < 0){
-			d+=2*dy;
+	for (int x = vert1.x; x <= vert2.x; x++)
+	{
+		if (d < 0) {
+			d += 2 * dy;
 		}
-		else{
+		else {
 			y += slope_direction;
-			d+=2*dy - 2*dx;
+			d += 2 * dy - 2 * dx;
 		}
 
 		//light the pixel
 		if(flipped){
-			DrawPixel(CLAMP(y,0,m_height-1), CLAMP(x,0,m_width-1), 1, specialColor != 1, specialColor != 2);
+			DrawPixel(CLAMP(y,0,m_height-1), CLAMP(x,0,m_width-1), !clear, !clear*(specialColor != 1), !clear*(specialColor != 2));
 		}
 		else{
-			DrawPixel(CLAMP(x,0,m_width-1), CLAMP(y,0,m_height-1), 1, specialColor != 1, specialColor != 2);
+			DrawPixel(CLAMP(x,0,m_width-1), CLAMP(y,0,m_height-1), !clear, !clear*(specialColor != 1), !clear*(specialColor != 2));
 		}
-			
+
 	}
 }
 
@@ -120,8 +154,11 @@ void Renderer::DrawPixel(int x, int y, float r, float g, float b){
  * vertices: vector of the camera space vertices
  * normals: directions of the respective world space normals.
  */
-void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals)
+void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals, bool draw_normals)
 {
+	// Clear the buffer before drawing new content
+	ClearBuffer();
+	
 	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
 	vector<vec3>::const_iterator normal = normals != NULL ? normals->begin() : vertices->begin();
 	for(auto it = vertices->begin(); it != vertices->end(); ++it, ++normal){
@@ -159,20 +196,18 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		DrawLine(p3, p1);
 
 		//Normal:
-		
-		DrawLine(n1, n2, 1);
+		if(draw_normals){
+		  DrawLine(n1, n2, 1);
+    }
 	}
 }
 
-void Renderer::DrawBoundingBox(const vec3* bounding_box) 
+void Renderer::DrawBoundingBox(const vec3* bounding_box, bool draw_box) 
 {
 	if (!bounding_box) {
 		return;
 	}
 	
-	for (int i = 0; i < 8; i++) {
-		std::cout << "BEFORE TRANSFORMATION " << i << ": " << bounding_box[i] << std::endl;
-	}
 	vec4 new_bounding_box[8];
 	vec2 bounding_box_in_vectwo[8];
 	for (int i = 0; i < 8; i++) {
@@ -183,25 +218,21 @@ void Renderer::DrawBoundingBox(const vec3* bounding_box)
 		new_bounding_box[i] = toEuclidian(mat_project * (mat_transform_inverse * homogeneous_point));
 		bounding_box_in_vectwo[i] = vec2(RANGE(new_bounding_box[i].x, -1, 1, 0, m_width), RANGE(new_bounding_box[i].y, -1, 1, 0, m_height));
 		//bounding_box_in_vectwo[i] = vec2(new_bounding_box[i].x, new_bounding_box[i].y);
-		std::cout << "TRYING TO DRAW THE STUPID BOX! 1 bounding box in vectwo i:" << i << " --- " << bounding_box_in_vectwo[i] << std::endl;
+
 	}
-	for (int i = 0; i < 8; i++) {
-		std::cout << "Transformed Point " << i << ": " << new_bounding_box[i] << std::endl;
-	}
-	std::cout << "TRYING TO DRAW THE STUPID BOX! 2" << std::endl;
-	std::cout << "bounding_box at 1 is: " << bounding_box_in_vectwo[1] << "bounding_box at 5 is: " << bounding_box_in_vectwo[5] << std::endl;
-	DrawLine(bounding_box_in_vectwo[1], bounding_box_in_vectwo[5], 2);
-	DrawLine(bounding_box_in_vectwo[1], bounding_box_in_vectwo[0], 2);
-	DrawLine(bounding_box_in_vectwo[1], bounding_box_in_vectwo[3], 2);
-	DrawLine(bounding_box_in_vectwo[2], bounding_box_in_vectwo[0], 2);
-	DrawLine(bounding_box_in_vectwo[2], bounding_box_in_vectwo[6], 2);
-	DrawLine(bounding_box_in_vectwo[2], bounding_box_in_vectwo[3], 2);
-	DrawLine(bounding_box_in_vectwo[3], bounding_box_in_vectwo[7], 2);
-	DrawLine(bounding_box_in_vectwo[4], bounding_box_in_vectwo[5], 2);
-	DrawLine(bounding_box_in_vectwo[4], bounding_box_in_vectwo[6], 2);
-	DrawLine(bounding_box_in_vectwo[4], bounding_box_in_vectwo[0], 2);
-	DrawLine(bounding_box_in_vectwo[5], bounding_box_in_vectwo[7], 2);
-	DrawLine(bounding_box_in_vectwo[6], bounding_box_in_vectwo[7], 2);
+
+	DrawLine(bounding_box_in_vectwo[1], bounding_box_in_vectwo[5], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[1], bounding_box_in_vectwo[0], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[1], bounding_box_in_vectwo[3], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[2], bounding_box_in_vectwo[0], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[2], bounding_box_in_vectwo[6], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[2], bounding_box_in_vectwo[3], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[3], bounding_box_in_vectwo[7], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[4], bounding_box_in_vectwo[5], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[4], bounding_box_in_vectwo[6], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[4], bounding_box_in_vectwo[0], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[5], bounding_box_in_vectwo[7], 2, !draw_box);
+	DrawLine(bounding_box_in_vectwo[6], bounding_box_in_vectwo[7], 2, !draw_box);
 }
 
 void Renderer::DrawPoint(const vec3& vertex)
@@ -228,32 +259,7 @@ void Renderer::setCameraMatrixes(const mat4& cTransform, const mat4& Projection)
 void Renderer::Init(){
 	CreateBuffers(m_width,m_height);
 
-	/*// Initialize ImGui
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	(void)io;
-
-	// Setup ImGui style
-	//ImGui::StyleColorsDark();*/
 }
-
-/*void Renderer::Render() {
-	// Your rendering code goes here
-
-	// Render ImGui
-	ImGui::Render();
-}
-
-void Renderer::HandleInput() {
-	// Your input handling code goes here
-
-	// Example: Check if the left arrow button is pressed
-	if (ImGui::ArrowButton("RotateLeft", ImGuiDir_Left)) {
-		// Code to rotate the object left goes here
-	}
-}*/
-
-
 
 
 /////////////////////////////////////////////////////

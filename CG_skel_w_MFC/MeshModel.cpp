@@ -64,6 +64,7 @@ MeshModel::MeshModel(string fileName)
 {
 	vertex_count = 0;
 	loadFile(fileName);
+	show_normals = false;
 }
 
 MeshModel::~MeshModel(void)
@@ -135,27 +136,34 @@ void MeshModel::loadFile(string fileName)
 	std::cout << "here is okay in loadFile after normalToFace" << std::endl;
 }
 
-
-
 void MeshModel::draw(Renderer* renderer)
 {
 	std::vector<vec3> vec(vertex_positions, vertex_positions + (3 * face_count));
 	std::vector<vec3> norm(normals, normals + (3 * face_count));
-	renderer->DrawTriangles(&vec, &norm);
-	renderer->DrawBoundingBox(bounding_box);
+	renderer->DrawTriangles(&vec, &norm, show_normals);
+	
+	renderer->DrawBoundingBox(bounding_box, show_box);
 }
 
 void MeshModel::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
 {
 	int i = 0;
-	while (i != sizeof(vertex_positions) / sizeof(vec3)) {
-		vec3 current_vertex = vertex_positions[i];
-
-		current_vertex[0] += x_trans;
-		current_vertex[1] += y_trans;
-		current_vertex[2] += z_trans;
+	while (i < vertex_count) {
+		// Update the actual vertex positions in the array
+		vertex_positions[i].x += x_trans;
+		vertex_positions[i].y += y_trans;
+		vertex_positions[i].z += z_trans;
 		i++;
 	}
+}
+
+vec3 MeshModel::translatePoint(vec3 point, GLfloat x_trans, GLfloat y_trans, GLfloat z_trans) 
+{
+	vec3 new_point;
+	new_point.x = point.x + x_trans;
+	new_point.y = point.y + y_trans;
+	new_point.z = point.z + z_trans;
+	return new_point;
 }
 
 void MeshModel::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale)
@@ -165,37 +173,94 @@ void MeshModel::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale)
 	}
 
 	int i = 0;
-	while (i != sizeof(vertex_positions) / sizeof(vec3)) {
-		vec3 current_vertex = vertex_positions[i];
+	while (i < vertex_count) {
 
-		current_vertex[0] *= x_scale;
-		current_vertex[1] *= y_scale;
-		current_vertex[2] *= z_scale;
+		vertex_positions[i].x *= x_scale;
+		vertex_positions[i].y *= y_scale;
+		vertex_positions[i].z *= z_scale;
 		i++;
 	}
 }
 
-void MeshModel::rotate(GLfloat theta_angle)
+mat4 rotateX(GLfloat theta_angle) {
+	mat4 rotation_matrix;
+	rotation_matrix[1].y = cos(theta_angle);
+	rotation_matrix[1].z = -sin(theta_angle);
+	rotation_matrix[2].y = sin(theta_angle);
+	rotation_matrix[2].z = cos(theta_angle);
+	return rotation_matrix;
+}
+
+mat4 rotateY(GLfloat theta_angle) {
+	mat4 rotation_matrix;
+	rotation_matrix[0].x = cos(theta_angle);
+	rotation_matrix[0].z = sin(theta_angle);
+	rotation_matrix[2].x = -sin(theta_angle);
+	rotation_matrix[2].z = cos(theta_angle);
+	/*((cos(theta_angle), 0, sin(theta_angle), 0),
+		(0, 1, 0, 0),
+		(-sin(theta_angle), 0, cos(theta_angle), 0),
+		(0, 0, 0, 1));*/
+	return rotation_matrix;
+}
+
+mat4 rotateZ(GLfloat theta_angle) {
+	mat4 rotation_matrix;
+	rotation_matrix[0].x = cos(theta_angle);
+	rotation_matrix[0].y = -sin(theta_angle);
+	rotation_matrix[1].x = sin(theta_angle);
+	rotation_matrix[1].y = cos(theta_angle);
+	/*((cos(theta_angle), -sin(theta_angle), 0, 0),
+		(sin(theta_angle), cos(theta_angle), 0, 0),
+		(0, 0, 1, 0),
+		(0, 0, 0, 1));*/
+	return rotation_matrix;
+}
+
+float Radians(float degrees) 
 {
+	return degrees * (M_PI / 180.0f);
+}
+
+
+void MeshModel::rotate(GLfloat theta_degree, int mode)
+{
+	if (theta_degree == 0) {
+		return;
+	}
+	float theta = Radians(theta_degree);
+	//mode = 0 is around x, mode = 1 is around y, mode = 2 is around z
 	int i = 0;
-	while (i != sizeof(vertex_positions) / sizeof(vec3)) {
+	mat4 rotation_matrix;
+	if (mode == 0) {
+		rotation_matrix = rotateX(theta);
+	}
+	else if (mode == 1) {
+		rotation_matrix = rotateY(theta);
+	}
+	else if (mode == 2) {
+		rotation_matrix = rotateZ(theta);
+	}
+	else {
+		std::cout << "something is wrong" << std::endl;
+		return;
+	}
+	while (i < vertex_count) {
 		vec3 current_vertex = vertex_positions[i];
-		mat4 rotation_matrixX = RotateX(theta_angle);
-		vec4 rotated_point = vec4(rotation_matrixX * vec4(current_vertex, 1.0f));
-		vertex_positions[i] = vec3(rotated_point.x, rotated_point.y, rotated_point.z);
+		vec4 curr_rotated_point = vec4(rotation_matrix * vec4(current_vertex, 1.0f));
+		
+		vertex_positions[i] = vec3(curr_rotated_point.x, curr_rotated_point.y, curr_rotated_point.z);
 		i++;
 	}
+	normalToFace();
+	calculateBoundingBox();
 
 }
 
 vec3 calculateNormal(vec3 first_point, vec3 second_point, vec3 third_point)
 {
-	vec3 normal_sized_first_point = vec3(100.0f * first_point.x, 100.0f * first_point.y, 100.0f * first_point.z);
-	vec3 normal_sized_second_point = vec3(100.0f * second_point.x, 100.0f * second_point.y, 100.0f * second_point.z);
-	vec3 normal_sized_third_point = vec3(100.0f * third_point.x, 100.0f * third_point.y, 100.0f * third_point.z);
-
-	vec3 a = normal_sized_third_point - normal_sized_first_point;
-	vec3 b = normal_sized_second_point - normal_sized_first_point;
+	vec3 a = third_point - first_point;
+	vec3 b = second_point - first_point;
 
 	vec3 c = cross(a, b);
 
@@ -260,4 +325,14 @@ void MeshModel::calculateBoundingBox()
 	bounding_box[5] = vec3(min_x, max_y, min_z);
 	bounding_box[6] = vec3(min_x, min_y, max_z);
 	bounding_box[7] = vec3(min_x, min_y, min_z);
+}
+
+void MeshModel::setShowNormals(bool change) 
+{
+	show_normals = change;
+}
+
+void MeshModel::setShowBox(bool change)
+{
+	show_box = change;
 }
