@@ -7,7 +7,7 @@
 using namespace std;
 
 class Model {
-protected:
+public:
 	virtual ~Model() {}
 	void virtual draw(Renderer* renderer) = 0;
 	virtual void setShowNormals(bool change);
@@ -39,14 +39,14 @@ public:
 	mat4 getTransform();
 	mat4 getTransformInverse();
 
-	void LookAt(const vec4& eye, const vec4& at, const vec4& up);
-	void Ortho(const float left, const float right,
+	void LookAt(const vec4& eye, const vec4& at, const vec4& up );
+	void Ortho( const float left, const float right,
 		const float bottom, const float top,
-		const float zNear, const float zFar);
-	void Frustum(const float left, const float right,
+		const float zNear, const float zFar );
+	void Frustum( const float left, const float right,
 		const float bottom, const float top,
-		const float zNear, const float zFar);
-	void Perspective(const float fovy, const float aspect,
+		const float zNear, const float zFar );
+	void Perspective( const float fovy, const float aspect,
 		const float zNear, const float zFar);
 
 };
@@ -57,11 +57,11 @@ class Scene {
 	int num_of_models;
 	vector<Light*> lights;
 	vector<Camera*> cameras;
-	Renderer* m_renderer;
+	Renderer *m_renderer;
 
 public:
 	Scene() {};
-	Scene(Renderer* renderer) : m_renderer(renderer) {};
+	Scene(Renderer *renderer) : m_renderer(renderer) {};
 	void loadOBJModel(string fileName);
 	void addMeshModel(Model* model);
 	void draw();
@@ -72,6 +72,7 @@ public:
 	void translateObjects(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans);
 	void rescaleModels(GLfloat scale);
 	void rotateModels(GLfloat theta_angle, int mode);
+
 	int activeModel;
 	int activeLight;
 	int activeCamera;

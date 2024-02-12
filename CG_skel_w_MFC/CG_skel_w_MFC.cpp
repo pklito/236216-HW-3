@@ -41,19 +41,17 @@ Renderer* renderer;
 Camera* camera;
 float m_time;
 
-int last_x, last_y;
-bool lb_down, rb_down, mb_down;
+int last_x,last_y;
+bool lb_down,rb_down,mb_down;
 
 //----------------------------------------------------------------------------
 // Callbacks
 
-void display(void)
+void display( void )
 {
-	//Call the scene and ask it to draw itself
 	std::cout << "<FRAME>" << std::endl;
 	m_time += 0.1;
-	//camera->LookAt(vec3(1, m_time, 1), vec3(-1, 0, 0), vec3(0, 1, 0));
-	//camera->LookAt(vec3(cos(m_time), 0, sin(m_time)), vec3(0, 1, 0), vec3(0, 1, 0));
+	camera->LookAt(vec3(cos(m_time),0,sin(m_time)),vec3(0,1,0),vec3(0,1,0));
 
 	renderer->SetCameraTransformInverse(camera->getTransformInverse());
 	renderer->SetProjection(camera->getProjection());
@@ -62,7 +60,7 @@ void display(void)
 	std::cout << "<FRAME END>" << ::std::endl;
 }
 
-void reshape(int width, int height)
+void reshape( int width, int height )
 {
 	// Update the renderer's buffers
 	renderer->ResizeBuffers(width, height);
@@ -78,11 +76,11 @@ void reshape(int width, int height)
 	glutPostRedisplay();
 }
 
-void keyboard(unsigned char key, int x, int y)
+void keyboard( unsigned char key, int x, int y )
 {
-	switch (key) {
+	switch ( key ) {
 	case 033:
-		exit(EXIT_SUCCESS);
+		exit( EXIT_SUCCESS );
 		break;
 	case 'r':
 		scene->rescaleModels(1.3f); // Increase scale by 30%
@@ -116,18 +114,18 @@ void mouse(int button, int state, int x, int y)
 {
 	//button = {GLUT_LEFT_BUTTON, GLUT_MIDDLE_BUTTON, GLUT_RIGHT_BUTTON}
 	//state = {GLUT_DOWN,GLUT_UP}
-
+	
 	//set down flags
-	switch (button) {
-	case GLUT_LEFT_BUTTON:
-		lb_down = (state == GLUT_UP) ? 0 : 1;
-		break;
-	case GLUT_RIGHT_BUTTON:
-		rb_down = (state == GLUT_UP) ? 0 : 1;
-		break;
-	case GLUT_MIDDLE_BUTTON:
-		mb_down = (state == GLUT_UP) ? 0 : 1;
-		break;
+	switch(button) {
+		case GLUT_LEFT_BUTTON:
+			lb_down = (state==GLUT_UP)?0:1;
+			break;
+		case GLUT_RIGHT_BUTTON:
+			rb_down = (state==GLUT_UP)?0:1;
+			break;
+		case GLUT_MIDDLE_BUTTON:
+			mb_down = (state==GLUT_UP)?0:1;	
+			break;
 	}
 
 	// add your code
@@ -136,11 +134,11 @@ void mouse(int button, int state, int x, int y)
 void motion(int x, int y)
 {
 	// calc difference in mouse movement
-	int dx = x - last_x;
-	int dy = y - last_y;
+	int dx=x-last_x;
+	int dy=y-last_y;
 	// update last x,y
-	last_x = x;
-	last_y = y;
+	last_x=x;
+	last_y=y;
 }
 
 void fileMenu(int id)
@@ -293,40 +291,38 @@ int my_main(int argc, char** argv)
 	}
 	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
-
 	renderer = new Renderer(1024, 1024);
 	scene = new Scene(renderer);
 	camera = new Camera();
 
-	std::cout << "start";
+	std::cout << "[ ] Reading mesh files... ";
 	MeshModel* demo_object = new MeshModel("bunny.obj");
 	scene->addMeshModel(demo_object);
-	std::cout << " end" << std::endl;
+	std::cout << " Done!" << std::endl;
 	//----------------------------------------------------------------------------
 
 	// Initialize Callbacks
 
-	glutDisplayFunc(display);
-	glutKeyboardFunc(keyboard);
-	glutMouseFunc(mouse);
-	glutMotionFunc(motion);
-	glutReshapeFunc(reshape);
+	glutDisplayFunc( display );
+	glutKeyboardFunc( keyboard );
+	glutMouseFunc( mouse );
+	glutMotionFunc ( motion );
+	glutReshapeFunc( reshape );
 	initMenu();
-
+	
 	//Init the renderer
 	renderer->Init();
-
+	
 	//Set the camera projection we want and send it to renderer (vec3 cast to vec4)
-	//camera->LookAt(vec3(1, 1, 1), vec3(-1, 0, 0), vec3(0, 1, 0));
-	//std::cout << "[ ] Camera transform: " << std::endl;
-	//std::cout << camera->getTransformInverse() << std::endl;
 
+	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
+	std::cout << "[ ] Camera transform: " << std::endl;
+	std::cout << camera->getTransformInverse() << std::endl;
+	//camera->Ortho(-2,2,0,4,0,8); 
 	renderer->SetCameraTransformInverse(camera->getTransformInverse());
 	renderer->SetProjection(camera->getProjection());
 
-
-	demo_object->draw(renderer);
-	renderer->SwapBuffers();
+	std::cout << "[V] Done with the initialization! " << std::endl;
 	glutMainLoop();
 	delete scene;
 	delete renderer;
@@ -337,10 +333,10 @@ CWinApp theApp;
 
 using namespace std;
 
-int main(int argc, char** argv)
+int main( int argc, char **argv )
 {
 	int nRetCode = 0;
-
+	
 	// initialize MFC and print and error on failure
 	if (!AfxWinInit(::GetModuleHandle(NULL), NULL, ::GetCommandLine(), 0))
 	{
@@ -350,8 +346,8 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		my_main(argc, argv);
+		my_main(argc, argv );
 	}
-
+	
 	return nRetCode;
 }

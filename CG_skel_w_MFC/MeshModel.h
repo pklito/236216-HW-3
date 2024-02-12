@@ -40,3 +40,5 @@ public:
 	void setShowNormals(bool change) override;
 	void setShowBox(bool change) override;
 };
+
+vec3 calculateNormal(vec3 first_point, vec3 second_point, vec3 third_point);

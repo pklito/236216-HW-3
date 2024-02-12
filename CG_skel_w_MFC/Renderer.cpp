@@ -4,6 +4,7 @@
 #include "InitShader.h"
 #include "GL\freeglut.h"
 //#include "imgui.h"
+#include "MeshModel.h"
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 
@@ -89,13 +90,6 @@ void Renderer::ClearBuffer()
 */
 void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor, bool clear)
 {
-	//Temp solution. drawing a line out of bounds crashes the code!
-	if (vert1.x < 1 || vert2.x < 1 || vert1.x >= m_width - 1 || vert2.x >= m_width - 1 ||
-		vert1.y < 1 || vert2.y < 1 || vert2.y >= m_height - 1 || vert1.y >= m_height - 1)
-	{
-		return;
-	}
-
 	//flip the axis so that slope is -1 <= m <= 1
 	bool flipped = false;
 	if (abs(vert1.y - vert2.y) > abs(vert1.x - vert2.x)) {
@@ -134,55 +128,19 @@ void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor, bool clear)
 		}
 
 		//light the pixel
-		if (flipped) {
-			if (specialColor == 1) {
-				m_outBuffer[INDEX(m_width, y, x, 0)] = 0;	m_outBuffer[INDEX(m_width, y, x, 1)] = 1;	m_outBuffer[INDEX(m_width, y, x, 2)] = 1;
-			}
-			else if (specialColor == 2) {
-				m_outBuffer[INDEX(m_width, y, x, 0)] = 1;	m_outBuffer[INDEX(m_width, y, x, 1)] = 0;	m_outBuffer[INDEX(m_width, y, x, 2)] = 0;
-			}
-			else {
-				m_outBuffer[INDEX(m_width, y, x, 0)] = 1;	m_outBuffer[INDEX(m_width, y, x, 1)] = 1;	m_outBuffer[INDEX(m_width, y, x, 2)] = 1;
-			}
-
-			// clear the pixel if specified
-			if (clear)
-			{
-				if (specialColor == 2) {
-					if (m_outBuffer[INDEX(m_width, y, x, 0)] != 0 && m_outBuffer[INDEX(m_width, y, x, 1)] != 1 && m_outBuffer[INDEX(m_width, y, x, 2)] != 1) {
-						m_outBuffer[INDEX(m_width, y, x, 0)] = 0; // set to background color
-						m_outBuffer[INDEX(m_width, y, x, 1)] = 0;
-						m_outBuffer[INDEX(m_width, y, x, 2)] = 0;
-					}
-				}
-				
-			}
-			//inverted y and x (because we swapped them in the beginning)
+		if(flipped){
+			DrawPixel(CLAMP(y,0,m_height-1), CLAMP(x,0,m_width-1), !clear, !clear*(specialColor != 1), !clear*(specialColor != 2));
 		}
-		else {
-			if (specialColor == 1) {
-				m_outBuffer[INDEX(m_width, x, y, 0)] = 0;	m_outBuffer[INDEX(m_width, x, y, 1)] = 1;	m_outBuffer[INDEX(m_width, x, y, 2)] = 1;
-			}
-			else if (specialColor == 2) {
-				m_outBuffer[INDEX(m_width, x, y, 0)] = 1;	m_outBuffer[INDEX(m_width, x, y, 1)] = 0;	m_outBuffer[INDEX(m_width, x, y, 2)] = 0;
-			}
-			else {
-				m_outBuffer[INDEX(m_width, x, y, 0)] = 1;	m_outBuffer[INDEX(m_width, x, y, 1)] = 1;	m_outBuffer[INDEX(m_width, x, y, 2)] = 1;
-			}
-			// clear the pixel if specified
-			if (clear)
-			{
-				if (specialColor == 2) {
-					if (m_outBuffer[INDEX(m_width, x, y, 0)] != 0 && m_outBuffer[INDEX(m_width, x, y, 1)] != 1 && m_outBuffer[INDEX(m_width, x, y, 2)] != 1) {
-						m_outBuffer[INDEX(m_width, x, y, 0)] = 0; // set to background color
-						m_outBuffer[INDEX(m_width, x, y, 1)] = 0;
-						m_outBuffer[INDEX(m_width, x, y, 2)] = 0;
-					}
-				}
-			}
+		else{
+			DrawPixel(CLAMP(x,0,m_width-1), CLAMP(y,0,m_height-1), !clear, !clear*(specialColor != 1), !clear*(specialColor != 2));
 		}
 
 	}
+}
+
+void Renderer::DrawPixel(int x, int y, float r, float g, float b){
+	m_outBuffer[INDEX(m_width,x,y,0)]=r;	m_outBuffer[INDEX(m_width,x,y,1)]=g;	m_outBuffer[INDEX(m_width,x,y,2)]=b;
+		
 }
 
 /**
@@ -210,10 +168,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		vec4 vert3 = vec4(*(it+2));
 		it = it + 2;
 
-		vec4 normCoor1 = vec4(*normal);
-		vec4 normCoor2 = normCoor1 + vec4(*(normal + 1));
-		
-		normal = normal + 2;
+		vec4 normCoor1, normCoor2;
 		
 		/*
 		TRANSFORMATIONS + PROJECTION ( P * Tc-1 * v)
@@ -222,33 +177,28 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 		vert2 = toEuclidian(mat_project * (mat_transform_inverse * vert2));
 		vert3 = toEuclidian(mat_project * (mat_transform_inverse * vert3));
 
-		normCoor1 = toEuclidian(mat_project * (mat_transform_inverse * normCoor1));
-		normCoor2 = toEuclidian(mat_project * (mat_transform_inverse * normCoor2));
+		vec3 norm_dir = calculateNormal(toVec3(vert1),toVec3(vert2),toVec3(vert3))/5.f;
+		normCoor1 = (vert1 + vert2 + vert3) / 3;
+		normCoor2 = normCoor1 - norm_dir;
 		/*
 		Clipspace coordinates to screenspace coordinates
 		*/
 		vec2 p1 = vec2(RANGE(vert1.x,-1,1,0,m_width), RANGE(vert1.y,-1,1,0,m_height));
 		vec2 p2 = vec2(RANGE(vert2.x,-1,1,0,m_width), RANGE(vert2.y,-1,1,0,m_height));
 		vec2 p3 = vec2(RANGE(vert3.x,-1,1,0,m_width), RANGE(vert3.y,-1,1,0,m_height));
-	
+
 		vec2 n1 = vec2(RANGE(normCoor1.x, -1, 1, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height));
 		vec2 n2 = vec2(RANGE(normCoor2.x, -1, 1, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height));
 
-		if(normals){
-			if (draw_normals) {
-				DrawLine(n1, n2, 1, false);
-			}
-			DrawLine(p1, p2, 0, false);
-			DrawLine(p2, p3, 0, false);
-			DrawLine(p3, p1, 0, false);
-			
-		}
-		else{
-			DrawLine(p1, p2, 0, false);
-			DrawLine(p2, p3, 0, false);
-			DrawLine(p3, p1, 0, false);
-			//DrawLine(vert1,vert2);
-		}
+		
+		DrawLine(p1, p2);
+		DrawLine(p2, p3);
+		DrawLine(p3, p1);
+
+		//Normal:
+		if(draw_normals){
+		  DrawLine(n1, n2, 1);
+    }
 	}
 }
 
@@ -299,6 +249,11 @@ void Renderer::SetCameraTransformInverse(const mat4& cTransform){
 }
 void Renderer::SetProjection(const mat4& projection){
 	mat_project = projection;
+}
+
+void Renderer::setCameraMatrixes(const mat4& cTransform, const mat4& Projection){
+	SetCameraTransformInverse(cTransform);
+	SetProjection(Projection);
 }
 
 void Renderer::Init(){
@@ -382,4 +337,7 @@ void Renderer::SwapBuffers()
 	a = glGetError();
 	glutSwapBuffers();
 	a = glGetError();
+
+	//clear the new buffer
+	std::fill(m_outBuffer,m_outBuffer+(m_width*m_height*3),0);
 }
