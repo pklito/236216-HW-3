@@ -153,6 +153,7 @@ void fileMenu(int id)
 		{
 			std::string s((LPCTSTR)dlg.GetPathName());
 			scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
+			glutPostRedisplay();
 		}
 		break;
 	}
