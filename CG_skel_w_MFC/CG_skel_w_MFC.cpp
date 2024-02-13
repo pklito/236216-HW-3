@@ -56,17 +56,48 @@ bool lb_down,rb_down,mb_down;
 // Camera + Scene modiications
 //----------------------------------------------------------------------------
 
+void swapCameras(){
+	scene->cycleActiveCamera();
+	renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
+	std::cout << "a " << std::endl;
+	glutPostRedisplay();
+}
+
 void addOrthoCamera(){
+
+	int result = AfxMessageBox(_T("You will be sent to the CMD to input the Orthographic specs.\npress CANCEL if you do not wish to continue."), MB_ICONINFORMATION | MB_OKCANCEL);
+	if(result == IDCANCEL){
+		return;
+	}
+
+	renderer->FillEdges(0.05,0.9,0.1,0.1);
+	glutPostRedisplay();
 	Camera* camera = new Camera();
 
-	int result = AfxMessageBox(_T("You will be sent to the CMD to input the camera specs.\npress CANCEL if you do not wish to continue."), MB_ICONINFORMATION | MB_OKCANCEL);
-	if(result = IDCANCEL)
-		return;
+	std::cout << "enter aspect ratio: ";
 	std::string userInput;
 	std::cin >> userInput;
+	float aspect_ratio = 1;
+	try {
+        // Try to convert the input string to a float
+        aspect_ratio = std::stof(userInput);
+        
+    } catch (const std::invalid_argument& e) {
+        std::cerr << "Invalid argument: " << e.what() << std::endl;
+		return;
+    } catch (const std::out_of_range& e) {
+        std::cerr << "Out of range: " << e.what() << std::endl;
+        return;
+    }
 
+	//std::cout << "enter z-min: ";
+	//std::string userInput2;
+	//std::cin >> userInput2;
 	camera->LookAt(vec3(0,0,1),vec3(0,0,0),vec3(0,1,0));
+	//TEMP ORTHOGRAPHIC
+	camera->Ortho(-0.5,0.5,aspect_ratio/2,aspect_ratio/2,0,-1);
 	scene->addCamera(camera);
+	glutPostRedisplay();
 }
 
 void readFromFile(){
@@ -146,6 +177,9 @@ void keyboard( unsigned char key, int x, int y )
 		break;
 	case 's':
 		scene->rotateObject(-30, 0);
+		break;
+	case ' ':
+		swapCameras();
 		break;
 	default:
 		//fail
@@ -356,6 +390,11 @@ int my_main(int argc, char** argv)
 	scene = new Scene(renderer);
 	camera = new Camera();
 
+	std::cout << "[ ] Camera transform: " << std::endl;
+	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
+	scene->addCamera(camera);
+	renderer->SET_CAMERA(scene->getActiveCamera());	//This is a macro im just lazy.
+
 	std::cout << "[ ] Reading mesh files... ";
 	MeshModel* demo_object = new MeshModel("meshes/fox.obj");
 	scene->addMeshModel(demo_object);
@@ -376,13 +415,6 @@ int my_main(int argc, char** argv)
 	renderer->Init();
 	
 	//Set the camera projection we want and send it to renderer (vec3 cast to vec4)
-
-	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
-	std::cout << "[ ] Camera transform: " << std::endl;
-	std::cout << camera->getTransformInverse() << std::endl;
-	//camera->Ortho(-2,2,0,4,0,8); 
-	renderer->SetCameraTransformInverse(camera->getTransformInverse());
-	renderer->SetProjection(camera->getProjection());
 
 	std::cout << "[V] Done with the initialization! " << std::endl;
 	glutMainLoop();

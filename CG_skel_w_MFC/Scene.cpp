@@ -123,6 +123,16 @@ void Scene::cycleSelectedObject()
 	activeModel = (activeModel+1) % models.size();
 }
 
+void Scene::cycleActiveCamera()
+{
+	activeCamera = (activeCamera+1) % cameras.size();
+}
+
+Camera* Scene::getActiveCamera()
+{
+	return cameras[activeCamera];
+}
+
 void Camera::setTransformation(const mat4& transform) {
 	cTransform = transform;
 }

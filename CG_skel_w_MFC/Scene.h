@@ -79,6 +79,8 @@ public:
 	void scaleObject(GLfloat scale, bool world_frame = false);
 	void rotateObject(GLfloat theta_angle, int axis, bool world_frame = false);
 	void cycleSelectedObject();
+	void cycleActiveCamera();
+	Camera* getActiveCamera();
 
 	int activeModel;
 	int activeLight;
