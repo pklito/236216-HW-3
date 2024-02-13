@@ -28,7 +28,8 @@
 
 enum MENU_STATES {
 	OPEN_FILE_OBJ,
-	ADD_CAMERA,
+	ADD_CAMERA_ORTHO,
+	ADD_CAMERA_PROJECTION,
 	MAIN_DEMO,
 	MAIN_ABOUT,
 
@@ -58,6 +59,29 @@ bool lb_down,rb_down,mb_down;
 void swapCameras(){
 	scene->cycleActiveCamera();
 	renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
+	glutPostRedisplay();
+}
+
+#define TRY_FLOAT(var, text) try { var = std::stof(text); } catch (const std::invalid_argument& e) {return;} catch (const std::out_of_range& e) {return;}
+void addProjCamera(){
+	int result = AfxMessageBox(_T("Enter Projection data in the TERMINAL.\npress CANCEL if you do not wish to continue."), MB_ICONINFORMATION | MB_OKCANCEL);
+	if(result == IDCANCEL){
+		return;
+	}
+
+	Camera* camera = new Camera();
+
+	std::cout << "enter aspect ratio: ";
+	std::string userInput;
+	std::cin >> userInput;
+	float aspect_ratio = 1;
+	TRY_FLOAT(aspect_ratio, userInput);
+	
+	
+	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
+	//TEMP ORTHOGRAPHIC
+	camera->Perspective(1,1,-1,-2);
+	scene->addCamera(camera);
 	glutPostRedisplay();
 }
 
@@ -91,7 +115,8 @@ void addOrthoCamera(){
 	//std::cout << "enter z-min: ";
 	//std::string userInput2;
 	//std::cin >> userInput2;
-	camera->LookAt(vec3(0,0,1),vec3(0,0,0),vec3(0,1,0));
+	
+	camera->LookAt(vec3(-1,1,-1),vec3(-1,0,0),vec3(0,1,0));
 	//TEMP ORTHOGRAPHIC
 	camera->Ortho(-0.5,0.5,aspect_ratio/2,aspect_ratio/2,0,-1);
 	scene->addCamera(camera);
@@ -136,6 +161,15 @@ void keyboard_special( int key, int x, int y ){
 	switch (key) {
 		case GLUT_KEY_LEFT:
 			scene->translateObject(-0.1,0,0);
+			break;
+		case GLUT_KEY_RIGHT:
+			scene->translateObject(0,0,-0.1);
+			break;
+		case GLUT_KEY_UP:
+			scene->translateObject(0.1,0,0);
+			break;
+		case GLUT_KEY_DOWN:
+			scene->translateObject(0,0,0.1);
 			break;
 		default:
 			//fail
@@ -231,8 +265,11 @@ void fileMenu(int id)
 	case OPEN_FILE_OBJ:
 		readFromFile();
 		break;
-	case ADD_CAMERA:
+	case ADD_CAMERA_ORTHO:
 		addOrthoCamera();
+		break;
+	case ADD_CAMERA_PROJECTION:
+		addProjCamera();
 		break;
 	}
 }
@@ -324,7 +361,8 @@ void initMenu()
 	glutAddMenuEntry("Cube", CUBE);
 
 	int menuFile = glutCreateMenu(fileMenu);
-	glutAddMenuEntry("Camera", ADD_CAMERA);
+	glutAddMenuEntry("Orthographic Camera", ADD_CAMERA_ORTHO);
+	glutAddMenuEntry("Perspective Camera", ADD_CAMERA_PROJECTION);
 	glutAddMenuEntry(".OBJ Mesh...", OPEN_FILE_OBJ);
 	glutAddSubMenu("Primitives", primitivesMenu);
 	

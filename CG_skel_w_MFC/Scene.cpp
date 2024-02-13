@@ -14,14 +14,7 @@ void Model::setShowNormals(bool show) {
 }
 
 void Camera::Perspective(float fovy, float aspect, float zNear, float zFar) {
-	float tanHalfFovy = tan(fovy / 2.0f);
-
-	projection = mat4(
-		1.0f / (tanHalfFovy * aspect), 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f / tanHalfFovy, 0.0f, 0.0f,
-		0.0f, 0.0f, -(zFar + zNear) / (zFar - zNear), -2.0f * zFar * zNear / (zFar - zNear),
-		0.0f, 0.0f, -1.0f, 0.0f
-	);
+	Frustum(-fovy*aspect*zNear,fovy*aspect*zNear,-fovy*zNear,fovy*zNear,zNear,zFar);
 }
 
 void Camera::UpdateProjectionMatrix(float aspect_ratio)
@@ -172,6 +165,13 @@ void Camera::Ortho( const float left, const float right, const float bottom, con
 					  0,				0,				0,		1);
 }
 
-void Camera::Frustum( const float left, const float right, const float bottom, const float top, const float zNear, const float zFar ){
 
+void Camera::Frustum(const float left, const float right, const float bottom, const float top, const float zNear, const float zFar) {
+    projection = mat4(
+        (2*zNear)/(right-left),  0,                      (right+left)/(right-left),      0,
+        0,                        (2*zNear)/(top-bottom), (top+bottom)/(top-bottom),      0,
+        0,                        0,                      -(zFar+zNear)/(zFar-zNear),    -2*zFar*zNear/(zFar-zNear),
+        0,                        0,                      -1,                            0
+    );
 }
+
