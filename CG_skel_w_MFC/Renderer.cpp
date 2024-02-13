@@ -204,6 +204,9 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* e
 		vert2 = toEuclidian(mat_project * (mat_transform_inverse * vert2));
 		vert3 = toEuclidian(mat_project * (mat_transform_inverse * vert3));
 
+		if(vert1.z < -1 || vert1.z > 1 || vert2.z < -1 || vert2.z > 1 || vert3.z < -1 || vert3.z > 1){
+			continue;
+		}
 		vec3 norm_dir = calculateNormal(toVec3(vert1),toVec3(vert2),toVec3(vert3))/5.f;
 		normCoor1 = (vert1 + vert2 + vert3) / 3;
 		normCoor2 = normCoor1 - norm_dir;
@@ -256,6 +259,10 @@ void Renderer::DrawBoundingBox(const vec3* bounding_box, bool draw_box)
 
 	// Draw lines to connect the vertices of the bounding box using the defined indices
 	for (int i = 0; i < 12; ++i) {
+		if(new_bounding_box[indices[i][0]].z < -1 || new_bounding_box[indices[i][0]].z > 1 || 
+		new_bounding_box[indices[i][1]].z < -1  || new_bounding_box[indices[i][0]].z > 1  ){
+			continue;
+		}
 		DrawLine(bounding_box_in_vectwo[indices[i][0]], bounding_box_in_vectwo[indices[i][1]], 2, !draw_box);
 	}
 }
@@ -280,6 +287,7 @@ void Renderer::setCameraMatrixes(const mat4& cTransformInverse, const mat4& Proj
 	SetCameraTransformInverse(cTransformInverse);
 	SetProjection(Projection);
 }
+
 
 void Renderer::Init(){
 	CreateBuffers(m_width,m_height);
