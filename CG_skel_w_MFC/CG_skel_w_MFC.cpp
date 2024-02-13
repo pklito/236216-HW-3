@@ -71,6 +71,20 @@ void reshape( int width, int height )
 	glutPostRedisplay();
 }
 
+void keyboard_special( int key, int x, int y ){
+	switch (key) {
+		case GLUT_KEY_LEFT:
+			scene->translateObject(-0.1,0,0);
+			break;
+		default:
+			//fail
+			return;
+	}
+	
+	//if key was accepted
+	glutPostRedisplay();
+}
+
 void keyboard( unsigned char key, int x, int y )
 {
 	switch ( key ) {
@@ -301,6 +315,7 @@ int my_main(int argc, char** argv)
 	// Initialize Callbacks
 
 	glutDisplayFunc( display );
+	glutSpecialFunc( keyboard_special );
 	glutKeyboardFunc( keyboard );
 	glutMouseFunc( mouse );
 	glutMotionFunc ( motion );
