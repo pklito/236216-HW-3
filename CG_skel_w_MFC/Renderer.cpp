@@ -247,19 +247,17 @@ void Renderer::DrawBoundingBox(const vec3* bounding_box, bool draw_box)
 		//bounding_box_in_vectwo[i] = vec2(new_bounding_box[i].x, new_bounding_box[i].y);
 
 	}
+// Define the indices to connect vertices in a sequential manner
+	const int indices[12][2] = {
+		{0, 1}, {1, 3}, {3, 2}, {2, 0},
+		{4, 5}, {5, 7}, {7, 6}, {6, 4},
+		{0, 4}, {1, 5}, {2, 6}, {3, 7}
+	};
 
-	DrawLine(bounding_box_in_vectwo[1], bounding_box_in_vectwo[5], 2, !draw_box);
-	DrawLine(bounding_box_in_vectwo[1], bounding_box_in_vectwo[0], 2, !draw_box);
-	DrawLine(bounding_box_in_vectwo[1], bounding_box_in_vectwo[3], 2, !draw_box);
-	DrawLine(bounding_box_in_vectwo[2], bounding_box_in_vectwo[0], 2, !draw_box);
-	DrawLine(bounding_box_in_vectwo[2], bounding_box_in_vectwo[6], 2, !draw_box);
-	DrawLine(bounding_box_in_vectwo[2], bounding_box_in_vectwo[3], 2, !draw_box);
-	DrawLine(bounding_box_in_vectwo[3], bounding_box_in_vectwo[7], 2, !draw_box);
-	DrawLine(bounding_box_in_vectwo[4], bounding_box_in_vectwo[5], 2, !draw_box);
-	DrawLine(bounding_box_in_vectwo[4], bounding_box_in_vectwo[6], 2, !draw_box);
-	DrawLine(bounding_box_in_vectwo[4], bounding_box_in_vectwo[0], 2, !draw_box);
-	DrawLine(bounding_box_in_vectwo[5], bounding_box_in_vectwo[7], 2, !draw_box);
-	DrawLine(bounding_box_in_vectwo[6], bounding_box_in_vectwo[7], 2, !draw_box);
+	// Draw lines to connect the vertices of the bounding box using the defined indices
+	for (int i = 0; i < 12; ++i) {
+		DrawLine(bounding_box_in_vectwo[indices[i][0]], bounding_box_in_vectwo[indices[i][1]], 2, !draw_box);
+	}
 }
 
 void Renderer::DrawPoint(const vec3& vertex)
