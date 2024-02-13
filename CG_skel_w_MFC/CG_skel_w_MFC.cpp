@@ -136,7 +136,9 @@ void readFromFile(){
 //----------------------------------------------------------------------------
 
 void display( void ){
-
+	if(scene->getWorldControl()){
+		renderer->FillEdges(0.02,0.1,0.1,0.5);
+	}
 	scene->draw();
 }
 
@@ -223,6 +225,9 @@ void keyboard( unsigned char key, int x, int y )
 		break;
 	case 'i':
 		scene->rotateObject(-30, 0);
+		break;
+	case 'f':
+		scene->setWorldControl(!scene->getWorldControl());
 		break;
 	case ' ':
 		swapCameras();

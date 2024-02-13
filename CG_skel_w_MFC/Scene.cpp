@@ -38,6 +38,13 @@ void Scene::addCamera(Camera* camera){
 	cameras.push_back(camera);
 }
 
+void Scene::setWorldControl(bool ctrl){
+	world_control = ctrl;
+}
+bool Scene::getWorldControl(){
+	return world_control;
+}
+
 // Iterate over the models and call setShowNormals for MeshModels
 void Scene::setShowNormalsForMeshModels(bool change) {
 	for (Model* model : models) {
@@ -77,7 +84,7 @@ void Scene::translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, b
 
 void Scene::scaleObject(GLfloat scale, bool world_frame)
 {
-	if(world_frame){
+	if(world_control){
 		models[activeModel]->applyWorldTransformation(Scale(scale,scale,scale));
 	}
 	else{
@@ -86,12 +93,18 @@ void Scene::scaleObject(GLfloat scale, bool world_frame)
 }
 void Scene::rotateObject(GLfloat theta_angle, int axis, bool world_frame)
 {
-	if(world_frame){
-		mat4 rotate_mat = RotateAxis(theta_angle,axis);
-		models[activeModel]->applyWorldTransformation(rotate_mat);
+	if(moving_model){
+		if(world_control){
+			mat4 rotate_mat = RotateAxis(theta_angle,axis);
+			models[activeModel]->applyWorldTransformation(rotate_mat);
+		}
+		else{
+			models[activeModel]->rotate(theta_angle,axis);
+		}
 	}
 	else{
-		models[activeModel]->rotate(theta_angle,axis);
+		//camera control
+		moving_model = true;
 	}
 }
 

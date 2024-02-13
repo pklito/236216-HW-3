@@ -182,7 +182,7 @@ void Renderer::DrawPixelSafe(int x, int y, float r, float g, float b){
  * vertices: vector of the camera space vertices
  * normals: directions of the respective world space normals.
  */
-void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* edge_normals, bool draw_normals)
+void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, const vector<vec3>* edge_normals, bool draw_normals)
 {
 	// Clear the buffer before drawing new content
 	
@@ -200,9 +200,9 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* e
 		/*
 		TRANSFORMATIONS + PROJECTION ( P * Tc-1 * v)
 		*/
-		vert1 = toEuclidian(mat_project * (mat_transform_inverse * vert1));
-		vert2 = toEuclidian(mat_project * (mat_transform_inverse * vert2));
-		vert3 = toEuclidian(mat_project * (mat_transform_inverse * vert3));
+		vert1 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vert1));
+		vert2 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vert2));
+		vert3 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vert3));
 
 		if(vert1.z < -1 || vert1.z > 1 || vert2.z < -1 || vert2.z > 1 || vert3.z < -1 || vert3.z > 1){
 			continue;
@@ -232,7 +232,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* e
 	}
 }
 
-void Renderer::DrawBoundingBox(const vec3* bounding_box, bool draw_box) 
+void Renderer::DrawBoundingBox(const vec3* bounding_box, const mat4& world_transform, bool draw_box) 
 {
 	if (!bounding_box || !draw_box) {
 		return;
@@ -245,7 +245,7 @@ void Renderer::DrawBoundingBox(const vec3* bounding_box, bool draw_box)
 		vec4 homogeneous_point = vec4(bounding_box[i], 1.0f);
 
 		// Apply transformations
-		new_bounding_box[i] = toEuclidian(mat_project * (mat_transform_inverse * homogeneous_point));
+		new_bounding_box[i] = toEuclidian(mat_project * (mat_transform_inverse * world_transform * homogeneous_point));
 		bounding_box_in_vectwo[i] = vec2(RANGE(new_bounding_box[i].x, -1, 1, 0, m_width), RANGE(new_bounding_box[i].y, -1, 1, 0, m_height));
 		//bounding_box_in_vectwo[i] = vec2(new_bounding_box[i].x, new_bounding_box[i].y);
 

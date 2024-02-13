@@ -140,9 +140,9 @@ void MeshModel::draw(Renderer* renderer)
 {
 	std::vector<vec3> vec(vertex_positions, vertex_positions + (3 * face_count));
 	std::vector<vec3> norm(normals, normals + (3 * face_count));
-	renderer->DrawTriangles(&vec, &norm, show_face_normals);
+	renderer->DrawTriangles(&vec, _world_transform, &norm, show_face_normals);
 	
-	renderer->DrawBoundingBox(bounding_box, show_box);
+	renderer->DrawBoundingBox(bounding_box, _world_transform, show_box);
 }
 
 void MeshModel::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)

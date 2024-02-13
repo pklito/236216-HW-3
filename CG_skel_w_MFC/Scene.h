@@ -64,6 +64,9 @@ class Scene {
 	vector<Camera*> cameras;
 	Renderer *m_renderer;
 
+	bool world_control;
+	bool moving_model;
+
 public:
 	Scene() {activeModel = 0; activeLight = 0; activeCamera = 0;};
 	Scene(Renderer *renderer) : m_renderer(renderer) {activeModel = 0; activeLight = 0; activeCamera = 0;};
@@ -81,6 +84,9 @@ public:
 	void cycleSelectedObject();
 	void cycleActiveCamera();
 	Camera* getActiveCamera();
+
+	void setWorldControl(bool ctrl);
+	bool getWorldControl();
 
 	int activeModel;
 	int activeLight;
