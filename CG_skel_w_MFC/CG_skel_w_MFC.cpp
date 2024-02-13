@@ -393,7 +393,7 @@ int my_main(int argc, char** argv)
 	std::cout << "[ ] Camera transform: " << std::endl;
 	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
 	scene->addCamera(camera);
-	renderer->SET_CAMERA(scene->getActiveCamera());	//This is a macro im just lazy.
+	renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
 
 	std::cout << "[ ] Reading mesh files... ";
 	MeshModel* demo_object = new MeshModel("meshes/fox.obj");

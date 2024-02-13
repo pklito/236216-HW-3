@@ -60,7 +60,6 @@ public:
 
 #define RANGE(x,min,max,new_min,new_max) (((((x)-(min))*((new_max)-(new_min))/((max)-(min))))+(new_min))
 
-#define SET_CAMERA(camera) setCameraMatrixes((camera)->getTransformInverse(),(camera)->getProjection())
 /*
 Macro set pixels
 #define SET_CHANNEL(array,x,y,width,channel,value) ((array)[INDEX((width),(x),(y),(channel))]=value)
