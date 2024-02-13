@@ -180,6 +180,7 @@ void MeshModel::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale)
 		vertex_positions[i].z *= z_scale;
 		i++;
 	}
+	calculateBoundingBox();
 }
 
 mat4 rotateX(GLfloat theta_angle) {
