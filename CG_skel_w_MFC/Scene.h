@@ -54,7 +54,6 @@ public:
 class Scene {
 
 	vector<Model*> models;
-	int num_of_models;
 	vector<Light*> lights;
 	vector<Camera*> cameras;
 	Renderer *m_renderer;

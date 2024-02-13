@@ -34,7 +34,6 @@ void Scene::loadOBJModel(string fileName)
 {
 	MeshModel *model = new MeshModel(fileName);
 	models.push_back(model);
-	num_of_models++;
 }
 
 void Scene::addMeshModel(Model* model)
@@ -42,7 +41,6 @@ void Scene::addMeshModel(Model* model)
 	MeshModel* model_to_push = dynamic_cast<MeshModel*>(model);
 	if (model_to_push) {
 		models.push_back(model_to_push);
-		num_of_models++;
 	}
 }
 
