@@ -56,12 +56,28 @@ bool lb_down,rb_down,mb_down;
 // Camera + Scene modiications
 //----------------------------------------------------------------------------
 
-void addCamera(){
+void addOrthoCamera(){
 	Camera* camera = new Camera();
 
+	int result = AfxMessageBox(_T("You will be sent to the CMD to input the camera specs.\npress CANCEL if you do not wish to continue."), MB_ICONINFORMATION | MB_OKCANCEL);
+	if(result = IDCANCEL)
+		return;
+	std::string userInput;
+	std::cin >> userInput;
+
+	camera->LookAt(vec3(0,0,1),vec3(0,0,0),vec3(0,1,0));
 	scene->addCamera(camera);
 }
 
+void readFromFile(){
+	CFileDialog dlg(TRUE, _T(".obj"), NULL, NULL, _T("*.obj|*.*"));
+	if (dlg.DoModal() == IDOK)
+	{
+		std::string s((LPCTSTR)dlg.GetPathName());
+		scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
+		glutPostRedisplay();
+	}
+}
 //----------------------------------------------------------------------------
 // Callbacks
 //----------------------------------------------------------------------------
@@ -184,13 +200,10 @@ void fileMenu(int id)
 	switch (id)
 	{
 	case OPEN_FILE_OBJ:
-		CFileDialog dlg(TRUE, _T(".obj"), NULL, NULL, _T("*.obj|*.*"));
-		if (dlg.DoModal() == IDOK)
-		{
-			std::string s((LPCTSTR)dlg.GetPathName());
-			scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
-			glutPostRedisplay();
-		}
+		readFromFile();
+		break;
+	case ADD_CAMERA:
+		addOrthoCamera();
 		break;
 	}
 }
@@ -293,6 +306,8 @@ void initMenu()
 	glutAddMenuEntry("Hide Normals", HIDE_NORMALS);
 	glutAddMenuEntry("Draw Bounding Box", DRAW_BOUNDING_BOX);
 	glutAddMenuEntry("Hide Bounding Box", HIDE_BOUNDING_BOX);
+	//Draw Hide cameras
+	//Draw hide vertex normals
 
 	int rescaleMenu = glutCreateMenu(menuCallback);
 	glutAddMenuEntry("Rescale Window Up", RESCALE_WINDOW_MENU_ITEM_UP);
