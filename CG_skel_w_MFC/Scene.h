@@ -69,6 +69,7 @@ public:
 	Scene(Renderer *renderer) : m_renderer(renderer) {activeModel = 0; activeLight = 0; activeCamera = 0;};
 	void loadOBJModel(string fileName);
 	void addMeshModel(Model* model);
+	void addCamera(Camera* camera);
 	void draw();
 	void drawDemo();
 

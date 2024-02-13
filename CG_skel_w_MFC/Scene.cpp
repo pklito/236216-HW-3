@@ -44,6 +44,10 @@ void Scene::addMeshModel(Model* model)
 	}
 }
 
+void Scene::addCamera(Camera* camera){
+	cameras.push_back(camera);
+}
+
 // Iterate over the models and call setShowNormals for MeshModels
 void Scene::setShowNormalsForMeshModels(bool change) {
 	for (Model* model : models) {
