@@ -82,30 +82,29 @@ void keyboard( unsigned char key, int x, int y )
 		break;
 	case 'r':
 		scene->scaleObject(1.3f); // Increase scale by 30%
-		glutPostRedisplay();
 		break;
 	case 't':
 		scene->scaleObject(0.7f); // Decrease scale by 30%
-		glutPostRedisplay();
 		break;
 	case 'a':
 		scene->rotateObject(-30, 1);
-		glutPostRedisplay();
 		break;
 	case 'd':
 		scene->rotateObject(30, 1);
-		glutPostRedisplay();
 		break;
 	case 'w':
 		scene->rotateObject(30, 0);
-		glutPostRedisplay();
 		break;
 	case 's':
 		scene->rotateObject(-30, 0);
-		glutPostRedisplay();
 		break;
+	default:
+		//fail
+		return;
 	}
 
+	//if key was accepted
+	glutPostRedisplay();
 }
 
 void mouse(int button, int state, int x, int y)
