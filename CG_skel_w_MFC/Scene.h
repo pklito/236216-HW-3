@@ -68,9 +68,9 @@ public:
 
 	void setShowNormalsForMeshModels(bool change);
 	void setShowBoxForMeshModels(bool change);
-	void translateObjects(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans);
-	void rescaleModels(GLfloat scale);
-	void rotateModels(GLfloat theta_angle, int mode);
+	void translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans);
+	void scaleObject(GLfloat scale);
+	void rotateObject(GLfloat theta_angle, int mode);
 
 	int activeModel;
 	int activeLight;

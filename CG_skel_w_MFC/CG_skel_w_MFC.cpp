@@ -78,27 +78,27 @@ void keyboard( unsigned char key, int x, int y )
 		exit( EXIT_SUCCESS );
 		break;
 	case 'r':
-		scene->rescaleModels(1.3f); // Increase scale by 30%
+		scene->scaleObject(1.3f); // Increase scale by 30%
 		glutPostRedisplay();
 		break;
 	case 't':
-		scene->rescaleModels(0.7f); // Decrease scale by 30%
+		scene->scaleObject(0.7f); // Decrease scale by 30%
 		glutPostRedisplay();
 		break;
 	case 'a':
-		scene->rotateModels(-30, 1);
+		scene->rotateObject(-30, 1);
 		glutPostRedisplay();
 		break;
 	case 'd':
-		scene->rotateModels(30, 1);
+		scene->rotateObject(30, 1);
 		glutPostRedisplay();
 		break;
 	case 'w':
-		scene->rotateModels(30, 0);
+		scene->rotateObject(30, 0);
 		glutPostRedisplay();
 		break;
 	case 's':
-		scene->rotateModels(-30, 0);
+		scene->rotateObject(-30, 0);
 		glutPostRedisplay();
 		break;
 	}
@@ -212,7 +212,7 @@ void rescaleWindow(bool up_or_down)
 		return;
 	}
 
-	//scene->translateObjects((newWidth - glutGet(GLUT_WINDOW_WIDTH)) / 2, (newHeight - glutGet(GLUT_WINDOW_HEIGHT)) / 2, 0);
+	//scene->translateObject((newWidth - glutGet(GLUT_WINDOW_WIDTH)) / 2, (newHeight - glutGet(GLUT_WINDOW_HEIGHT)) / 2, 0);
 
 	glutReshapeWindow(newWidth, newHeight);
 	glutPostRedisplay();

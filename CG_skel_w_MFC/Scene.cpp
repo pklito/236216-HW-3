@@ -69,7 +69,7 @@ void Scene::setShowBoxForMeshModels(bool change) {
 	}
 }
 
-void Scene::translateObjects(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
+void Scene::translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
 {
 	for (Model* model : models) {
 		// Check if the model is of type MeshModel
@@ -82,7 +82,7 @@ void Scene::translateObjects(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
 	}
 }
 
-void Scene::rescaleModels(GLfloat scale)
+void Scene::scaleObject(GLfloat scale)
 {
 	for (Model* model : models) {
 		// Check if the model is of type MeshModel
@@ -94,7 +94,7 @@ void Scene::rescaleModels(GLfloat scale)
 		// You can handle other types of models here if needed
 	}
 }
-void Scene::rotateModels(GLfloat theta_angle, int mode)
+void Scene::rotateObject(GLfloat theta_angle, int mode)
 {
 	for (Model* model : models) {
 		// Check if the model is of type MeshModel
