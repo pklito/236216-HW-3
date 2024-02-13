@@ -38,10 +38,7 @@ void Scene::loadOBJModel(string fileName)
 
 void Scene::addMeshModel(Model* model)
 {
-	MeshModel* model_to_push = dynamic_cast<MeshModel*>(model);
-	if (model_to_push) {
-		models.push_back(model_to_push);
-	}
+	models.push_back(model);
 }
 
 void Scene::addCamera(Camera* camera){
