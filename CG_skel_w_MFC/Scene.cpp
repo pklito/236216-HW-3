@@ -69,42 +69,19 @@ void Scene::setShowBoxForMeshModels(bool change) {
 	}
 }
 
-void Scene::translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
+void Scene::translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, bool world_frame)
 {
-	for (Model* model : models) {
-		// Check if the model is of type MeshModel
-		MeshModel* meshModel = dynamic_cast<MeshModel*>(model);
-		if (meshModel != nullptr) {
-			// It's a MeshModel, call setShowBox
-			meshModel->translate(x_trans, y_trans, z_trans);
-		}
-		// You can handle other types of models here if needed
-	}
+	models[activeModel]->translate(x_trans,y_trans,z_trans);
 }
 
-void Scene::scaleObject(GLfloat scale)
+void Scene::scaleObject(GLfloat scale, bool world_frame)
 {
-	for (Model* model : models) {
-		// Check if the model is of type MeshModel
-		MeshModel* meshModel = dynamic_cast<MeshModel*>(model);
-		if (meshModel != nullptr) {
-			// It's a MeshModel, call scale
-			meshModel->scale(scale, scale, scale);
-		}
-		// You can handle other types of models here if needed
-	}
+	//Scale the selected object
+	models[activeModel]->scale(scale,scale,scale);
 }
-void Scene::rotateObject(GLfloat theta_angle, int axis)
+void Scene::rotateObject(GLfloat theta_angle, int axis, bool world_frame)
 {
-	for (Model* model : models) {
-		// Check if the model is of type MeshModel
-		MeshModel* meshModel = dynamic_cast<MeshModel*>(model);
-		if (meshModel != nullptr) {
-			// It's a MeshModel, call rotate
-			meshModel->rotate(theta_angle, axis);
-		}
-		// You can handle other types of models here if needed
-	}
+	models[activeModel]->rotate(theta_angle,axis);
 }
 
 void Scene::draw()
