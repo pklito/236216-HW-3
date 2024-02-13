@@ -94,14 +94,14 @@ void Scene::scaleObject(GLfloat scale)
 		// You can handle other types of models here if needed
 	}
 }
-void Scene::rotateObject(GLfloat theta_angle, int mode)
+void Scene::rotateObject(GLfloat theta_angle, int axis)
 {
 	for (Model* model : models) {
 		// Check if the model is of type MeshModel
 		MeshModel* meshModel = dynamic_cast<MeshModel*>(model);
 		if (meshModel != nullptr) {
 			// It's a MeshModel, call rotate
-			meshModel->rotate(theta_angle, mode);
+			meshModel->rotate(theta_angle, axis);
 		}
 		// You can handle other types of models here if needed
 	}

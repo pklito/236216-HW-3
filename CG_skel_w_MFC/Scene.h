@@ -13,7 +13,7 @@ public:
 	virtual void setShowNormals(bool change);
 	virtual void setShowBox(bool change) = 0;
 	virtual void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans) = 0;
-	virtual void rotate(GLfloat theta_angle, int mode) = 0;
+	virtual void rotate(GLfloat theta_angle, int axis) = 0;
 };
 
 
@@ -70,7 +70,7 @@ public:
 	void setShowBoxForMeshModels(bool change);
 	void translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans);
 	void scaleObject(GLfloat scale);
-	void rotateObject(GLfloat theta_angle, int mode);
+	void rotateObject(GLfloat theta_angle, int axis);
 
 	int activeModel;
 	int activeLight;
