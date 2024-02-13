@@ -77,6 +77,9 @@ void keyboard( unsigned char key, int x, int y )
 	case 033:
 		exit( EXIT_SUCCESS );
 		break;
+	case 9:
+		scene->cycleSelectedObject();
+		break;
 	case 'r':
 		scene->scaleObject(1.3f); // Increase scale by 30%
 		glutPostRedisplay();

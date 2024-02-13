@@ -117,6 +117,10 @@ void Scene::drawDemo()
 	m_renderer->SwapBuffers();
 }
 
+void Scene::cycleSelectedObject()
+{
+	activeModel = (activeModel+1) % models.size();
+}
 
 void Camera::setTransformation(const mat4& transform) {
 	cTransform = transform;
