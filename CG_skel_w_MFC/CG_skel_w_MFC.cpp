@@ -25,16 +25,24 @@
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
-#define FILE_OPEN 1
-#define MAIN_DEMO 2
-#define MAIN_ABOUT 3
 
-#define RESCALE_WINDOW_MENU_ITEM_UP 4
-#define RESCALE_WINDOW_MENU_ITEM_DOWN 5
-#define DRAW_NORMALS 1
-#define HIDE_NORMALS 2
-#define DRAW_BOUNDING_BOX 3
-#define HIDE_BOUNDING_BOX 4
+enum MENU_STATES {
+	OPEN_FILE_OBJ,
+	ADD_CAMERA,
+	MAIN_DEMO,
+	MAIN_ABOUT,
+
+	RESCALE_WINDOW_MENU_ITEM_UP,
+	RESCALE_WINDOW_MENU_ITEM_DOWN,
+
+	DRAW_NORMALS,
+	HIDE_NORMALS,
+	DRAW_BOUNDING_BOX,
+	HIDE_BOUNDING_BOX,
+
+	PYRAMID,
+	CUBE
+};
 
 Scene* scene;
 Renderer* renderer;
@@ -45,7 +53,18 @@ int last_x,last_y;
 bool lb_down,rb_down,mb_down;
 
 //----------------------------------------------------------------------------
+// Camera + Scene modiications
+//----------------------------------------------------------------------------
+
+void addCamera(){
+	Camera* camera = new Camera();
+
+	scene->addCamera(camera);
+}
+
+//----------------------------------------------------------------------------
 // Callbacks
+//----------------------------------------------------------------------------
 
 void display( void ){
 
@@ -152,11 +171,19 @@ void motion(int x, int y)
 	last_y=y;
 }
 
+//----------------------------------------------------------------------------
+// Menus
+//----------------------------------------------------------------------------
+
+void primMenu(int id){
+
+}
+
 void fileMenu(int id)
 {
 	switch (id)
 	{
-	case FILE_OPEN:
+	case OPEN_FILE_OBJ:
 		CFileDialog dlg(TRUE, _T(".obj"), NULL, NULL, _T("*.obj|*.*"));
 		if (dlg.DoModal() == IDOK)
 		{
@@ -227,7 +254,6 @@ void rescaleWindow(bool up_or_down)
 	if (newWidth == glutGet(GLUT_WINDOW_WIDTH) && newHeight == glutGet(GLUT_WINDOW_HEIGHT)) {
 		return;
 	}
-
 	//scene->translateObject((newWidth - glutGet(GLUT_WINDOW_WIDTH)) / 2, (newHeight - glutGet(GLUT_WINDOW_HEIGHT)) / 2, 0);
 
 	glutReshapeWindow(newWidth, newHeight);
@@ -251,8 +277,14 @@ void menuCallback(int menuItem)
 
 void initMenu()
 {
+	int primitivesMenu = glutCreateMenu(primMenu);
+	glutAddMenuEntry("Pyramid", PYRAMID);
+	glutAddMenuEntry("Cube", CUBE);
+
 	int menuFile = glutCreateMenu(fileMenu);
-	glutAddMenuEntry("Open..", FILE_OPEN);
+	glutAddMenuEntry("Camera", ADD_CAMERA);
+	glutAddMenuEntry(".OBJ Mesh...", OPEN_FILE_OBJ);
+	glutAddSubMenu("Primitives", primitivesMenu);
 	
 	// Create the "Normal" submenu
 	int optionsSubMenu = glutCreateMenu(optionMenu);
@@ -267,9 +299,9 @@ void initMenu()
 	glutAddMenuEntry("Rescale Window Down", RESCALE_WINDOW_MENU_ITEM_DOWN);
 
 	glutCreateMenu(mainMenu);
-	glutAddSubMenu("File", menuFile);
-	glutAddSubMenu("Options", optionsSubMenu);
-	glutAddSubMenu("Rescaling Window", rescaleMenu);
+	glutAddSubMenu("New", menuFile);
+	glutAddSubMenu("View", optionsSubMenu);
+	glutAddSubMenu("Window", rescaleMenu);
 	glutAddMenuEntry("Demo", MAIN_DEMO);
 	glutAddMenuEntry("About", MAIN_ABOUT);
 	
@@ -280,6 +312,9 @@ void initMenu()
 }
 //----------------------------------------------------------------------------
 
+//----------------------------------------------------------------------------
+// Main
+//----------------------------------------------------------------------------
 
 int my_main(int argc, char** argv)
 {
