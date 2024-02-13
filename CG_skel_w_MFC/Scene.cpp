@@ -71,17 +71,34 @@ void Scene::setShowBoxForMeshModels(bool change) {
 
 void Scene::translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, bool world_frame)
 {
-	models[activeModel]->translate(x_trans,y_trans,z_trans);
+	if(world_frame){
+		models[activeModel]->applyWorldTransformation(Translate(x_trans,y_trans,z_trans));
+	}
+	else {
+		//should be: models[activeModel]->applyModelTransformation(Translate(x_trans,y_trans,z_trans));
+		models[activeModel]->translate(x_trans,y_trans,z_trans);
+	}
+
 }
 
 void Scene::scaleObject(GLfloat scale, bool world_frame)
 {
-	//Scale the selected object
-	models[activeModel]->scale(scale,scale,scale);
+	if(world_frame){
+		models[activeModel]->applyWorldTransformation(Scale(scale,scale,scale));
+	}
+	else{
+		models[activeModel]->scale(scale,scale,scale);
+	}
 }
 void Scene::rotateObject(GLfloat theta_angle, int axis, bool world_frame)
 {
-	models[activeModel]->rotate(theta_angle,axis);
+	if(world_frame){
+		mat4 rotate_mat = (axis == 0 ? RotateX(theta_angle) : (axis == 1 ? RotateY(theta_angle) : RotateZ(theta_angle)));
+		models[activeModel]->applyWorldTransformation(rotate_mat);
+	}
+	else{
+		models[activeModel]->rotate(theta_angle,axis);
+	}
 }
 
 void Scene::draw()

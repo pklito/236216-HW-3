@@ -183,41 +183,6 @@ void MeshModel::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale)
 	calculateBoundingBox();
 }
 
-mat4 rotateX(GLfloat theta_angle) {
-	mat4 rotation_matrix;
-	rotation_matrix[1].y = cos(theta_angle);
-	rotation_matrix[1].z = -sin(theta_angle);
-	rotation_matrix[2].y = sin(theta_angle);
-	rotation_matrix[2].z = cos(theta_angle);
-	return rotation_matrix;
-}
-
-mat4 rotateY(GLfloat theta_angle) {
-	mat4 rotation_matrix;
-	rotation_matrix[0].x = cos(theta_angle);
-	rotation_matrix[0].z = sin(theta_angle);
-	rotation_matrix[2].x = -sin(theta_angle);
-	rotation_matrix[2].z = cos(theta_angle);
-	/*((cos(theta_angle), 0, sin(theta_angle), 0),
-		(0, 1, 0, 0),
-		(-sin(theta_angle), 0, cos(theta_angle), 0),
-		(0, 0, 0, 1));*/
-	return rotation_matrix;
-}
-
-mat4 rotateZ(GLfloat theta_angle) {
-	mat4 rotation_matrix;
-	rotation_matrix[0].x = cos(theta_angle);
-	rotation_matrix[0].y = -sin(theta_angle);
-	rotation_matrix[1].x = sin(theta_angle);
-	rotation_matrix[1].y = cos(theta_angle);
-	/*((cos(theta_angle), -sin(theta_angle), 0, 0),
-		(sin(theta_angle), cos(theta_angle), 0, 0),
-		(0, 0, 1, 0),
-		(0, 0, 0, 1));*/
-	return rotation_matrix;
-}
-
 float Radians(float degrees) 
 {
 	return degrees * (M_PI / 180.0f);
@@ -326,6 +291,15 @@ void MeshModel::calculateBoundingBox()
 	bounding_box[5] = vec3(min_x, max_y, min_z);
 	bounding_box[6] = vec3(min_x, min_y, max_z);
 	bounding_box[7] = vec3(min_x, min_y, min_z);
+}
+
+
+
+void MeshModel::applyWorldTransformation(const mat4& transformation) {
+	_world_transform = transformation * _world_transform;
+}
+void MeshModel::applyModelTransformation(const mat4& transformation) {
+	//_model_transform = transformation * _model_transform;
 }
 
 void MeshModel::setShowNormals(bool change) 

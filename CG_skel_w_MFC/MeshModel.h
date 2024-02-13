@@ -38,6 +38,9 @@ public:
 	void calculateBoundingBox();
 	void normalToFace();
 
+	void applyWorldTransformation(const mat4& transformation) override;
+	void applyModelTransformation(const mat4& transformation) override;
+
 	void setShowNormals(bool change) override;
 	void setShowBox(bool change) override;
 };
