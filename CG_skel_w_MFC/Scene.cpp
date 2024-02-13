@@ -93,7 +93,7 @@ void Scene::scaleObject(GLfloat scale, bool world_frame)
 void Scene::rotateObject(GLfloat theta_angle, int axis, bool world_frame)
 {
 	if(world_frame){
-		mat4 rotate_mat = (axis == 0 ? RotateX(theta_angle) : (axis == 1 ? RotateY(theta_angle) : RotateZ(theta_angle)));
+		mat4 rotate_mat = RotateAxis(theta_angle,axis);
 		models[activeModel]->applyWorldTransformation(rotate_mat);
 	}
 	else{

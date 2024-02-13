@@ -199,13 +199,13 @@ void MeshModel::rotate(GLfloat theta_degree, int mode)
 	int i = 0;
 	mat4 rotation_matrix;
 	if (mode == 0) {
-		rotation_matrix = rotateX(theta);
+		rotation_matrix = RotateX(theta);
 	}
 	else if (mode == 1) {
-		rotation_matrix = rotateY(theta);
+		rotation_matrix = RotateY(theta);
 	}
 	else if (mode == 2) {
-		rotation_matrix = rotateZ(theta);
+		rotation_matrix = RotateZ(theta);
 	}
 	else {
 		std::cout << "something is wrong" << std::endl;
