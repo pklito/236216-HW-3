@@ -209,7 +209,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* e
 
 void Renderer::DrawBoundingBox(const vec3* bounding_box, bool draw_box) 
 {
-	if (!bounding_box) {
+	if (!bounding_box || !draw_box) {
 		return;
 	}
 	
