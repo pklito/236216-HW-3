@@ -116,9 +116,8 @@ void addOrthoCamera(){
 	//std::string userInput2;
 	//std::cin >> userInput2;
 	
-	camera->LookAt(vec3(-1,1,-1),vec3(-1,0,0),vec3(0,1,0));
-	//TEMP ORTHOGRAPHIC
-	camera->Ortho(-0.5,0.5,aspect_ratio/2,aspect_ratio/2,0,-1);
+	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
+	camera->Ortho(-1,1,-1,1,-0.5,-5);
 	scene->addCamera(camera);
 	glutPostRedisplay();
 }
@@ -424,7 +423,8 @@ int my_main(int argc, char** argv)
 	Camera* camera = new Camera();
 
 	std::cout << "[ ] Camera transform: " << std::endl;
-	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
+	camera->LookAt(vec3(0,0,1),vec3(0,0,-1),vec3(0,1,0));
+	camera->Ortho(-1,1,-1,1,-0.5,-5);
 	scene->addCamera(camera);
 	renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
 

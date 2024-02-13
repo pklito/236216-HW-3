@@ -155,6 +155,7 @@ void MeshModel::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
 		vertex_positions[i].z += z_trans;
 		i++;
 	}
+	calculateBoundingBox();
 }
 
 vec3 MeshModel::translatePoint(vec3 point, GLfloat x_trans, GLfloat y_trans, GLfloat z_trans) 
