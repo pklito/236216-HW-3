@@ -14,7 +14,8 @@ protected:
 	int vertex_count;
 	int face_count;
 
-	bool show_normals;
+	bool show_vertex_normals;
+	bool show_face_normals;
 	bool show_box;
 
 	vec3* normals;

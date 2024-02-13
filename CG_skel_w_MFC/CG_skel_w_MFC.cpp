@@ -291,7 +291,7 @@ int my_main(int argc, char** argv)
 	camera = new Camera();
 
 	std::cout << "[ ] Reading mesh files... ";
-	MeshModel* demo_object = new MeshModel("meshes/obj_example.obj");
+	MeshModel* demo_object = new MeshModel("meshes/fox.obj");
 	scene->addMeshModel(demo_object);
 	std::cout << " Done!" << std::endl;
 	//----------------------------------------------------------------------------

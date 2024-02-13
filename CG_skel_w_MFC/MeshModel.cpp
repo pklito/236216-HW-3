@@ -64,7 +64,7 @@ MeshModel::MeshModel(string fileName)
 {
 	vertex_count = 0;
 	loadFile(fileName);
-	show_normals = false;
+	show_face_normals = false;
 }
 
 MeshModel::~MeshModel(void)
@@ -140,7 +140,7 @@ void MeshModel::draw(Renderer* renderer)
 {
 	std::vector<vec3> vec(vertex_positions, vertex_positions + (3 * face_count));
 	std::vector<vec3> norm(normals, normals + (3 * face_count));
-	renderer->DrawTriangles(&vec, &norm, show_normals);
+	renderer->DrawTriangles(&vec, &norm, show_face_normals);
 	
 	renderer->DrawBoundingBox(bounding_box, show_box);
 }
@@ -329,7 +329,7 @@ void MeshModel::calculateBoundingBox()
 
 void MeshModel::setShowNormals(bool change) 
 {
-	show_normals = change;
+	show_face_normals = change;
 }
 
 void MeshModel::setShowBox(bool change)
