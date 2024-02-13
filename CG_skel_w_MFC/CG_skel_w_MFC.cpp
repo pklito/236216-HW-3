@@ -188,22 +188,40 @@ void keyboard( unsigned char key, int x, int y )
 	case 9:
 		scene->cycleSelectedObject();
 		break;
-	case 'r':
+	case 'c':
 		scene->scaleObject(1.3f); // Increase scale by 30%
 		break;
-	case 't':
+	case 'x':
 		scene->scaleObject(0.7f); // Decrease scale by 30%
 		break;
 	case 'a':
-		scene->rotateObject(-30, 1);
+		scene->translateObject(-0.2, 0, 0);
 		break;
 	case 'd':
-		scene->rotateObject(30, 1);
+		scene->translateObject(0.2, 0, 0);
 		break;
 	case 'w':
-		scene->rotateObject(30, 0);
+		scene->translateObject(0, 0, 0.2);
 		break;
 	case 's':
+		scene->translateObject(0, 0, -0.2);
+		break;
+	case 'e':
+		scene->translateObject(0, 0.2, 0);
+		break;
+	case 'q':
+		scene->translateObject(0, -0.2, 0);
+		break;
+	case 'j':
+		scene->rotateObject(-30, 1);
+		break;
+	case 'l':
+		scene->rotateObject(30, 1);
+		break;
+	case 'k':
+		scene->rotateObject(30, 0);
+		break;
+	case 'i':
 		scene->rotateObject(-30, 0);
 		break;
 	case ' ':
