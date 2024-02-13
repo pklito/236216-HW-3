@@ -46,7 +46,6 @@ enum MENU_STATES {
 
 Scene* scene;
 Renderer* renderer;
-Camera* camera;
 float m_time;
 
 int last_x,last_y;
@@ -59,7 +58,6 @@ bool lb_down,rb_down,mb_down;
 void swapCameras(){
 	scene->cycleActiveCamera();
 	renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
-	std::cout << "a " << std::endl;
 	glutPostRedisplay();
 }
 
@@ -114,9 +112,6 @@ void readFromFile(){
 //----------------------------------------------------------------------------
 
 void display( void ){
-
-	renderer->SetCameraTransformInverse(camera->getTransformInverse());
-	renderer->SetProjection(camera->getProjection());
 
 	scene->draw();
 }
@@ -388,7 +383,7 @@ int my_main(int argc, char** argv)
 
 	renderer = new Renderer(1024, 1024);
 	scene = new Scene(renderer);
-	camera = new Camera();
+	Camera* camera = new Camera();
 
 	std::cout << "[ ] Camera transform: " << std::endl;
 	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
