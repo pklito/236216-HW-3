@@ -599,7 +599,8 @@ vec4 mvmult(const mat4& a, const vec4& b)
 inline
 mat4 RotateX(const GLfloat theta)
 {
-    GLfloat angle = (M_PI / 180.0) * theta;
+    //GLfloat angle = (M_PI / 180.0) * theta;
+    GLfloat angle = theta;
 
     mat4 c;
     c[2][2] = c[1][1] = cos(angle);
@@ -608,7 +609,37 @@ mat4 RotateX(const GLfloat theta)
     return c;
 }
 
+inline
+mat4 RotateY(GLfloat theta_angle) {
+	mat4 rotation_matrix;
+	rotation_matrix[0].x = cos(theta_angle);
+	rotation_matrix[0].z = sin(theta_angle);
+	rotation_matrix[2].x = -sin(theta_angle);
+	rotation_matrix[2].z = cos(theta_angle);
+	/*((cos(theta_angle), 0, sin(theta_angle), 0),
+		(0, 1, 0, 0),
+		(-sin(theta_angle), 0, cos(theta_angle), 0),
+		(0, 0, 0, 1));*/
+	return rotation_matrix;
+}
 
+inline
+mat4 RotateZ(GLfloat theta_angle) {
+	mat4 rotation_matrix;
+	rotation_matrix[0].x = cos(theta_angle);
+	rotation_matrix[0].y = -sin(theta_angle);
+	rotation_matrix[1].x = sin(theta_angle);
+	rotation_matrix[1].y = cos(theta_angle);
+	/*((cos(theta_angle), -sin(theta_angle), 0, 0),
+		(sin(theta_angle), cos(theta_angle), 0, 0),
+		(0, 0, 1, 0),
+		(0, 0, 0, 1));*/
+	return rotation_matrix;
+}
+
+inline mat4 RotateAxis(GLfloat theta_angle, int axis){
+	return (axis == 0 ? RotateX(theta_angle) : (axis == 1 ? RotateY(theta_angle) : RotateZ(theta_angle)));
+}
 //----------------------------------------------------------------------------
 //
 //  Translation matrix generators

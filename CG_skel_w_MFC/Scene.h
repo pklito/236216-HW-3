@@ -1,5 +1,7 @@
 #pragma once
 
+
+#include "mat.h"
 #include "gl/glew.h"
 #include <vector>
 #include <string>
@@ -13,7 +15,11 @@ public:
 	virtual void setShowNormals(bool change);
 	virtual void setShowBox(bool change) = 0;
 	virtual void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans) = 0;
-	virtual void rotate(GLfloat theta_angle, int mode) = 0;
+	virtual void rotate(GLfloat theta_angle, int axis) = 0;
+	virtual void scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) = 0;
+
+	virtual void applyWorldTransformation(const mat4& transformation) = 0;
+	virtual void applyModelTransformation(const mat4& transformation) = 0;
 };
 
 
@@ -54,24 +60,27 @@ public:
 class Scene {
 
 	vector<Model*> models;
-	int num_of_models;
 	vector<Light*> lights;
 	vector<Camera*> cameras;
 	Renderer *m_renderer;
 
 public:
-	Scene() {};
-	Scene(Renderer *renderer) : m_renderer(renderer) {};
+	Scene() {activeModel = 0; activeLight = 0; activeCamera = 0;};
+	Scene(Renderer *renderer) : m_renderer(renderer) {activeModel = 0; activeLight = 0; activeCamera = 0;};
 	void loadOBJModel(string fileName);
 	void addMeshModel(Model* model);
+	void addCamera(Camera* camera);
 	void draw();
 	void drawDemo();
 
 	void setShowNormalsForMeshModels(bool change);
 	void setShowBoxForMeshModels(bool change);
-	void translateObjects(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans);
-	void rescaleModels(GLfloat scale);
-	void rotateModels(GLfloat theta_angle, int mode);
+	void translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, bool world_frame = false);
+	void scaleObject(GLfloat scale, bool world_frame = false);
+	void rotateObject(GLfloat theta_angle, int axis, bool world_frame = false);
+	void cycleSelectedObject();
+	void cycleActiveCamera();
+	Camera* getActiveCamera();
 
 	int activeModel;
 	int activeLight;

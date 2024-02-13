@@ -14,7 +14,8 @@ protected:
 	int vertex_count;
 	int face_count;
 
-	bool show_normals;
+	bool show_vertex_normals;
+	bool show_face_normals;
 	bool show_box;
 
 	vec3* normals;
@@ -30,12 +31,15 @@ public:
 	void loadFile(string fileName);
 	void draw(Renderer* renderer) override;
 
-	void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans);
+	void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans) override;
 	vec3 translatePoint(vec3 point, GLfloat x_trans, GLfloat y_trans, GLfloat z_trans);
-	void rotate(GLfloat theta_angle, int mode);
-	void scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale);
+	void rotate(GLfloat theta_angle, int mode) override;
+	void scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) override;
 	void calculateBoundingBox();
 	void normalToFace();
+
+	void applyWorldTransformation(const mat4& transformation) override;
+	void applyModelTransformation(const mat4& transformation) override;
 
 	void setShowNormals(bool change) override;
 	void setShowBox(bool change) override;

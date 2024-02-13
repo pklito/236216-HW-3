@@ -64,7 +64,7 @@ MeshModel::MeshModel(string fileName)
 {
 	vertex_count = 0;
 	loadFile(fileName);
-	show_normals = false;
+	show_face_normals = false;
 }
 
 MeshModel::~MeshModel(void)
@@ -140,7 +140,7 @@ void MeshModel::draw(Renderer* renderer)
 {
 	std::vector<vec3> vec(vertex_positions, vertex_positions + (3 * face_count));
 	std::vector<vec3> norm(normals, normals + (3 * face_count));
-	renderer->DrawTriangles(&vec, &norm, show_normals);
+	renderer->DrawTriangles(&vec, &norm, show_face_normals);
 	
 	renderer->DrawBoundingBox(bounding_box, show_box);
 }
@@ -180,41 +180,7 @@ void MeshModel::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale)
 		vertex_positions[i].z *= z_scale;
 		i++;
 	}
-}
-
-mat4 rotateX(GLfloat theta_angle) {
-	mat4 rotation_matrix;
-	rotation_matrix[1].y = cos(theta_angle);
-	rotation_matrix[1].z = -sin(theta_angle);
-	rotation_matrix[2].y = sin(theta_angle);
-	rotation_matrix[2].z = cos(theta_angle);
-	return rotation_matrix;
-}
-
-mat4 rotateY(GLfloat theta_angle) {
-	mat4 rotation_matrix;
-	rotation_matrix[0].x = cos(theta_angle);
-	rotation_matrix[0].z = sin(theta_angle);
-	rotation_matrix[2].x = -sin(theta_angle);
-	rotation_matrix[2].z = cos(theta_angle);
-	/*((cos(theta_angle), 0, sin(theta_angle), 0),
-		(0, 1, 0, 0),
-		(-sin(theta_angle), 0, cos(theta_angle), 0),
-		(0, 0, 0, 1));*/
-	return rotation_matrix;
-}
-
-mat4 rotateZ(GLfloat theta_angle) {
-	mat4 rotation_matrix;
-	rotation_matrix[0].x = cos(theta_angle);
-	rotation_matrix[0].y = -sin(theta_angle);
-	rotation_matrix[1].x = sin(theta_angle);
-	rotation_matrix[1].y = cos(theta_angle);
-	/*((cos(theta_angle), -sin(theta_angle), 0, 0),
-		(sin(theta_angle), cos(theta_angle), 0, 0),
-		(0, 0, 1, 0),
-		(0, 0, 0, 1));*/
-	return rotation_matrix;
+	calculateBoundingBox();
 }
 
 float Radians(float degrees) 
@@ -233,13 +199,13 @@ void MeshModel::rotate(GLfloat theta_degree, int mode)
 	int i = 0;
 	mat4 rotation_matrix;
 	if (mode == 0) {
-		rotation_matrix = rotateX(theta);
+		rotation_matrix = RotateX(theta);
 	}
 	else if (mode == 1) {
-		rotation_matrix = rotateY(theta);
+		rotation_matrix = RotateY(theta);
 	}
 	else if (mode == 2) {
-		rotation_matrix = rotateZ(theta);
+		rotation_matrix = RotateZ(theta);
 	}
 	else {
 		std::cout << "something is wrong" << std::endl;
@@ -327,9 +293,18 @@ void MeshModel::calculateBoundingBox()
 	bounding_box[7] = vec3(min_x, min_y, min_z);
 }
 
+
+
+void MeshModel::applyWorldTransformation(const mat4& transformation) {
+	_world_transform = transformation * _world_transform;
+}
+void MeshModel::applyModelTransformation(const mat4& transformation) {
+	//_model_transform = transformation * _model_transform;
+}
+
 void MeshModel::setShowNormals(bool change) 
 {
-	show_normals = change;
+	show_face_normals = change;
 }
 
 void MeshModel::setShowBox(bool change)

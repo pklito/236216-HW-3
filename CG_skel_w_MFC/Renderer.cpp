@@ -83,6 +83,28 @@ void Renderer::FillBuffer(float r, float g, float b)
 	}
 }
 
+void Renderer::FillEdges(float percent, float r, float g, float b){
+	if(percent <= 0){
+		return;
+	}
+	if(percent >= 0.5){
+		percent = 0.5;
+	}
+	for(int i = 0; i <= (int)(m_height*percent); i++){
+		for(int j = 0; j < m_width; j++){
+			DrawPixel(j,i,r,g,b);
+			DrawPixel(j,m_height - i- 1,r,g,b);
+		}
+	}
+	for(int j = 0; j < (int)(m_width*percent); j++){
+		for(int i = (int)(m_height*percent) - 1; i < m_height - (int)(m_height*percent) - 1; i++){
+			DrawPixel(j,i,r,g,b);
+			DrawPixel(m_width - j - 1,i,r,g,b);
+		}
+	}
+}
+
+
 /*
  This function gets two pixels on screen and draws the line between them (rasterization)
  vert1 + vert2 = ends of the edge
@@ -160,12 +182,12 @@ void Renderer::DrawPixelSafe(int x, int y, float r, float g, float b){
  * vertices: vector of the camera space vertices
  * normals: directions of the respective world space normals.
  */
-void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals, bool draw_normals)
+void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* edge_normals, bool draw_normals)
 {
 	// Clear the buffer before drawing new content
 	
 	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
-	vector<vec3>::const_iterator normal = normals != NULL ? normals->begin() : vertices->begin();
+	vector<vec3>::const_iterator normal = edge_normals != NULL ? edge_normals->begin() : vertices->begin();
 	for(auto it = vertices->begin(); it != vertices->end(); ++it, ++normal){
 		//get the next face
 		vec4 vert1 = vec4(*it);
@@ -209,7 +231,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* n
 
 void Renderer::DrawBoundingBox(const vec3* bounding_box, bool draw_box) 
 {
-	if (!bounding_box) {
+	if (!bounding_box || !draw_box) {
 		return;
 	}
 	
@@ -256,8 +278,8 @@ void Renderer::SetProjection(const mat4& projection){
 	mat_project = projection;
 }
 
-void Renderer::setCameraMatrixes(const mat4& cTransform, const mat4& Projection){
-	SetCameraTransformInverse(cTransform);
+void Renderer::setCameraMatrixes(const mat4& cTransformInverse, const mat4& Projection){
+	SetCameraTransformInverse(cTransformInverse);
 	SetProjection(Projection);
 }
 
@@ -326,6 +348,13 @@ void Renderer::CreateOpenGLBuffer()
 
 void Renderer::SwapBuffers()
 {
+	UpdateBuffer();
+	//clear the new buffer
+	ClearBuffer();
+}
+
+//Doesn't clear the buffer afterwards!
+void Renderer::UpdateBuffer(){
 
 	int a = glGetError();
 	glActiveTexture(GL_TEXTURE0);
@@ -343,6 +372,4 @@ void Renderer::SwapBuffers()
 	glutSwapBuffers();
 	a = glGetError();
 
-	//clear the new buffer
-	ClearBuffer();
 }

@@ -25,32 +25,118 @@
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
-#define FILE_OPEN 1
-#define MAIN_DEMO 2
-#define MAIN_ABOUT 3
 
-#define RESCALE_WINDOW_MENU_ITEM_UP 4
-#define RESCALE_WINDOW_MENU_ITEM_DOWN 5
-#define DRAW_NORMALS 1
-#define HIDE_NORMALS 2
-#define DRAW_BOUNDING_BOX 3
-#define HIDE_BOUNDING_BOX 4
+enum MENU_STATES {
+	OPEN_FILE_OBJ,
+	ADD_CAMERA_ORTHO,
+	ADD_CAMERA_PROJECTION,
+	MAIN_DEMO,
+	MAIN_ABOUT,
+
+	RESCALE_WINDOW_MENU_ITEM_UP,
+	RESCALE_WINDOW_MENU_ITEM_DOWN,
+
+	DRAW_NORMALS,
+	HIDE_NORMALS,
+	DRAW_BOUNDING_BOX,
+	HIDE_BOUNDING_BOX,
+
+	PYRAMID,
+	CUBE
+};
 
 Scene* scene;
 Renderer* renderer;
-Camera* camera;
 float m_time;
 
 int last_x,last_y;
 bool lb_down,rb_down,mb_down;
 
 //----------------------------------------------------------------------------
+// Camera + Scene modiications
+//----------------------------------------------------------------------------
+
+void swapCameras(){
+	scene->cycleActiveCamera();
+	renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
+	glutPostRedisplay();
+}
+
+#define TRY_FLOAT(var, text) try { var = std::stof(text); } catch (const std::invalid_argument& e) {return;} catch (const std::out_of_range& e) {return;}
+void addProjCamera(){
+	int result = AfxMessageBox(_T("Enter Projection data in the TERMINAL.\npress CANCEL if you do not wish to continue."), MB_ICONINFORMATION | MB_OKCANCEL);
+	if(result == IDCANCEL){
+		return;
+	}
+
+	Camera* camera = new Camera();
+
+	std::cout << "enter aspect ratio: ";
+	std::string userInput;
+	std::cin >> userInput;
+	float aspect_ratio = 1;
+	TRY_FLOAT(aspect_ratio, userInput);
+	
+	
+	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
+	//TEMP ORTHOGRAPHIC
+	camera->Perspective(1,1,-1,-2);
+	scene->addCamera(camera);
+	glutPostRedisplay();
+}
+
+void addOrthoCamera(){
+
+	int result = AfxMessageBox(_T("You will be sent to the CMD to input the Orthographic specs.\npress CANCEL if you do not wish to continue."), MB_ICONINFORMATION | MB_OKCANCEL);
+	if(result == IDCANCEL){
+		return;
+	}
+
+	renderer->FillEdges(0.05,0.9,0.1,0.1);
+	glutPostRedisplay();
+	Camera* camera = new Camera();
+
+	std::cout << "enter aspect ratio: ";
+	std::string userInput;
+	std::cin >> userInput;
+	float aspect_ratio = 1;
+	try {
+        // Try to convert the input string to a float
+        aspect_ratio = std::stof(userInput);
+        
+    } catch (const std::invalid_argument& e) {
+        std::cerr << "Invalid argument: " << e.what() << std::endl;
+		return;
+    } catch (const std::out_of_range& e) {
+        std::cerr << "Out of range: " << e.what() << std::endl;
+        return;
+    }
+
+	//std::cout << "enter z-min: ";
+	//std::string userInput2;
+	//std::cin >> userInput2;
+	
+	camera->LookAt(vec3(-1,1,-1),vec3(-1,0,0),vec3(0,1,0));
+	//TEMP ORTHOGRAPHIC
+	camera->Ortho(-0.5,0.5,aspect_ratio/2,aspect_ratio/2,0,-1);
+	scene->addCamera(camera);
+	glutPostRedisplay();
+}
+
+void readFromFile(){
+	CFileDialog dlg(TRUE, _T(".obj"), NULL, NULL, _T("*.obj|*.*"));
+	if (dlg.DoModal() == IDOK)
+	{
+		std::string s((LPCTSTR)dlg.GetPathName());
+		scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
+		glutPostRedisplay();
+	}
+}
+//----------------------------------------------------------------------------
 // Callbacks
+//----------------------------------------------------------------------------
 
 void display( void ){
-
-	renderer->SetCameraTransformInverse(camera->getTransformInverse());
-	renderer->SetProjection(camera->getProjection());
 
 	scene->draw();
 }
@@ -71,38 +157,66 @@ void reshape( int width, int height )
 	glutPostRedisplay();
 }
 
+void keyboard_special( int key, int x, int y ){
+	switch (key) {
+		case GLUT_KEY_LEFT:
+			scene->translateObject(-0.1,0,0);
+			break;
+		case GLUT_KEY_RIGHT:
+			scene->translateObject(0,0,-0.1);
+			break;
+		case GLUT_KEY_UP:
+			scene->translateObject(0.1,0,0);
+			break;
+		case GLUT_KEY_DOWN:
+			scene->translateObject(0,0,0.1);
+			break;
+		default:
+			//fail
+			return;
+	}
+	
+	//if key was accepted
+	glutPostRedisplay();
+}
+
 void keyboard( unsigned char key, int x, int y )
 {
 	switch ( key ) {
 	case 033:
 		exit( EXIT_SUCCESS );
 		break;
+	case 9:
+		scene->cycleSelectedObject();
+		break;
 	case 'r':
-		scene->rescaleModels(1.3f); // Increase scale by 30%
-		glutPostRedisplay();
+		scene->scaleObject(1.3f); // Increase scale by 30%
 		break;
 	case 't':
-		scene->rescaleModels(0.7f); // Decrease scale by 30%
-		glutPostRedisplay();
+		scene->scaleObject(0.7f); // Decrease scale by 30%
 		break;
 	case 'a':
-		scene->rotateModels(-30, 1);
-		glutPostRedisplay();
+		scene->rotateObject(-30, 1);
 		break;
 	case 'd':
-		scene->rotateModels(30, 1);
-		glutPostRedisplay();
+		scene->rotateObject(30, 1);
 		break;
 	case 'w':
-		scene->rotateModels(30, 0);
-		glutPostRedisplay();
+		scene->rotateObject(30, 0);
 		break;
 	case 's':
-		scene->rotateModels(-30, 0);
-		glutPostRedisplay();
+		scene->rotateObject(-30, 0);
 		break;
+	case ' ':
+		swapCameras();
+		break;
+	default:
+		//fail
+		return;
 	}
 
+	//if key was accepted
+	glutPostRedisplay();
 }
 
 void mouse(int button, int state, int x, int y)
@@ -136,18 +250,26 @@ void motion(int x, int y)
 	last_y=y;
 }
 
+//----------------------------------------------------------------------------
+// Menus
+//----------------------------------------------------------------------------
+
+void primMenu(int id){
+
+}
+
 void fileMenu(int id)
 {
 	switch (id)
 	{
-	case FILE_OPEN:
-		CFileDialog dlg(TRUE, _T(".obj"), NULL, NULL, _T("*.obj|*.*"));
-		if (dlg.DoModal() == IDOK)
-		{
-			std::string s((LPCTSTR)dlg.GetPathName());
-			scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
-			glutPostRedisplay();
-		}
+	case OPEN_FILE_OBJ:
+		readFromFile();
+		break;
+	case ADD_CAMERA_ORTHO:
+		addOrthoCamera();
+		break;
+	case ADD_CAMERA_PROJECTION:
+		addProjCamera();
 		break;
 	}
 }
@@ -211,8 +333,7 @@ void rescaleWindow(bool up_or_down)
 	if (newWidth == glutGet(GLUT_WINDOW_WIDTH) && newHeight == glutGet(GLUT_WINDOW_HEIGHT)) {
 		return;
 	}
-
-	//scene->translateObjects((newWidth - glutGet(GLUT_WINDOW_WIDTH)) / 2, (newHeight - glutGet(GLUT_WINDOW_HEIGHT)) / 2, 0);
+	//scene->translateObject((newWidth - glutGet(GLUT_WINDOW_WIDTH)) / 2, (newHeight - glutGet(GLUT_WINDOW_HEIGHT)) / 2, 0);
 
 	glutReshapeWindow(newWidth, newHeight);
 	glutPostRedisplay();
@@ -235,8 +356,15 @@ void menuCallback(int menuItem)
 
 void initMenu()
 {
+	int primitivesMenu = glutCreateMenu(primMenu);
+	glutAddMenuEntry("Pyramid", PYRAMID);
+	glutAddMenuEntry("Cube", CUBE);
+
 	int menuFile = glutCreateMenu(fileMenu);
-	glutAddMenuEntry("Open..", FILE_OPEN);
+	glutAddMenuEntry("Orthographic Camera", ADD_CAMERA_ORTHO);
+	glutAddMenuEntry("Perspective Camera", ADD_CAMERA_PROJECTION);
+	glutAddMenuEntry(".OBJ Mesh...", OPEN_FILE_OBJ);
+	glutAddSubMenu("Primitives", primitivesMenu);
 	
 	// Create the "Normal" submenu
 	int optionsSubMenu = glutCreateMenu(optionMenu);
@@ -245,15 +373,17 @@ void initMenu()
 	glutAddMenuEntry("Hide Normals", HIDE_NORMALS);
 	glutAddMenuEntry("Draw Bounding Box", DRAW_BOUNDING_BOX);
 	glutAddMenuEntry("Hide Bounding Box", HIDE_BOUNDING_BOX);
+	//Draw Hide cameras
+	//Draw hide vertex normals
 
 	int rescaleMenu = glutCreateMenu(menuCallback);
 	glutAddMenuEntry("Rescale Window Up", RESCALE_WINDOW_MENU_ITEM_UP);
 	glutAddMenuEntry("Rescale Window Down", RESCALE_WINDOW_MENU_ITEM_DOWN);
 
 	glutCreateMenu(mainMenu);
-	glutAddSubMenu("File", menuFile);
-	glutAddSubMenu("Options", optionsSubMenu);
-	glutAddSubMenu("Rescaling Window", rescaleMenu);
+	glutAddSubMenu("New", menuFile);
+	glutAddSubMenu("View", optionsSubMenu);
+	glutAddSubMenu("Window", rescaleMenu);
 	glutAddMenuEntry("Demo", MAIN_DEMO);
 	glutAddMenuEntry("About", MAIN_ABOUT);
 	
@@ -264,6 +394,9 @@ void initMenu()
 }
 //----------------------------------------------------------------------------
 
+//----------------------------------------------------------------------------
+// Main
+//----------------------------------------------------------------------------
 
 int my_main(int argc, char** argv)
 {
@@ -288,10 +421,15 @@ int my_main(int argc, char** argv)
 
 	renderer = new Renderer(1024, 1024);
 	scene = new Scene(renderer);
-	camera = new Camera();
+	Camera* camera = new Camera();
+
+	std::cout << "[ ] Camera transform: " << std::endl;
+	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
+	scene->addCamera(camera);
+	renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
 
 	std::cout << "[ ] Reading mesh files... ";
-	MeshModel* demo_object = new MeshModel("meshes/obj_example.obj");
+	MeshModel* demo_object = new MeshModel("meshes/fox.obj");
 	scene->addMeshModel(demo_object);
 	std::cout << " Done!" << std::endl;
 	//----------------------------------------------------------------------------
@@ -299,6 +437,7 @@ int my_main(int argc, char** argv)
 	// Initialize Callbacks
 
 	glutDisplayFunc( display );
+	glutSpecialFunc( keyboard_special );
 	glutKeyboardFunc( keyboard );
 	glutMouseFunc( mouse );
 	glutMotionFunc ( motion );
@@ -309,13 +448,6 @@ int my_main(int argc, char** argv)
 	renderer->Init();
 	
 	//Set the camera projection we want and send it to renderer (vec3 cast to vec4)
-
-	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
-	std::cout << "[ ] Camera transform: " << std::endl;
-	std::cout << camera->getTransformInverse() << std::endl;
-	//camera->Ortho(-2,2,0,4,0,8); 
-	renderer->SetCameraTransformInverse(camera->getTransformInverse());
-	renderer->SetProjection(camera->getProjection());
 
 	std::cout << "[V] Done with the initialization! " << std::endl;
 	glutMainLoop();
