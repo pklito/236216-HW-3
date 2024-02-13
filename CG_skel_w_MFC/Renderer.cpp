@@ -83,6 +83,28 @@ void Renderer::FillBuffer(float r, float g, float b)
 	}
 }
 
+void Renderer::FillEdges(float percent, float r, float g, float b){
+	if(percent <= 0){
+		return;
+	}
+	if(percent >= 0.5){
+		percent = 0.5;
+	}
+	for(int i = 0; i <= (int)(m_height*percent); i++){
+		for(int j = 0; j < m_width; j++){
+			DrawPixel(j,i,r,g,b);
+			DrawPixel(j,m_height - i- 1,r,g,b);
+		}
+	}
+	for(int j = 0; j < (int)(m_width*percent); j++){
+		for(int i = (int)(m_height*percent) - 1; i < m_height - (int)(m_height*percent) - 1; i++){
+			DrawPixel(j,i,r,g,b);
+			DrawPixel(m_width - j - 1,i,r,g,b);
+		}
+	}
+}
+
+
 /*
  This function gets two pixels on screen and draws the line between them (rasterization)
  vert1 + vert2 = ends of the edge
@@ -326,6 +348,13 @@ void Renderer::CreateOpenGLBuffer()
 
 void Renderer::SwapBuffers()
 {
+	UpdateBuffer();
+	//clear the new buffer
+	ClearBuffer();
+}
+
+//Doesn't clear the buffer afterwards!
+void Renderer::UpdateBuffer(){
 
 	int a = glGetError();
 	glActiveTexture(GL_TEXTURE0);
@@ -343,6 +372,4 @@ void Renderer::SwapBuffers()
 	glutSwapBuffers();
 	a = glGetError();
 
-	//clear the new buffer
-	ClearBuffer();
 }
