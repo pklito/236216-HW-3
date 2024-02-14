@@ -192,6 +192,14 @@ void keyboard( unsigned char key, int x, int y )
 	case 9:
 		scene->cycleSelectedObject();
 		break;
+	case ',':
+		scene->getActiveCamera()->translate(0, 0, -0.1, scene->getWorldControl());
+		renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
+		break;
+	case '.':
+		scene->getActiveCamera()->translate(0, 0, 0.1, scene->getWorldControl());
+		renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
+		break;
 	case 't':
 		scene->scaleObject(1.3f); // Increase scale by 30%
 		break;
