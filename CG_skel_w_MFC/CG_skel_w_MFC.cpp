@@ -111,8 +111,27 @@ void addOrthoCamera(){
 	if(result == IDCANCEL){
 		return;
 	}
+	float width = 2;
+	float height = 2;
+	float zNear = 0.5;
+	float zFar = 5;
 	if(result == IDYES){
+		renderer->FillEdges(0.1,0.9,0.1,0.1);
+		display();
+		std::string userInput;
 		
+		std::cout << "width: (right-left) ";
+		std::cin >> userInput;
+		TRY_FLOAT(width, userInput);
+		std::cout << "height (top - bottom): ";
+		std::cin >> userInput;
+		TRY_FLOAT(height, userInput);
+		std::cout << "enter zNear: ";
+		std::cin >> userInput;
+		TRY_FLOAT(zNear, userInput);
+		std::cout << "enter zFar: ";
+		std::cin >> userInput;
+		TRY_FLOAT(zFar, userInput);
 	}
 	Camera* camera = new Camera();
 
@@ -122,7 +141,7 @@ void addOrthoCamera(){
 	//std::cin >> userInput2;
 	
 	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
-	camera->Ortho(-1,1,-1,1,-0.5,-5);
+	camera->Ortho(-width/2,width/2,-height/2,height/2,zNear,zFar);
 	scene->addCamera(camera);
 	glutPostRedisplay();
 }
