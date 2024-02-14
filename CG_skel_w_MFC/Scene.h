@@ -50,6 +50,8 @@ public:
 	mat4 getTransform();
 	mat4 getTransformInverse();
 
+	void draw(Renderer* renderer);
+	vec3 getCameraPosition();
 	void setInverseTransformation(const mat4& InvTransform);
 	void applyWorldInverseTransformation(const mat4& InvMatrix);
 	void applyScreenInverseTransformation(const mat4& InvMatrix);

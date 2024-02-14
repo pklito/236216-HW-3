@@ -112,11 +112,20 @@ void Scene::rotateObject(GLfloat theta_angle, int axis)
 
 void Scene::draw()
 {
+	int i = 0;
+	for(auto it = cameras.begin(); it != cameras.end(); it++){
+		if(i!=activeCamera){
+			(*it)->draw(m_renderer);
+		}
+		i++;
+	}
+
 	// 1. Send the renderer the current camera transform and the projection
 	// 2. Tell all models to draw themselves
 	for(auto it = models.begin(); it != models.end(); it++){
 		(*(it))->draw(m_renderer);
 	}
+
 }
 
 void Scene::drawDemo()
@@ -159,6 +168,16 @@ Camera* Scene::getActiveCamera()
 //---------------------
 //   CAMERA
 //---------------------
+
+
+void Camera::draw(Renderer* renderer){
+	renderer->DrawSymbol(getCameraPosition(),mat4(),SYM_SQUARE, 1);
+}
+vec3 Camera::getCameraPosition(){
+	vec4 point = cTransformInverse * vec4(0,0,0,1);
+	return vec3(-point.x, -point.y, -point.z);
+}
+
 void Camera::setInverseTransformation(const mat4& InvTransform){
 	cTransformInverse = InvTransform;
 }
