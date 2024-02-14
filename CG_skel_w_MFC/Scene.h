@@ -45,6 +45,12 @@ public:
 	mat4 getTransform();
 	mat4 getTransformInverse();
 
+	void setInverseTransformation(const mat4& InvTransform);
+	void applyInverseTransformation(const mat4& matrix);
+	void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans);
+	void rotate(GLfloat theta_angle, int mode);
+	void scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale);
+
 	void LookAt(const vec4& eye, const vec4& at, const vec4& up );
 	void Ortho( const float left, const float right,
 		const float bottom, const float top,

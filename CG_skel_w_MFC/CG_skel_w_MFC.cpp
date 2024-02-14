@@ -161,16 +161,16 @@ void reshape( int width, int height )
 void keyboard_special( int key, int x, int y ){
 	switch (key) {
 		case GLUT_KEY_LEFT:
-			scene->translateObject(-0.1,0,0);
+			scene->getActiveCamera()->translate(-0.1,0,0);
 			break;
 		case GLUT_KEY_RIGHT:
-			scene->translateObject(0,0,-0.1);
+			scene->getActiveCamera()->translate(0.1,0,0);
 			break;
 		case GLUT_KEY_UP:
-			scene->translateObject(0.1,0,0);
+			scene->getActiveCamera()->translate(0,0.1,0);
 			break;
 		case GLUT_KEY_DOWN:
-			scene->translateObject(0,0,0.1);
+			scene->getActiveCamera()->translate(0,-0.1,0);
 			break;
 		default:
 			//fail
@@ -178,6 +178,7 @@ void keyboard_special( int key, int x, int y ){
 	}
 	
 	//if key was accepted
+	renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
 	glutPostRedisplay();
 }
 
@@ -453,7 +454,7 @@ int my_main(int argc, char** argv)
 	renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
 
 	std::cout << "[ ] Reading mesh files... ";
-	MeshModel* demo_object = new MeshModel("meshes/obj_example.obj");
+	MeshModel* demo_object = new MeshModel("meshes/fox.obj");
 	scene->addMeshModel(demo_object);
 	std::cout << " Done!" << std::endl;
 	//----------------------------------------------------------------------------
