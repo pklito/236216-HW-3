@@ -110,7 +110,7 @@ void Renderer::FillEdges(float percent, float r, float g, float b){
  vert1 + vert2 = ends of the edge
  normal = direction of normal.
 */
-void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor, bool clear)
+void Renderer::DrawLine(vec2 vert1, vec2 vert2, float r, float g, float b)
 {
 	//flip the axis so that slope is -1 <= m <= 1
 	bool flipped = false;
@@ -151,10 +151,10 @@ void Renderer::DrawLine(vec2 vert1, vec2 vert2, int specialColor, bool clear)
 
 		//light the pixel
 		if(flipped){
-			DrawPixelSafe(y,x, !clear, !clear*(specialColor != 1), !clear*(specialColor != 2));
+			DrawPixelSafe(y,x, r, g, b);
 		}
 		else{
-			DrawPixelSafe(x,y, !clear, !clear*(specialColor != 1), !clear*(specialColor != 2));
+			DrawPixelSafe(x,y, r, g, b);
 		}
 
 	}
@@ -182,7 +182,7 @@ void Renderer::DrawPixelSafe(int x, int y, float r, float g, float b){
  * vertices: vector of the camera space vertices
  * normals: directions of the respective world space normals.
  */
-void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, const vector<vec3>* edge_normals, bool draw_normals)
+void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, const vector<vec3>* edge_normals, bool draw_normals, float r, float g, float b)
 {
 	// Clear the buffer before drawing new content
 
@@ -230,13 +230,13 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		vec2 n1 = vec2(RANGE(normCoor1.x, -1, 1, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height));
 		vec2 n2 = vec2(RANGE(normCoor2.x, -1, 1, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height));
 
-		DrawLine(p1, p2);
-		DrawLine(p2, p3);
-		DrawLine(p3, p1);
+		DrawLine(p1, p2, r, g, b);
+		DrawLine(p2, p3, r, g, b);
+		DrawLine(p3, p1, r, g, b);
 
 		//Normal:
 		if(draw_normals){
-		  DrawLine(n1, n2, 1);
+		  DrawLine(n1, n2, 1, 0, 1);
     	}
 	}
 }
@@ -330,7 +330,7 @@ void Renderer::DrawBoundingBox(const vec3* bounding_box, const mat4& world_trans
 		{
 			continue;
 		}
-		DrawLine(bounding_box_in_vectwo[indices[i][0]], bounding_box_in_vectwo[indices[i][1]], 2, !draw_box);
+		DrawLine(bounding_box_in_vectwo[indices[i][0]], bounding_box_in_vectwo[indices[i][1]], 1, 1, 0);
 	}
 }
 
@@ -367,7 +367,7 @@ void Renderer::DrawSymbol(const vec3& vertex, const mat4& world_transform, SYMBO
 
 	auto a = decided->begin();
 	while(a != decided->end()){
-		DrawLine(scale*(*a) + image_space, scale*(*(a+1)) + image_space,1);
+		DrawLine(scale*(*a) + image_space, scale*(*(a+1)) + image_space,0.6, 0.9, 0.4);
 		a+=2;
 	}
 }
