@@ -287,7 +287,7 @@ void Renderer::DrawNormalsToVertices(const vector<vec3>* vertices, const vector<
 
 		// Normal:
 		if (draw_normals) {
-			DrawLine(first_point, vec2(RANGE(vert1.x, -1, 1, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height)), 1);
+			DrawLine(first_point, vec2(RANGE(vert1.x, -1, 1, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height)), 0.2,0.5,1);
 		}
     }
 }

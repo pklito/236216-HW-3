@@ -9,7 +9,7 @@ using namespace std;
 class MeshModel : public Model
 {
 protected:
-	MeshModel() : vertex_normals_exist(false) {}
+	MeshModel() : vertex_normals_exist(false), show_vertex_normals(false), show_face_normals(false) {}
 	vec3* vertex_positions;
 	vec3* normals_to_vertices;
 

@@ -62,8 +62,10 @@ vec2 vec2fFromStream(std::istream& aStream)
 
 MeshModel::MeshModel(string fileName)
 {
-	loadFile(fileName);
+	vertex_normals_exist = false;
+	show_vertex_normals = false;
 	show_face_normals = false;
+	loadFile(fileName);
 }
 
 MeshModel::~MeshModel(void)
@@ -147,7 +149,6 @@ void MeshModel::draw(Renderer* renderer)
 {
 	std::vector<vec3> vec(vertex_positions, vertex_positions + (3 * face_count));
 
-	std::vector<vec3> norm(normals, normals + (3 * face_count));
 	if(data == 1){
 		renderer->DrawTriangles(&vec, _world_transform, NULL, show_face_normals);
 	}
