@@ -135,6 +135,20 @@ void Scene::cycleActiveCamera()
 	activeCamera = (activeCamera+1) % cameras.size();
 }
 
+void Scene::removeSelectedObject(){
+	if(models.size() <= 1)
+		return;
+	models.erase(models.begin()+activeModel);
+	cycleSelectedObject();
+}
+
+void Scene::removeSelectedCamera(){
+	if(cameras.size() <= 1)
+		return;
+	cameras.erase(cameras.begin()+activeCamera);
+	cycleSelectedObject();
+}
+
 Camera* Scene::getActiveCamera()
 {
 	return cameras[activeCamera];

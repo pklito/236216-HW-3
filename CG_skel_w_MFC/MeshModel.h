@@ -9,12 +9,11 @@ using namespace std;
 class MeshModel : public Model
 {
 protected:
-	MeshModel() {}
+	MeshModel() : vertex_normals_exist(false) {}
 	vec3* vertex_positions;
 	vec3* normals_to_vertices;
 
 	bool vertex_normals_exist;
-	int vertex_count;
 	int face_count;
 
 	bool show_vertex_normals;
@@ -47,6 +46,33 @@ public:
 	void setShowNormals(bool change) override;
 	void setShowNormalsToVertices(bool change) override;
 	void setShowBox(bool change) override;
+};
+
+typedef enum{
+	PRIM_CUBE,
+	PRIM_TETRAHEDRON
+} PRIM_MODEL;
+class PrimMeshModel : public MeshModel
+{
+	protected:
+		void Cube();
+		void Tetrahedron();
+	public:
+	PrimMeshModel(PRIM_MODEL model){
+		vertex_normals_exist = false;
+		show_vertex_normals = false;
+		show_face_normals = false;
+		switch(model){
+			case PRIM_CUBE:
+				Cube();
+				break;
+			case PRIM_TETRAHEDRON:
+				Tetrahedron();
+				break;
+		}
+		calculateBoundingBox();
+	}
+
 };
 
 vec3 calculateNormal(vec3 first_point, vec3 second_point, vec3 third_point);

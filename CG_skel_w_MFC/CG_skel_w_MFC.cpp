@@ -33,6 +33,9 @@ enum MENU_STATES {
 	MAIN_DEMO,
 	MAIN_ABOUT,
 
+	DELETE_MESH,
+	DELETE_CAMERA,
+
 	RESCALE_WINDOW_MENU_ITEM_UP,
 	RESCALE_WINDOW_MENU_ITEM_DOWN,
 
@@ -43,13 +46,8 @@ enum MENU_STATES {
 	DRAW_BOUNDING_BOX,
 	HIDE_BOUNDING_BOX,
 
-	DRAW_CUBE,
-	DRAW_SPHERE,
-	HIDE_CUBE,
-	HIDE_SPHERE,
-
-	PYRAMID,
-	CUBE
+	ADD_TETRAHEDRON,
+	ADD_CUBE
 };
 
 Scene* scene;
@@ -292,28 +290,33 @@ void motion(int x, int y)
 // Menus
 //----------------------------------------------------------------------------
 
+void deleteMenu(int id){
+	switch(id){
+		case DELETE_MESH:
+			scene->removeSelectedObject();
+			break;
+		case DELETE_CAMERA:
+			scene->removeSelectedCamera();
+			renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
+			break;
+	}
+	glutPostRedisplay();
+}
+
 void primMenu(int id) {
-	/*if (scene) {
-		switch (id)
-		{
-		case DRAW_CUBE:
-			// Logic to draw the cube
-			scene->addMeshModel(PrimMeshModel());
+	PrimMeshModel* model;
+	switch(id){
+		case ADD_CUBE:
+			model = new PrimMeshModel(PRIM_CUBE);
 			break;
-		case HIDE_CUBE:
-			// Logic to draw the cube
-			scene->setDrawCube(false);
+		case ADD_TETRAHEDRON:
+			model = new PrimMeshModel(PRIM_TETRAHEDRON);
 			break;
-		case DRAW_SPHERE:
-			// Logic to draw the sphere
-			scene->setDrawSphere(true);
-			break;
-		case HIDE_SPHERE:
-			// Logic to draw the sphere
-			scene->setDrawSphere(false);
-			break;
-		}
-	}*/
+		default:
+			return;
+	}
+	scene->addMeshModel(model);
+	glutPostRedisplay();
 }
 
 void fileMenu(int id)
@@ -363,7 +366,6 @@ void optionMenu(int id)
 			break;
 		}
 	}
-	std::cout << "WE GET HERE IN TURNING ON AND OFF THE NORMALS" << std::endl;
 	glutPostRedisplay();
 }
 
@@ -423,8 +425,8 @@ void menuCallback(int menuItem)
 void initMenu()
 {
 	int primitivesMenu = glutCreateMenu(primMenu);
-	glutAddMenuEntry("Pyramid", DRAW_SPHERE);
-	glutAddMenuEntry("Cube", DRAW_CUBE);
+	glutAddMenuEntry("Tetrahedron", ADD_TETRAHEDRON);
+	glutAddMenuEntry("Cube", ADD_CUBE);
 
 	int menuFile = glutCreateMenu(fileMenu);
 	glutAddMenuEntry("Orthographic Camera", ADD_CAMERA_ORTHO);
@@ -448,8 +450,13 @@ void initMenu()
 	glutAddMenuEntry("Rescale Window Up", RESCALE_WINDOW_MENU_ITEM_UP);
 	glutAddMenuEntry("Rescale Window Down", RESCALE_WINDOW_MENU_ITEM_DOWN);
 
+	int deleteSubMenu = glutCreateMenu(deleteMenu);
+	glutAddMenuEntry("Delete Sel. Mesh", DELETE_MESH);
+	glutAddMenuEntry("Delete Sel. Camera", DELETE_CAMERA);
+
 	glutCreateMenu(mainMenu);
 	glutAddSubMenu("New", menuFile);
+	glutAddSubMenu("Delete", deleteSubMenu);
 	glutAddSubMenu("View", optionsSubMenu);
 	glutAddSubMenu("Window", rescaleMenu);
 	glutAddMenuEntry("Demo", MAIN_DEMO);
@@ -493,7 +500,7 @@ int my_main(int argc, char** argv)
 
 	std::cout << "[ ] Camera transform: " << std::endl;
 	camera->LookAt(vec3(0,0,1),vec3(0,0,-1),vec3(0,1,0));
-	//camera->Ortho(-1,1,-1,1,0,5);
+	camera->Ortho(-1,1,-1,1,0,5);
 	scene->addCamera(camera);
 	std::cout <<"!"<< camera->getProjection();
 	renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());

@@ -273,15 +273,10 @@ void Renderer::DrawNormalsToVertices(const vector<vec3>* vertices, const vector<
         /*
         TRANSFORMATIONS + PROJECTION (P * Tc-1 * v)
         */
-	   if(it == vertices->begin())
-	   	std::cout << normCoor << " " << vert1+normCoor << std::endl;
+
         vert1 = toEuclidian(mat_project * (mat_transform_inverse * vert1));
         normCoor = toEuclidian(mat_project * (mat_transform_inverse * (normCoor+vert1)));
 
-		if(it == vertices->begin())
-		{
-			std::cout << normCoor << " " << vert1 << std::endl;
-		}
         // Normalize the vector without applying the range
 		//vec2 normalized_end_point = normalize(vec2(normCoor.x,normCoor.y)) + vec2(vert1.x,vert1.y);
 		
