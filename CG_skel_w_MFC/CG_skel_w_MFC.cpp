@@ -196,7 +196,7 @@ void keyboard( unsigned char key, int x, int y )
 		scene->scaleObject(1.3f); // Increase scale by 30%
 		break;
 	case 'r':
-		scene->scaleObject(0.7f); // Decrease scale by 30%
+		scene->scaleObject(0.77f); // Decrease scale by 30%
 		break;
 	case 'a':
 		scene->translateObject(-0.2, 0, 0);
