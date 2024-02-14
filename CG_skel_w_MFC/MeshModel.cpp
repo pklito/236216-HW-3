@@ -158,15 +158,6 @@ void MeshModel::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
 	calculateBoundingBox();
 }
 
-vec3 MeshModel::translatePoint(vec3 point, GLfloat x_trans, GLfloat y_trans, GLfloat z_trans) 
-{
-	vec3 new_point;
-	new_point.x = point.x + x_trans;
-	new_point.y = point.y + y_trans;
-	new_point.z = point.z + z_trans;
-	return new_point;
-}
-
 void MeshModel::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale)
 {
 	if (x_scale == 0 || y_scale == 0 || z_scale == 0) {
