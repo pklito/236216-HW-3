@@ -225,6 +225,9 @@ void keyboard( unsigned char key, int x, int y )
 		scene->getActiveCamera()->translate(0, 0, 0.1, scene->getWorldControl());
 		renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
 		break;
+	case 'v':
+		scene->rotateCameraToSelectedObject();
+		renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
 	case 't':
 		scene->scaleObject(1.3f); // Increase scale by 30%
 		break;
@@ -397,7 +400,7 @@ void mainMenu(int id)
 		scene->drawDemo();
 		break;
 	case MAIN_ABOUT:
-		AfxMessageBox(_T("Controls:\n\nWASDQE - Move the selected mesh.\nJKLI - Rotate selected mesh\nF - Toggle world/model space controls\nTab - Cycle selected Mesh\n\nSpace - Cycle active camera\n[Arrows , .] - Move camera"));
+		AfxMessageBox(_T("Controls:\n\nTab - Cycle selected Mesh\nWASDQE - Move the selected mesh.\nJKLI - Rotate selected mesh\nF - Toggle world/model space controls\n\nSpace - Cycle active camera\n[Arrows , .] - Move camera\n\nBlue outline means World space\nRed outline means an input needs to be put"));
 		break;
 	}
 }
