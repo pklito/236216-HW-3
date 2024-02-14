@@ -283,12 +283,42 @@ void Renderer::DrawBoundingBox(const vec3* bounding_box, const mat4& world_trans
 	}
 }
 
-void Renderer::DrawPoint(const vec3& vertex)
+void Renderer::DrawSymbol(const vec3& vertex, const mat4& world_transform, SYMBOL_TYPE symbol, float scale)
 {
-	std::cout << vertex << std::endl;
-   m_outBuffer[INDEX(m_width, CLAMP(toupper(100*vertex.x),0,m_width), CLAMP(toupper(100*vertex.y),0,m_height),0)] = 0;
-   m_outBuffer[INDEX(m_width, CLAMP(toupper(100*vertex.x),0,m_width), CLAMP(toupper(100*vertex.y),0,m_height),1)] = 1;
-   //m_outBuffer[INDEX(m_width, toupper(100*vertex.x), toupper(100*vertex.y), 2)] = 0;
+	scale *= 4;
+	const std::vector<vec2> square_shape = {vec2(-1,-1),vec2(1,-1),	vec2(1,-1),vec2(1,1), vec2(1,1), vec2(-1,1), vec2(-1,1), vec2(-1,-1)};
+	const std::vector<vec2> x_shape = {vec2(-1,-1),vec2(1,1),	vec2(1,-1),vec2(-1,1)};
+	const std::vector<vec2> star_shape = {vec2(0,1),vec2(0,-1),	vec2(1,-1),vec2(1,1), vec2(1,1), vec2(-1,1), vec2(-1,1), vec2(-1,-1)};
+	const std::vector<vec2> plus_shape = {vec2(0,1),vec2(0,-1),	vec2(-1,0),vec2(0,1)};
+	
+	const std::vector<vec2>* decided = &square_shape;
+
+	vec4 screen_space = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vertex));
+	vec2 image_space = vec2(RANGE(screen_space.x, -1, 1, 0, m_width), RANGE(screen_space.y, -1, 1, 0, m_height));
+	switch(symbol){
+		case SYM_SQUARE:
+			decided = &square_shape;
+			break;
+		case SYM_X:
+			decided = &x_shape;
+			break;
+		case SYM_STAR:
+			decided = &star_shape;
+			break;
+		case SYM_PLUS:
+			decided = &plus_shape;
+			break;
+		default:
+			decided = &x_shape;
+		break;
+	}
+
+
+	auto a = decided->begin();
+	while(a != decided->end()){
+		DrawLine(scale*(*a) + image_space, scale*(*(a+1)) + image_space,1);
+		a+=2;
+	}
 }
 
 

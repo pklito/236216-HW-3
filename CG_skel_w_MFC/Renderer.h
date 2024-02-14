@@ -5,6 +5,14 @@
 #include "mat.h"
 #include "GL/glew.h"
 using namespace std;
+
+typedef enum {
+	SYM_STAR,
+	SYM_SQUARE,
+	SYM_X,
+	SYM_PLUS
+} SYMBOL_TYPE;
+
 class Renderer
 {
 	float* m_outBuffer; // 3*width*height
@@ -42,7 +50,7 @@ public:
 	void DrawBoundingBox(const vec3* bounding_box, const mat4& world_transform, bool draw_box = false);
 	void DrawPixel(int x, int y, float r, float g, float b);
 	void DrawPixelSafe(int x, int y, float r, float g, float b);
-	void DrawPoint(const vec3& vertex);
+	void DrawSymbol(const vec3& vertex ,const mat4& =  mat4(), SYMBOL_TYPE symbol = SYM_STAR, float scale = 1);
 	void SetCameraTransformInverse(const mat4& cTransform);
 	void SetProjection(const mat4& projection);
 	void setCameraMatrixes(const mat4& cTransform, const mat4& Projection);

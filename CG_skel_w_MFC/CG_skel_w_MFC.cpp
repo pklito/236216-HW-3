@@ -243,7 +243,6 @@ void keyboard( unsigned char key, int x, int y )
 		swapCameras();
 		break;
 	default:
-		//fail
 		return;
 	}
 
