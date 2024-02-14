@@ -7,7 +7,7 @@
 #include "MeshModel.h"
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
-
+#define LINE_TOO_LARGE 30
 Renderer::Renderer() :m_width(512), m_height(512)
 {
 	InitOpenGLRendering();
@@ -210,6 +210,16 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		vec3 norm_dir = calculateNormal(toVec3(vert1),toVec3(vert2),toVec3(vert3))/5.f;
 		normCoor1 = (vert1 + vert2 + vert3) / 3;
 		normCoor2 = normCoor1 - norm_dir;
+
+
+		//sometimes a point will get sent really far (matrix bs)
+		//the DrawLine function wont draw out of bounds, but it will take
+		//very long to go over the whole distance (~200,000 iterations).
+		if (length(vert1) > LINE_TOO_LARGE || length(vert2) > LINE_TOO_LARGE || length(vert3) > LINE_TOO_LARGE)
+		{
+			continue;
+		}
+
 		/*
 		Clipspace coordinates to screenspace coordinates
 		*/
@@ -220,7 +230,6 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		vec2 n1 = vec2(RANGE(normCoor1.x, -1, 1, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height));
 		vec2 n2 = vec2(RANGE(normCoor2.x, -1, 1, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height));
 
-		
 		DrawLine(p1, p2);
 		DrawLine(p2, p3);
 		DrawLine(p3, p1);
@@ -261,6 +270,13 @@ void Renderer::DrawBoundingBox(const vec3* bounding_box, const mat4& world_trans
 	for (int i = 0; i < 12; ++i) {
 		if(new_bounding_box[indices[i][0]].z < -1 || new_bounding_box[indices[i][0]].z > 1 || 
 		new_bounding_box[indices[i][1]].z < -1  || new_bounding_box[indices[i][0]].z > 1  ){
+			continue;
+		}
+		//sometimes a point will get sent really far (matrix bs)
+		//the DrawLine function wont draw out of bounds, but it will take
+		//very long to go over the whole distance (~200,000 iterations).
+		if (length(new_bounding_box[indices[i][0]]) > LINE_TOO_LARGE || length(new_bounding_box[indices[i][0]]) > LINE_TOO_LARGE)
+		{
 			continue;
 		}
 		DrawLine(bounding_box_in_vectwo[indices[i][0]], bounding_box_in_vectwo[indices[i][1]], 2, !draw_box);

@@ -80,7 +80,7 @@ void addProjCamera(){
 	
 	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
 	//TEMP ORTHOGRAPHIC
-	camera->Perspective(1,1,-1,-2);
+	camera->Perspective(1,1,0.5,4);
 	scene->addCamera(camera);
 	glutPostRedisplay();
 }
