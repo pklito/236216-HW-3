@@ -140,7 +140,12 @@ void MeshModel::draw(Renderer* renderer)
 {
 	std::vector<vec3> vec(vertex_positions, vertex_positions + (3 * face_count));
 	std::vector<vec3> norm(normals, normals + (3 * face_count));
-	renderer->DrawTriangles(&vec, _world_transform, &norm, show_face_normals);
+	if(data == 1){
+		renderer->DrawTriangles(&vec, _world_transform, &norm, show_face_normals);
+	}
+	else{
+		renderer->DrawTriangles(&vec, _world_transform, &norm, show_face_normals,0.6,0.6,0.6);
+	}
 	
 	renderer->DrawBoundingBox(bounding_box, _world_transform, show_box);
 }

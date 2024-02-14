@@ -119,7 +119,9 @@ void Scene::drawDemo()
 
 void Scene::cycleSelectedObject()
 {
+	models[activeModel]->setData(0);
 	activeModel = (activeModel+1) % models.size();
+	models[activeModel]->setData(1);
 }
 
 void Scene::cycleActiveCamera()

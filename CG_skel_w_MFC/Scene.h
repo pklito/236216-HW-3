@@ -9,7 +9,10 @@
 using namespace std;
 
 class Model {
+	protected:
+		int data;	//int that lets you store some extra metadata
 public:
+	Model() : data(0) {}
 	virtual ~Model() {}
 	void virtual draw(Renderer* renderer) = 0;
 	virtual void setShowNormals(bool change);
@@ -20,6 +23,7 @@ public:
 
 	virtual void applyWorldTransformation(const mat4& transformation) = 0;
 	virtual void applyModelTransformation(const mat4& transformation) = 0;
+	void setData(int dat) {data = dat;}
 };
 
 
