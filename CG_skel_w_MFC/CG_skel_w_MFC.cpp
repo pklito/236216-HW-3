@@ -377,7 +377,7 @@ void mainMenu(int id)
 		scene->drawDemo();
 		break;
 	case MAIN_ABOUT:
-		AfxMessageBox(_T("Computer Graphics"));
+		AfxMessageBox(_T("Controls:\n\nWASDQE - Move the selected mesh.\nJKLI - Rotate selected mesh\nF - Toggle world/model space controls\nTab - Cycle selected Mesh\n\nSpace - Cycle active camera\n[Arrows , .] - Move camera"));
 		break;
 	}
 }
