@@ -85,9 +85,9 @@ public:
 
 	void setShowNormalsForMeshModels(bool change);
 	void setShowBoxForMeshModels(bool change);
-	void translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, bool world_frame = false);
-	void scaleObject(GLfloat scale, bool world_frame = false);
-	void rotateObject(GLfloat theta_angle, int axis, bool world_frame = false);
+	void translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans);
+	void scaleObject(GLfloat scale);
+	void rotateObject(GLfloat theta_angle, int axis);
 	void cycleSelectedObject();
 	void cycleActiveCamera();
 	Camera* getActiveCamera();
