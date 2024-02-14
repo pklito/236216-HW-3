@@ -14,7 +14,6 @@ protected:
 	vec3* normals_to_vertices;
 
 	bool vertex_normals_exist;
-	int vertex_count;
 	int face_count;
 
 	bool show_vertex_normals;

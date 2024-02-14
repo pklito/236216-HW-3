@@ -62,7 +62,6 @@ vec2 vec2fFromStream(std::istream& aStream)
 
 MeshModel::MeshModel(string fileName)
 {
-	vertex_count = 0;
 	loadFile(fileName);
 	show_face_normals = false;
 }
@@ -139,7 +138,6 @@ void MeshModel::loadFile(string fileName)
 				normals_to_vertices[k] = normals_to_vert[it->vn[i] - 1];
 			}
 			vertex_positions[k++] = vertices[it->v[i] - 1]; 	//Take the face indexes from the vertix array BUG FIXED
-			vertex_count++;
 		}
 	}
 	normalToFace();
@@ -162,7 +160,7 @@ void MeshModel::draw(Renderer* renderer)
 void MeshModel::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
 {
 	int i = 0;
-	while (i < vertex_count) {
+	while (i < 3*face_count) {
 		// Update the actual vertex positions in the array
 		vertex_positions[i].x += x_trans;
 		vertex_positions[i].y += y_trans;
@@ -179,7 +177,7 @@ void MeshModel::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale)
 	}
 
 	int i = 0;
-	while (i < vertex_count) {
+	while (i < 3*face_count) {
 
 		vertex_positions[i].x *= x_scale;
 		vertex_positions[i].y *= y_scale;
@@ -210,7 +208,7 @@ void MeshModel::rotate(GLfloat theta, int mode)
 		std::cout << "something is wrong" << std::endl;
 		return;
 	}
-	while (i < vertex_count) {
+	while (i < 3*face_count) {
 		vec3 current_vertex = vertex_positions[i];
 		vec4 curr_rotated_point = vec4(rotation_matrix * vec4(current_vertex, 1.0f));
 		
@@ -235,7 +233,7 @@ vec3 calculateNormal(vec3 first_point, vec3 second_point, vec3 third_point)
 void MeshModel::normalToFace()
 {
 	int i = 0;
-	while(i < vertex_count) {
+	while(i < 3*face_count) {
 		vec3 curr_normal = calculateNormal(vertex_positions[i], vertex_positions[i + 1], vertex_positions[i + 2]);
 		normals[i] = curr_normal;  // Store the normal vector
 		normals[i+ 1] = (vertex_positions[i] + vertex_positions[i + 1] + vertex_positions[i + 2]) / 3.0f;
@@ -258,7 +256,7 @@ void MeshModel::calculateBoundingBox()
 	GLfloat min_z = vertex_positions[0].z;
 
 	int i = 0;
-	while (i != vertex_count) {
+	while (i != 3*face_count) {
 		if (vertex_positions[i].x > max_x)
 		{
 			max_x = vertex_positions[i].x;
