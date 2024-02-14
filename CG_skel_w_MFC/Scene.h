@@ -92,6 +92,8 @@ public:
 	void rotateObject(GLfloat theta_angle, int axis);
 	void cycleSelectedObject();
 	void cycleActiveCamera();
+	void removeSelectedObject();
+	void removeSelectedCamera();
 	Camera* getActiveCamera();
 
 	void setWorldControl(bool ctrl);

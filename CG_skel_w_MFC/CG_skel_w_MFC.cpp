@@ -33,6 +33,9 @@ enum MENU_STATES {
 	MAIN_DEMO,
 	MAIN_ABOUT,
 
+	DELETE_MESH,
+	DELETE_CAMERA,
+
 	RESCALE_WINDOW_MENU_ITEM_UP,
 	RESCALE_WINDOW_MENU_ITEM_DOWN,
 
@@ -287,6 +290,19 @@ void motion(int x, int y)
 // Menus
 //----------------------------------------------------------------------------
 
+void deleteMenu(int id){
+	switch(id){
+		case DELETE_MESH:
+			scene->removeSelectedObject();
+			break;
+		case DELETE_CAMERA:
+			scene->removeSelectedCamera();
+			renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
+			break;
+	}
+	glutPostRedisplay();
+}
+
 void primMenu(int id) {
 	PrimMeshModel* model;
 	switch(id){
@@ -434,8 +450,13 @@ void initMenu()
 	glutAddMenuEntry("Rescale Window Up", RESCALE_WINDOW_MENU_ITEM_UP);
 	glutAddMenuEntry("Rescale Window Down", RESCALE_WINDOW_MENU_ITEM_DOWN);
 
+	int deleteSubMenu = glutCreateMenu(deleteMenu);
+	glutAddMenuEntry("Delete Sel. Mesh", DELETE_MESH);
+	glutAddMenuEntry("Delete Sel. Camera", DELETE_CAMERA);
+
 	glutCreateMenu(mainMenu);
 	glutAddSubMenu("New", menuFile);
+	glutAddSubMenu("Delete", deleteSubMenu);
 	glutAddSubMenu("View", optionsSubMenu);
 	glutAddSubMenu("Window", rescaleMenu);
 	glutAddMenuEntry("Demo", MAIN_DEMO);
@@ -479,7 +500,7 @@ int my_main(int argc, char** argv)
 
 	std::cout << "[ ] Camera transform: " << std::endl;
 	camera->LookAt(vec3(0,0,1),vec3(0,0,-1),vec3(0,1,0));
-	//camera->Ortho(-1,1,-1,1,0,5);
+	camera->Ortho(-1,1,-1,1,0,5);
 	scene->addCamera(camera);
 	std::cout <<"!"<< camera->getProjection();
 	renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
