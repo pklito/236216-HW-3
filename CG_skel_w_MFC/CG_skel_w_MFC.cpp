@@ -243,6 +243,7 @@ void keyboard( unsigned char key, int x, int y )
 	case 'v':
 		scene->rotateCameraToSelectedObject();
 		renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
+		break;
 	case 't':
 		scene->scaleObject(1.3f); // Increase scale by 30%
 		break;
