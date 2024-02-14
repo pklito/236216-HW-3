@@ -38,8 +38,15 @@ enum MENU_STATES {
 
 	DRAW_NORMALS,
 	HIDE_NORMALS,
+	DRAW_VERTEX_NORMALS,
+	HIDE_VERTEX_NORMALS,
 	DRAW_BOUNDING_BOX,
 	HIDE_BOUNDING_BOX,
+
+	DRAW_CUBE,
+	DRAW_SPHERE,
+	HIDE_CUBE,
+	HIDE_SPHERE,
 
 	PYRAMID,
 	CUBE
@@ -285,8 +292,28 @@ void motion(int x, int y)
 // Menus
 //----------------------------------------------------------------------------
 
-void primMenu(int id){
-
+void primMenu(int id) {
+	/*if (scene) {
+		switch (id)
+		{
+		case DRAW_CUBE:
+			// Logic to draw the cube
+			scene->addMeshModel(PrimMeshModel());
+			break;
+		case HIDE_CUBE:
+			// Logic to draw the cube
+			scene->setDrawCube(false);
+			break;
+		case DRAW_SPHERE:
+			// Logic to draw the sphere
+			scene->setDrawSphere(true);
+			break;
+		case HIDE_SPHERE:
+			// Logic to draw the sphere
+			scene->setDrawSphere(false);
+			break;
+		}
+	}*/
 }
 
 void fileMenu(int id)
@@ -325,6 +352,14 @@ void optionMenu(int id)
 		case HIDE_BOUNDING_BOX:
 			// Logic to hide bounding box (turn off)
 			scene->setShowBoxForMeshModels(false);
+			break;
+		case DRAW_VERTEX_NORMALS:
+			// Logic to draw normals to vertices (turn on)
+			scene->setShowNormalsToVerticesForMeshModels(true);
+			break;
+		case HIDE_VERTEX_NORMALS:
+			// Logic to draw normals to vertices (turn off)
+			scene->setShowNormalsToVerticesForMeshModels(false);
 			break;
 		}
 	}
@@ -388,8 +423,8 @@ void menuCallback(int menuItem)
 void initMenu()
 {
 	int primitivesMenu = glutCreateMenu(primMenu);
-	glutAddMenuEntry("Pyramid", PYRAMID);
-	glutAddMenuEntry("Cube", CUBE);
+	glutAddMenuEntry("Pyramid", DRAW_SPHERE);
+	glutAddMenuEntry("Cube", DRAW_CUBE);
 
 	int menuFile = glutCreateMenu(fileMenu);
 	glutAddMenuEntry("Orthographic Camera", ADD_CAMERA_ORTHO);
@@ -402,6 +437,8 @@ void initMenu()
 	// Attach the "Normal" submenu to the main menu
 	glutAddMenuEntry("Draw Normals", DRAW_NORMALS);
 	glutAddMenuEntry("Hide Normals", HIDE_NORMALS);
+	glutAddMenuEntry("Draw Normals To Vertices", DRAW_VERTEX_NORMALS);
+	glutAddMenuEntry("Hide Normals To Vertices", HIDE_VERTEX_NORMALS);
 	glutAddMenuEntry("Draw Bounding Box", DRAW_BOUNDING_BOX);
 	glutAddMenuEntry("Hide Bounding Box", HIDE_BOUNDING_BOX);
 	//Draw Hide cameras
@@ -455,14 +492,14 @@ int my_main(int argc, char** argv)
 	Camera* camera = new Camera();
 
 	std::cout << "[ ] Camera transform: " << std::endl;
-	camera->LookAt(vec3(1,1,1),vec3(0,0,-1),vec3(0,1,0));
-	camera->Ortho(-1,1,-1,1,0,5);
+	camera->LookAt(vec3(0,0,1),vec3(0,0,-1),vec3(0,1,0));
+	//camera->Ortho(-1,1,-1,1,0,5);
 	scene->addCamera(camera);
 	std::cout <<"!"<< camera->getProjection();
 	renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
 
 	std::cout << "[ ] Reading mesh files... ";
-	MeshModel* demo_object = new MeshModel("meshes/fox.obj");
+	MeshModel* demo_object = new MeshModel("meshes/bunny.obj");
 	scene->addMeshModel(demo_object);
 	std::cout << " Done!" << std::endl;
 	//----------------------------------------------------------------------------

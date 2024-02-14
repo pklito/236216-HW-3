@@ -78,6 +78,7 @@ void MeshModel::loadFile(string fileName)
 	ifstream ifile(fileName.c_str());
 	vector<FaceIdcs> faces;
 	vector<vec3> vertices;
+	vector<vec3> normals_to_vert;
 	// while not end of file
 	while (!ifile.eof())
 	{
@@ -97,7 +98,8 @@ void MeshModel::loadFile(string fileName)
 		else if (lineType == "f")	//BUG FIXED
 			faces.push_back(issLine);
 		else if (lineType == "vn") {
-			//normal
+			//normal to vertices
+			normals_to_vert.push_back(vec3fFromStream(issLine));
 		}
 		else if (lineType == "vt") {
 			//texture
@@ -120,20 +122,28 @@ void MeshModel::loadFile(string fileName)
 	face_count = faces.size();
 	vertex_positions = new vec3[3 * faces.size()]; //In our project every face is a triangle. BUG FIXED
 	normals = new vec3[3 * faces.size()];
+	normals_to_vertices = new vec3[3 * faces.size()];
 	
+	std::cout << "[ ] Read model "<<vertices.size() << " VN:" <<  normals_to_vert.size() << std::endl;
+	vertex_normals_exist = normals_to_vert.size() != 0;
+	if(!vertex_normals_exist){
+		vertex_normals_exist = true;
+	}
 	// iterate through all stored faces and create triangles
 	int k = 0;
 	for (vector<FaceIdcs>::iterator it = faces.begin(); it != faces.end(); ++it)
 	{
 		for (int i = 0; i < 3; i++)
 		{
+			if(vertex_normals_exist){
+				normals_to_vertices[k] = normals_to_vert[it->vn[i] - 1];
+			}
 			vertex_positions[k++] = vertices[it->v[i] - 1]; 	//Take the face indexes from the vertix array BUG FIXED
 			vertex_count++;
 		}
 	}
 	normalToFace();
 	calculateBoundingBox();
-	std::cout << "here is okay in loadFile after normalToFace" << std::endl;
 }
 
 void MeshModel::draw(Renderer* renderer)
@@ -142,6 +152,10 @@ void MeshModel::draw(Renderer* renderer)
 	std::vector<vec3> norm(normals, normals + (3 * face_count));
 	renderer->DrawTriangles(&vec, _world_transform, &norm, show_face_normals);
 	
+	if(vertex_normals_exist){
+		std::vector<vec3> norm_to_vert(normals_to_vertices, normals_to_vertices + (3 * face_count));
+		renderer->DrawNormalsToVertices(&vec, &norm_to_vert, show_vertex_normals);
+	}
 	renderer->DrawBoundingBox(bounding_box, _world_transform, show_box);
 }
 
@@ -292,6 +306,9 @@ void MeshModel::setShowNormals(bool change)
 	show_face_normals = change;
 }
 
+void MeshModel::setShowNormalsToVertices(bool change){
+	show_vertex_normals = change;
+}
 void MeshModel::setShowBox(bool change)
 {
 	show_box = change;

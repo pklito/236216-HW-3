@@ -237,8 +237,64 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		//Normal:
 		if(draw_normals){
 		  DrawLine(n1, n2, 1);
-    }
+    	}
 	}
+}
+vec2 normalizeVectorWithFixedPoint(const vec2& fixedPoint, const vec2& pointToNormalize)
+{
+	float directionX = pointToNormalize.x - fixedPoint.x;
+	float directionY = pointToNormalize.y - fixedPoint.y;
+
+	float length = std::sqrt(directionX * directionX + directionY * directionY);
+
+	// Check if the length is not zero to avoid division by zero
+	if (length > 0.0f) {
+		// Normalize the direction vector and scale it to the original length
+		return vec2(fixedPoint.x + directionX / length, fixedPoint.y + directionY / length);
+	}
+
+	// Return the original point if the length is zero
+	return pointToNormalize;
+}
+
+void Renderer::DrawNormalsToVertices(const vector<vec3>* vertices, const vector<vec3>* vertex_normals, bool draw_normals)
+{
+	if (!vertex_normals) {
+		return;
+	}
+
+	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
+	vector<vec3>::const_iterator normal =  vertex_normals->begin();
+	for (auto it = vertices->begin(); it != vertices->end(); it++, normal++) {
+        // Get the next face
+        vec4 vert1 = vec4(*it);
+        vec4 normCoor = vec4(*normal);
+
+        /*
+        TRANSFORMATIONS + PROJECTION (P * Tc-1 * v)
+        */
+	   if(it == vertices->begin())
+	   	std::cout << normCoor << " " << vert1+normCoor << std::endl;
+        vert1 = toEuclidian(mat_project * (mat_transform_inverse * vert1));
+        normCoor = toEuclidian(mat_project * (mat_transform_inverse * (normCoor+vert1)));
+
+		if(it == vertices->begin())
+		{
+			std::cout << normCoor << " " << vert1 << std::endl;
+		}
+        // Normalize the vector without applying the range
+		//vec2 normalized_end_point = normalize(vec2(normCoor.x,normCoor.y)) + vec2(vert1.x,vert1.y);
+		
+		// Scale down the normalized vector (make the normals smaller)
+
+		// Apply the range to the normalized point
+		vec2 first_point = vec2(RANGE(normCoor.x, -1, 1, 0, m_width), RANGE(normCoor.y, -1, 1, 0, m_height));
+
+		// Normal:
+		if (draw_normals) {
+			DrawLine(first_point, vec2(RANGE(vert1.x, -1, 1, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height)), 1);
+		}
+    }
 }
 
 void Renderer::DrawBoundingBox(const vec3* bounding_box, const mat4& world_transform, bool draw_box) 

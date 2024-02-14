@@ -11,6 +11,9 @@ class MeshModel : public Model
 protected:
 	MeshModel() {}
 	vec3* vertex_positions;
+	vec3* normals_to_vertices;
+
+	bool vertex_normals_exist;
 	int vertex_count;
 	int face_count;
 
@@ -36,11 +39,13 @@ public:
 	void scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) override;
 	void calculateBoundingBox();
 	void normalToFace();
+	void CalculateVertexNormals();
 
 	void applyWorldTransformation(const mat4& transformation) override;
 	void applyModelTransformation(const mat4& transformation) override;
 
 	void setShowNormals(bool change) override;
+	void setShowNormalsToVertices(bool change) override;
 	void setShowBox(bool change) override;
 };
 
