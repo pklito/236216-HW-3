@@ -334,13 +334,13 @@ void Renderer::DrawBoundingBox(const vec3* bounding_box, const mat4& world_trans
 	}
 }
 
-void Renderer::DrawSymbol(const vec3& vertex, const mat4& world_transform, SYMBOL_TYPE symbol, float scale)
+void Renderer::DrawSymbol(const vec3& vertex, const mat4& world_transform, SYMBOL_TYPE symbol, float scale,vec3 colors)
 {
 	scale *= 4;
 	const std::vector<vec2> square_shape = {vec2(-1,-1),vec2(1,-1),	vec2(1,-1),vec2(1,1), vec2(1,1), vec2(-1,1), vec2(-1,1), vec2(-1,-1)};
 	const std::vector<vec2> x_shape = {vec2(-1,-1),vec2(1,1),	vec2(1,-1),vec2(-1,1)};
-	const std::vector<vec2> star_shape = {vec2(0,1),vec2(0,-1),	vec2(1,-1),vec2(1,1), vec2(1,1), vec2(-1,1), vec2(-1,1), vec2(-1,-1)};
-	const std::vector<vec2> plus_shape = {vec2(0,1),vec2(0,-1),	vec2(-1,0),vec2(0,1)};
+	const std::vector<vec2> star_shape = {vec2(0,1),vec2(0,-1),	vec2(1,-1),vec2(-1,1), vec2(1,1), vec2(-1,-1), vec2(-1,0), vec2(1,0)};
+	const std::vector<vec2> plus_shape = {vec2(0,1),vec2(0,-1),	vec2(-1,0),vec2(1,0)};
 	
 	const std::vector<vec2>* decided = &square_shape;
 
@@ -367,7 +367,7 @@ void Renderer::DrawSymbol(const vec3& vertex, const mat4& world_transform, SYMBO
 
 	auto a = decided->begin();
 	while(a != decided->end()){
-		DrawLine(scale*(*a) + image_space, scale*(*(a+1)) + image_space,0.6, 0.9, 0.4);
+		DrawLine(scale*(*a) + image_space, scale*(*(a+1)) + image_space, colors.x, colors.y, colors.z);
 		a+=2;
 	}
 }
