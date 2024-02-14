@@ -80,7 +80,7 @@ void addProjCamera(){
 	
 	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
 	//TEMP ORTHOGRAPHIC
-	camera->Perspective(1,1,-1,-2);
+	camera->Perspective(1,1,0.5,4);
 	scene->addCamera(camera);
 	glutPostRedisplay();
 }
@@ -136,8 +136,11 @@ void readFromFile(){
 //----------------------------------------------------------------------------
 
 void display( void ){
-
+	if(scene->getWorldControl()){
+		renderer->FillEdges(0.02,0.1,0.1,0.5);
+	}
 	scene->draw();
+	renderer->SwapBuffers();
 }
 
 void reshape( int width, int height )
@@ -159,16 +162,16 @@ void reshape( int width, int height )
 void keyboard_special( int key, int x, int y ){
 	switch (key) {
 		case GLUT_KEY_LEFT:
-			scene->translateObject(-0.1,0,0);
+			scene->getActiveCamera()->translate(-0.1, 0, 0, scene->getWorldControl());
 			break;
 		case GLUT_KEY_RIGHT:
-			scene->translateObject(0,0,-0.1);
+			scene->getActiveCamera()->translate(0.1, 0, 0, scene->getWorldControl());
 			break;
 		case GLUT_KEY_UP:
-			scene->translateObject(0.1,0,0);
+			scene->getActiveCamera()->translate(0, 0.1, 0, scene->getWorldControl());
 			break;
 		case GLUT_KEY_DOWN:
-			scene->translateObject(0,0,0.1);
+			scene->getActiveCamera()->translate(0, -0.1, 0, scene->getWorldControl());
 			break;
 		default:
 			//fail
@@ -176,6 +179,7 @@ void keyboard_special( int key, int x, int y ){
 	}
 	
 	//if key was accepted
+	renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
 	glutPostRedisplay();
 }
 
@@ -188,11 +192,19 @@ void keyboard( unsigned char key, int x, int y )
 	case 9:
 		scene->cycleSelectedObject();
 		break;
-	case 'c':
+	case ',':
+		scene->getActiveCamera()->translate(0, 0, -0.1, scene->getWorldControl());
+		renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
+		break;
+	case '.':
+		scene->getActiveCamera()->translate(0, 0, 0.1, scene->getWorldControl());
+		renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
+		break;
+	case 't':
 		scene->scaleObject(1.3f); // Increase scale by 30%
 		break;
-	case 'x':
-		scene->scaleObject(0.7f); // Decrease scale by 30%
+	case 'r':
+		scene->scaleObject(0.77f); // Decrease scale by 30%
 		break;
 	case 'a':
 		scene->translateObject(-0.2, 0, 0);
@@ -201,10 +213,10 @@ void keyboard( unsigned char key, int x, int y )
 		scene->translateObject(0.2, 0, 0);
 		break;
 	case 'w':
-		scene->translateObject(0, 0, 0.2);
+		scene->translateObject(0, 0, -0.2);
 		break;
 	case 's':
-		scene->translateObject(0, 0, -0.2);
+		scene->translateObject(0, 0, 0.2);
 		break;
 	case 'e':
 		scene->translateObject(0, 0.2, 0);
@@ -224,11 +236,13 @@ void keyboard( unsigned char key, int x, int y )
 	case 'i':
 		scene->rotateObject(-30, 0);
 		break;
+	case 'f':
+		scene->setWorldControl(!scene->getWorldControl());
+		break;
 	case ' ':
 		swapCameras();
 		break;
 	default:
-		//fail
 		return;
 	}
 
@@ -441,9 +455,10 @@ int my_main(int argc, char** argv)
 	Camera* camera = new Camera();
 
 	std::cout << "[ ] Camera transform: " << std::endl;
-	camera->LookAt(vec3(0,0,1),vec3(0,0,-1),vec3(0,1,0));
-	camera->Ortho(-1,1,-1,1,-0.5,-5);
+	camera->LookAt(vec3(1,1,1),vec3(0,0,-1),vec3(0,1,0));
+	camera->Ortho(-1,1,-1,1,0,5);
 	scene->addCamera(camera);
+	std::cout <<"!"<< camera->getProjection();
 	renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
 
 	std::cout << "[ ] Reading mesh files... ";
@@ -464,6 +479,8 @@ int my_main(int argc, char** argv)
 	
 	//Init the renderer
 	renderer->Init();
+
+	std::cout << scene->getWorldControl() << " : (#)" << std::endl;
 	
 	//Set the camera projection we want and send it to renderer (vec3 cast to vec4)
 

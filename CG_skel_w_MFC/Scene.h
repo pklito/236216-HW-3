@@ -45,6 +45,13 @@ public:
 	mat4 getTransform();
 	mat4 getTransformInverse();
 
+	void setInverseTransformation(const mat4& InvTransform);
+	void applyWorldInverseTransformation(const mat4& InvMatrix);
+	void applyScreenInverseTransformation(const mat4& InvMatrix);
+	void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, bool in_world);
+	void rotate(GLfloat theta_angle, int mode, bool in_world);
+	void scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale, bool in_world);
+
 	void LookAt(const vec4& eye, const vec4& at, const vec4& up );
 	void Ortho( const float left, const float right,
 		const float bottom, const float top,
@@ -64,9 +71,12 @@ class Scene {
 	vector<Camera*> cameras;
 	Renderer *m_renderer;
 
+	bool world_control;
+	bool moving_model;
+
 public:
-	Scene() {activeModel = 0; activeLight = 0; activeCamera = 0;};
-	Scene(Renderer *renderer) : m_renderer(renderer) {activeModel = 0; activeLight = 0; activeCamera = 0;};
+	Scene() : world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0) {};
+	Scene(Renderer *renderer) : m_renderer(renderer), world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0) {};
 	void loadOBJModel(string fileName);
 	void addMeshModel(Model* model);
 	void addCamera(Camera* camera);
@@ -75,12 +85,15 @@ public:
 
 	void setShowNormalsForMeshModels(bool change);
 	void setShowBoxForMeshModels(bool change);
-	void translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, bool world_frame = false);
-	void scaleObject(GLfloat scale, bool world_frame = false);
-	void rotateObject(GLfloat theta_angle, int axis, bool world_frame = false);
+	void translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans);
+	void scaleObject(GLfloat scale);
+	void rotateObject(GLfloat theta_angle, int axis);
 	void cycleSelectedObject();
 	void cycleActiveCamera();
 	Camera* getActiveCamera();
+
+	void setWorldControl(bool ctrl);
+	bool getWorldControl();
 
 	int activeModel;
 	int activeLight;

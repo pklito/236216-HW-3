@@ -7,7 +7,7 @@
 #include "MeshModel.h"
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
-
+#define LINE_TOO_LARGE 30
 Renderer::Renderer() :m_width(512), m_height(512)
 {
 	InitOpenGLRendering();
@@ -182,10 +182,10 @@ void Renderer::DrawPixelSafe(int x, int y, float r, float g, float b){
  * vertices: vector of the camera space vertices
  * normals: directions of the respective world space normals.
  */
-void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* edge_normals, bool draw_normals)
+void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, const vector<vec3>* edge_normals, bool draw_normals)
 {
 	// Clear the buffer before drawing new content
-	
+
 	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
 	vector<vec3>::const_iterator normal = edge_normals != NULL ? edge_normals->begin() : vertices->begin();
 	for(auto it = vertices->begin(); it != vertices->end(); ++it, ++normal){
@@ -200,9 +200,9 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* e
 		/*
 		TRANSFORMATIONS + PROJECTION ( P * Tc-1 * v)
 		*/
-		vert1 = toEuclidian(mat_project * (mat_transform_inverse * vert1));
-		vert2 = toEuclidian(mat_project * (mat_transform_inverse * vert2));
-		vert3 = toEuclidian(mat_project * (mat_transform_inverse * vert3));
+		vert1 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vert1));
+		vert2 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vert2));
+		vert3 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vert3));
 
 		if(vert1.z < -1 || vert1.z > 1 || vert2.z < -1 || vert2.z > 1 || vert3.z < -1 || vert3.z > 1){
 			continue;
@@ -210,6 +210,16 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* e
 		vec3 norm_dir = calculateNormal(toVec3(vert1),toVec3(vert2),toVec3(vert3))/5.f;
 		normCoor1 = (vert1 + vert2 + vert3) / 3;
 		normCoor2 = normCoor1 - norm_dir;
+
+
+		//sometimes a point will get sent really far (matrix bs)
+		//the DrawLine function wont draw out of bounds, but it will take
+		//very long to go over the whole distance (~200,000 iterations).
+		if (length(vert1) > LINE_TOO_LARGE || length(vert2) > LINE_TOO_LARGE || length(vert3) > LINE_TOO_LARGE)
+		{
+			continue;
+		}
+
 		/*
 		Clipspace coordinates to screenspace coordinates
 		*/
@@ -220,7 +230,6 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* e
 		vec2 n1 = vec2(RANGE(normCoor1.x, -1, 1, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height));
 		vec2 n2 = vec2(RANGE(normCoor2.x, -1, 1, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height));
 
-		
 		DrawLine(p1, p2);
 		DrawLine(p2, p3);
 		DrawLine(p3, p1);
@@ -232,7 +241,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* e
 	}
 }
 
-void Renderer::DrawBoundingBox(const vec3* bounding_box, bool draw_box) 
+void Renderer::DrawBoundingBox(const vec3* bounding_box, const mat4& world_transform, bool draw_box) 
 {
 	if (!bounding_box || !draw_box) {
 		return;
@@ -245,7 +254,7 @@ void Renderer::DrawBoundingBox(const vec3* bounding_box, bool draw_box)
 		vec4 homogeneous_point = vec4(bounding_box[i], 1.0f);
 
 		// Apply transformations
-		new_bounding_box[i] = toEuclidian(mat_project * (mat_transform_inverse * homogeneous_point));
+		new_bounding_box[i] = toEuclidian(mat_project * (mat_transform_inverse * world_transform * homogeneous_point));
 		bounding_box_in_vectwo[i] = vec2(RANGE(new_bounding_box[i].x, -1, 1, 0, m_width), RANGE(new_bounding_box[i].y, -1, 1, 0, m_height));
 		//bounding_box_in_vectwo[i] = vec2(new_bounding_box[i].x, new_bounding_box[i].y);
 
@@ -263,16 +272,53 @@ void Renderer::DrawBoundingBox(const vec3* bounding_box, bool draw_box)
 		new_bounding_box[indices[i][1]].z < -1  || new_bounding_box[indices[i][0]].z > 1  ){
 			continue;
 		}
+		//sometimes a point will get sent really far (matrix bs)
+		//the DrawLine function wont draw out of bounds, but it will take
+		//very long to go over the whole distance (~200,000 iterations).
+		if (length(new_bounding_box[indices[i][0]]) > LINE_TOO_LARGE || length(new_bounding_box[indices[i][0]]) > LINE_TOO_LARGE)
+		{
+			continue;
+		}
 		DrawLine(bounding_box_in_vectwo[indices[i][0]], bounding_box_in_vectwo[indices[i][1]], 2, !draw_box);
 	}
 }
 
-void Renderer::DrawPoint(const vec3& vertex)
+void Renderer::DrawSymbol(const vec3& vertex, const mat4& world_transform, SYMBOL_TYPE symbol, float scale)
 {
-	std::cout << vertex << std::endl;
-   m_outBuffer[INDEX(m_width, CLAMP(toupper(100*vertex.x),0,m_width), CLAMP(toupper(100*vertex.y),0,m_height),0)] = 0;
-   m_outBuffer[INDEX(m_width, CLAMP(toupper(100*vertex.x),0,m_width), CLAMP(toupper(100*vertex.y),0,m_height),1)] = 1;
-   //m_outBuffer[INDEX(m_width, toupper(100*vertex.x), toupper(100*vertex.y), 2)] = 0;
+	scale *= 4;
+	const std::vector<vec2> square_shape = {vec2(-1,-1),vec2(1,-1),	vec2(1,-1),vec2(1,1), vec2(1,1), vec2(-1,1), vec2(-1,1), vec2(-1,-1)};
+	const std::vector<vec2> x_shape = {vec2(-1,-1),vec2(1,1),	vec2(1,-1),vec2(-1,1)};
+	const std::vector<vec2> star_shape = {vec2(0,1),vec2(0,-1),	vec2(1,-1),vec2(1,1), vec2(1,1), vec2(-1,1), vec2(-1,1), vec2(-1,-1)};
+	const std::vector<vec2> plus_shape = {vec2(0,1),vec2(0,-1),	vec2(-1,0),vec2(0,1)};
+	
+	const std::vector<vec2>* decided = &square_shape;
+
+	vec4 screen_space = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vertex));
+	vec2 image_space = vec2(RANGE(screen_space.x, -1, 1, 0, m_width), RANGE(screen_space.y, -1, 1, 0, m_height));
+	switch(symbol){
+		case SYM_SQUARE:
+			decided = &square_shape;
+			break;
+		case SYM_X:
+			decided = &x_shape;
+			break;
+		case SYM_STAR:
+			decided = &star_shape;
+			break;
+		case SYM_PLUS:
+			decided = &plus_shape;
+			break;
+		default:
+			decided = &x_shape;
+		break;
+	}
+
+
+	auto a = decided->begin();
+	while(a != decided->end()){
+		DrawLine(scale*(*a) + image_space, scale*(*(a+1)) + image_space,1);
+		a+=2;
+	}
 }
 
 

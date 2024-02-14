@@ -140,9 +140,9 @@ void MeshModel::draw(Renderer* renderer)
 {
 	std::vector<vec3> vec(vertex_positions, vertex_positions + (3 * face_count));
 	std::vector<vec3> norm(normals, normals + (3 * face_count));
-	renderer->DrawTriangles(&vec, &norm, show_face_normals);
+	renderer->DrawTriangles(&vec, _world_transform, &norm, show_face_normals);
 	
-	renderer->DrawBoundingBox(bounding_box, show_box);
+	renderer->DrawBoundingBox(bounding_box, _world_transform, show_box);
 }
 
 void MeshModel::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
@@ -156,15 +156,6 @@ void MeshModel::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
 		i++;
 	}
 	calculateBoundingBox();
-}
-
-vec3 MeshModel::translatePoint(vec3 point, GLfloat x_trans, GLfloat y_trans, GLfloat z_trans) 
-{
-	vec3 new_point;
-	new_point.x = point.x + x_trans;
-	new_point.y = point.y + y_trans;
-	new_point.z = point.z + z_trans;
-	return new_point;
 }
 
 void MeshModel::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale)
@@ -184,18 +175,11 @@ void MeshModel::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale)
 	calculateBoundingBox();
 }
 
-float Radians(float degrees) 
+void MeshModel::rotate(GLfloat theta, int mode)
 {
-	return degrees * (M_PI / 180.0f);
-}
-
-
-void MeshModel::rotate(GLfloat theta_degree, int mode)
-{
-	if (theta_degree == 0) {
+	if (theta == 0) {
 		return;
 	}
-	float theta = Radians(theta_degree);
 	//mode = 0 is around x, mode = 1 is around y, mode = 2 is around z
 	int i = 0;
 	mat4 rotation_matrix;

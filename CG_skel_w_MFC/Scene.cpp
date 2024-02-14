@@ -38,6 +38,13 @@ void Scene::addCamera(Camera* camera){
 	cameras.push_back(camera);
 }
 
+void Scene::setWorldControl(bool ctrl){
+	world_control = ctrl;
+}
+bool Scene::getWorldControl(){
+	return world_control;
+}
+
 // Iterate over the models and call setShowNormals for MeshModels
 void Scene::setShowNormalsForMeshModels(bool change) {
 	for (Model* model : models) {
@@ -63,9 +70,9 @@ void Scene::setShowBoxForMeshModels(bool change) {
 	}
 }
 
-void Scene::translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, bool world_frame)
+void Scene::translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
 {
-	if(world_frame){
+	if(world_control){
 		models[activeModel]->applyWorldTransformation(Translate(x_trans,y_trans,z_trans));
 	}
 	else {
@@ -75,18 +82,18 @@ void Scene::translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, b
 
 }
 
-void Scene::scaleObject(GLfloat scale, bool world_frame)
+void Scene::scaleObject(GLfloat scale)
 {
-	if(world_frame){
+	if(world_control){
 		models[activeModel]->applyWorldTransformation(Scale(scale,scale,scale));
 	}
 	else{
 		models[activeModel]->scale(scale,scale,scale);
 	}
 }
-void Scene::rotateObject(GLfloat theta_angle, int axis, bool world_frame)
+void Scene::rotateObject(GLfloat theta_angle, int axis)
 {
-	if(world_frame){
+	if(world_control){
 		mat4 rotate_mat = RotateAxis(theta_angle,axis);
 		models[activeModel]->applyWorldTransformation(rotate_mat);
 	}
@@ -102,7 +109,6 @@ void Scene::draw()
 	for(auto it = models.begin(); it != models.end(); it++){
 		(*(it))->draw(m_renderer);
 	}
-	m_renderer->SwapBuffers();
 }
 
 void Scene::drawDemo()
@@ -124,6 +130,57 @@ void Scene::cycleActiveCamera()
 Camera* Scene::getActiveCamera()
 {
 	return cameras[activeCamera];
+}
+
+//---------------------
+//   CAMERA
+//---------------------
+void Camera::setInverseTransformation(const mat4& InvTransform){
+	cTransformInverse = InvTransform;
+}
+void Camera::applyWorldInverseTransformation(const mat4& InvMatrix){
+	cTransformInverse = cTransformInverse * InvMatrix;
+}
+
+void Camera::applyScreenInverseTransformation(const mat4& InvMatrix){
+	cTransformInverse =  InvMatrix * cTransformInverse;
+}
+
+void Camera::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, bool in_world)
+{
+	//Inverse of Translate
+	if(in_world){
+		applyWorldInverseTransformation(Translate(-x_trans,-y_trans,-z_trans));
+	}
+	else{
+		applyScreenInverseTransformation(Translate(-x_trans,-y_trans,-z_trans));
+	}
+}
+
+void Camera::rotate(GLfloat theta_angle, int axis, bool in_world)
+{
+	//Inverse of Rotate
+	if(in_world){
+		applyWorldInverseTransformation(RotateAxis(-theta_angle,axis));
+	}
+	else{
+		applyScreenInverseTransformation(RotateAxis(-theta_angle,axis));
+	}
+
+}
+
+void Camera::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale, bool in_world)
+{
+	if(abs(x_scale)<0.01 || abs(y_scale)<0.01 || abs(z_scale)<0.01)
+		return;
+
+	//Inverse of Scale
+	if(in_world){
+		applyWorldInverseTransformation(Scale(1/x_scale,1/y_scale,1/z_scale));
+	}
+	else{
+		applyWorldInverseTransformation(Scale(1/x_scale,1/y_scale,1/z_scale));
+	}
 }
 
 void Camera::setTransformation(const mat4& transform) {
@@ -159,19 +216,19 @@ void Camera::LookAt(const vec4& eye, const vec4& at, const vec4& up ){
 }
 
 void Camera::Ortho( const float left, const float right, const float bottom, const float top, const float zNear, const float zFar ){
-	projection = mat4(2/(right-left),   0, 				0, 		-(left+right)/(right-left),
-					  0,				2/(top-bottom), 0, 		-(top+bottom)/(top-bottom),
-					  0,				0,	-2/(zFar-zNear),	-(zFar + zNear)/(zFar - zNear),
-					  0,				0,				0,		1);
+	projection = mat4(vec4(2/(right-left),   0, 				0, 		-(left+right)/(right-left)),
+					  vec4(0,				2/(top-bottom), 0, 		-(top+bottom)/(top-bottom)),
+					  vec4(0,				0,	-2/(zFar-zNear),	-(zFar + zNear)/(zFar - zNear)),
+					  vec4(0,				0,				0,		1));
 }
 
 
 void Camera::Frustum(const float left, const float right, const float bottom, const float top, const float zNear, const float zFar) {
     projection = mat4(
-        (2*zNear)/(right-left),  0,                      (right+left)/(right-left),      0,
-        0,                        (2*zNear)/(top-bottom), (top+bottom)/(top-bottom),      0,
-        0,                        0,                      -(zFar+zNear)/(zFar-zNear),    -2*zFar*zNear/(zFar-zNear),
-        0,                        0,                      -1,                            0
+       vec4( (2*zNear)/(right-left),  0,                      (right+left)/(right-left),      0),
+        vec4(0,                        (2*zNear)/(top-bottom), (top+bottom)/(top-bottom),      0),
+        vec4(0,                        0,                      -(zFar+zNear)/(zFar-zNear),    -2*zFar*zNear/(zFar-zNear)),
+        vec4(0,                        0,                      -1,                            0)
     );
 }
 
