@@ -9,8 +9,16 @@ float radians(float degrees) {
 	return degrees * (M_PI / 180.0f);
 }
 
-void Model::setShowNormals(bool show) {
-	return;
+void Scene::setShowNormalsToVerticesForMeshModels(bool change) {
+	for (Model* model : models) {
+		// Check if the model is of type MeshModel
+		MeshModel* meshModel = dynamic_cast<MeshModel*>(model);
+		if (meshModel != nullptr) {
+			// It's a MeshModel, call setShowNormals
+			meshModel->setShowNormalsToVertices(change);
+		}
+		// You can handle other types of models here if needed
+	}
 }
 
 void Camera::Perspective(float fovy, float aspect, float zNear, float zFar) {
@@ -127,6 +135,20 @@ void Scene::cycleSelectedObject()
 void Scene::cycleActiveCamera()
 {
 	activeCamera = (activeCamera+1) % cameras.size();
+}
+
+void Scene::removeSelectedObject(){
+	if(models.size() <= 1)
+		return;
+	models.erase(models.begin()+activeModel);
+	cycleSelectedObject();
+}
+
+void Scene::removeSelectedCamera(){
+	if(cameras.size() <= 1)
+		return;
+	cameras.erase(cameras.begin()+activeCamera);
+	cycleSelectedObject();
 }
 
 Camera* Scene::getActiveCamera()

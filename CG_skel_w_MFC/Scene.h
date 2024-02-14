@@ -15,7 +15,8 @@ public:
 	Model() : data(0) {}
 	virtual ~Model() {}
 	void virtual draw(Renderer* renderer) = 0;
-	virtual void setShowNormals(bool change);
+	virtual void setShowNormals(bool change) = 0;
+	virtual void setShowNormalsToVertices(bool change) = 0;
 	virtual void setShowBox(bool change) = 0;
 	virtual void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans) = 0;
 	virtual void rotate(GLfloat theta_angle, int axis) = 0;
@@ -88,12 +89,15 @@ public:
 	void drawDemo();
 
 	void setShowNormalsForMeshModels(bool change);
+	void setShowNormalsToVerticesForMeshModels(bool change);
 	void setShowBoxForMeshModels(bool change);
 	void translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans);
 	void scaleObject(GLfloat scale);
 	void rotateObject(GLfloat theta_angle, int axis);
 	void cycleSelectedObject();
 	void cycleActiveCamera();
+	void removeSelectedObject();
+	void removeSelectedCamera();
 	Camera* getActiveCamera();
 
 	void setWorldControl(bool ctrl);

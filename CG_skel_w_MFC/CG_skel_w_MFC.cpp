@@ -33,16 +33,21 @@ enum MENU_STATES {
 	MAIN_DEMO,
 	MAIN_ABOUT,
 
+	DELETE_MESH,
+	DELETE_CAMERA,
+
 	RESCALE_WINDOW_MENU_ITEM_UP,
 	RESCALE_WINDOW_MENU_ITEM_DOWN,
 
 	DRAW_NORMALS,
 	HIDE_NORMALS,
+	DRAW_VERTEX_NORMALS,
+	HIDE_VERTEX_NORMALS,
 	DRAW_BOUNDING_BOX,
 	HIDE_BOUNDING_BOX,
 
-	PYRAMID,
-	CUBE
+	ADD_TETRAHEDRON,
+	ADD_CUBE
 };
 
 Scene* scene;
@@ -285,8 +290,33 @@ void motion(int x, int y)
 // Menus
 //----------------------------------------------------------------------------
 
-void primMenu(int id){
+void deleteMenu(int id){
+	switch(id){
+		case DELETE_MESH:
+			scene->removeSelectedObject();
+			break;
+		case DELETE_CAMERA:
+			scene->removeSelectedCamera();
+			renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
+			break;
+	}
+	glutPostRedisplay();
+}
 
+void primMenu(int id) {
+	PrimMeshModel* model;
+	switch(id){
+		case ADD_CUBE:
+			model = new PrimMeshModel(PRIM_CUBE);
+			break;
+		case ADD_TETRAHEDRON:
+			model = new PrimMeshModel(PRIM_TETRAHEDRON);
+			break;
+		default:
+			return;
+	}
+	scene->addMeshModel(model);
+	glutPostRedisplay();
 }
 
 void fileMenu(int id)
@@ -326,9 +356,16 @@ void optionMenu(int id)
 			// Logic to hide bounding box (turn off)
 			scene->setShowBoxForMeshModels(false);
 			break;
+		case DRAW_VERTEX_NORMALS:
+			// Logic to draw normals to vertices (turn on)
+			scene->setShowNormalsToVerticesForMeshModels(true);
+			break;
+		case HIDE_VERTEX_NORMALS:
+			// Logic to draw normals to vertices (turn off)
+			scene->setShowNormalsToVerticesForMeshModels(false);
+			break;
 		}
 	}
-	std::cout << "WE GET HERE IN TURNING ON AND OFF THE NORMALS" << std::endl;
 	glutPostRedisplay();
 }
 
@@ -388,8 +425,8 @@ void menuCallback(int menuItem)
 void initMenu()
 {
 	int primitivesMenu = glutCreateMenu(primMenu);
-	glutAddMenuEntry("Pyramid", PYRAMID);
-	glutAddMenuEntry("Cube", CUBE);
+	glutAddMenuEntry("Tetrahedron", ADD_TETRAHEDRON);
+	glutAddMenuEntry("Cube", ADD_CUBE);
 
 	int menuFile = glutCreateMenu(fileMenu);
 	glutAddMenuEntry("Orthographic Camera", ADD_CAMERA_ORTHO);
@@ -402,6 +439,8 @@ void initMenu()
 	// Attach the "Normal" submenu to the main menu
 	glutAddMenuEntry("Draw Normals", DRAW_NORMALS);
 	glutAddMenuEntry("Hide Normals", HIDE_NORMALS);
+	glutAddMenuEntry("Draw Normals To Vertices", DRAW_VERTEX_NORMALS);
+	glutAddMenuEntry("Hide Normals To Vertices", HIDE_VERTEX_NORMALS);
 	glutAddMenuEntry("Draw Bounding Box", DRAW_BOUNDING_BOX);
 	glutAddMenuEntry("Hide Bounding Box", HIDE_BOUNDING_BOX);
 	//Draw Hide cameras
@@ -411,8 +450,13 @@ void initMenu()
 	glutAddMenuEntry("Rescale Window Up", RESCALE_WINDOW_MENU_ITEM_UP);
 	glutAddMenuEntry("Rescale Window Down", RESCALE_WINDOW_MENU_ITEM_DOWN);
 
+	int deleteSubMenu = glutCreateMenu(deleteMenu);
+	glutAddMenuEntry("Delete Sel. Mesh", DELETE_MESH);
+	glutAddMenuEntry("Delete Sel. Camera", DELETE_CAMERA);
+
 	glutCreateMenu(mainMenu);
 	glutAddSubMenu("New", menuFile);
+	glutAddSubMenu("Delete", deleteSubMenu);
 	glutAddSubMenu("View", optionsSubMenu);
 	glutAddSubMenu("Window", rescaleMenu);
 	glutAddMenuEntry("Demo", MAIN_DEMO);
@@ -455,14 +499,14 @@ int my_main(int argc, char** argv)
 	Camera* camera = new Camera();
 
 	std::cout << "[ ] Camera transform: " << std::endl;
-	camera->LookAt(vec3(1,1,1),vec3(0,0,-1),vec3(0,1,0));
+	camera->LookAt(vec3(0,0,1),vec3(0,0,-1),vec3(0,1,0));
 	camera->Ortho(-1,1,-1,1,0,5);
 	scene->addCamera(camera);
 	std::cout <<"!"<< camera->getProjection();
 	renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
 
 	std::cout << "[ ] Reading mesh files... ";
-	MeshModel* demo_object = new MeshModel("meshes/fox.obj");
+	MeshModel* demo_object = new MeshModel("meshes/bunny.obj");
 	scene->addMeshModel(demo_object);
 	std::cout << " Done!" << std::endl;
 	//----------------------------------------------------------------------------
