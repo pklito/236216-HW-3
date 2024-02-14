@@ -140,15 +140,13 @@ void MeshModel::loadFile(string fileName)
 			vertex_positions[k++] = vertices[it->v[i] - 1]; 	//Take the face indexes from the vertix array BUG FIXED
 		}
 	}
-	normalToFace();
 	calculateBoundingBox();
 }
 
 void MeshModel::draw(Renderer* renderer)
 {
 	std::vector<vec3> vec(vertex_positions, vertex_positions + (3 * face_count));
-	std::vector<vec3> norm(normals, normals + (3 * face_count));
-	renderer->DrawTriangles(&vec, _world_transform, &norm, show_face_normals);
+	renderer->DrawTriangles(&vec, _world_transform, NULL, show_face_normals);
 	
 	if(vertex_normals_exist){
 		std::vector<vec3> norm_to_vert(normals_to_vertices, normals_to_vertices + (3 * face_count));
@@ -215,7 +213,6 @@ void MeshModel::rotate(GLfloat theta, int mode)
 		vertex_positions[i] = vec3(curr_rotated_point.x, curr_rotated_point.y, curr_rotated_point.z);
 		i++;
 	}
-	normalToFace();
 	calculateBoundingBox();
 
 }
@@ -310,4 +307,63 @@ void MeshModel::setShowNormalsToVertices(bool change){
 void MeshModel::setShowBox(bool change)
 {
 	show_box = change;
+}
+
+//------------
+// PRIM
+//------------
+
+
+void PrimMeshModel::Cube()
+{
+	const vec3 cube_points[] = {vec3(-0.5f, -0.5f, -0.5f),vec3(0.5f, -0.5f, -0.5f),vec3(0.5f, 0.5f, -0.5f),vec3(-0.5f, 0.5f, -0.5f),vec3(-0.5f, -0.5f, 0.5f),vec3(0.5f, -0.5f, 0.5f),vec3(0.5f, 0.5f, 0.5f),vec3(-0.5f, 0.5f, 0.5f)};
+	const int face_indices[] = {
+        0, 1, 2,
+        2, 3, 0,
+        1, 5, 6,
+        6, 2, 1,
+        5, 4, 7,
+        7, 6, 5,
+        4, 0, 3,
+        3, 7, 4,
+        3, 2, 6,
+        6, 7, 3,
+        0, 4, 5,
+        5, 1, 0
+    };
+
+	// Hardcoded cube vertices
+	face_count = 12;
+	vertex_positions = new vec3[3*face_count];
+	for(int i = 0; i < 3*face_count; i++){
+		vertex_positions[i] = cube_points[face_indices[i]];
+	}
+}
+
+void PrimMeshModel::Tetrahedron()
+{
+	face_count = 4;
+	vertex_positions = new vec3[3*face_count];
+	vec3 base1 = vec3( 0.866, 0, 0.5);
+	vec3 base2 = vec3( -0.866, 0, 0.5);
+	vec3 base3 = vec3( 0, 0, -1);
+	vec3 top = vec3(0,1,0);
+
+	int i = 0;
+	vertex_positions[i++] = base3;
+	vertex_positions[i++] = base2;
+	vertex_positions[i++] = base1;
+
+	vertex_positions[i++] = top;
+	vertex_positions[i++] = base3;
+	vertex_positions[i++] = base1;
+	
+	vertex_positions[i++] = top;
+	vertex_positions[i++] = base1;
+	vertex_positions[i++] = base2;
+	
+	vertex_positions[i++] = top;
+	vertex_positions[i++] = base2;
+	vertex_positions[i++] = base3;
+	
 }
