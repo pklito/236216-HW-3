@@ -273,19 +273,22 @@ void Renderer::DrawNormalsToVertices(const vector<vec3>* vertices, const vector<
         /*
         TRANSFORMATIONS + PROJECTION (P * Tc-1 * v)
         */
+	   if(it == vertices->begin())
+	   	std::cout << normCoor << " " << vert1+normCoor << std::endl;
         vert1 = toEuclidian(mat_project * (mat_transform_inverse * vert1));
-        normCoor = toEuclidian(mat_project * (mat_transform_inverse * normCoor));
+        normCoor = toEuclidian(mat_project * (mat_transform_inverse * (normCoor+vert1)));
 
+		if(it == vertices->begin())
+		{
+			std::cout << normCoor << " " << vert1 << std::endl;
+		}
         // Normalize the vector without applying the range
 		//vec2 normalized_end_point = normalize(vec2(normCoor.x,normCoor.y)) + vec2(vert1.x,vert1.y);
-		vec2 normalized_end_point = normalizeVectorWithFixedPoint(vec2(vert1.x + normCoor.x, vert1.y + normCoor.y), vec2(vert1.x, vert1.y));
-
+		
 		// Scale down the normalized vector (make the normals smaller)
-		float scale_factor = 0.5;  // Adjust this factor as needed
-		normalized_end_point *= scale_factor;
 
 		// Apply the range to the normalized point
-		vec2 first_point = vec2(RANGE(normalized_end_point.x, -1, 1, 0, m_width), RANGE(normalized_end_point.y, -1, 1, 0, m_height));
+		vec2 first_point = vec2(RANGE(normCoor.x, -1, 1, 0, m_width), RANGE(normCoor.y, -1, 1, 0, m_height));
 
 		// Normal:
 		if (draw_normals) {

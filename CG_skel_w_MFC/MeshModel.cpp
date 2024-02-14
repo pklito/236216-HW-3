@@ -124,9 +124,9 @@ void MeshModel::loadFile(string fileName)
 	normals = new vec3[3 * faces.size()];
 	normals_to_vertices = new vec3[3 * faces.size()];
 	
-	vertex_normals_exist = normals_to_vert.size() == vertices.size();
+	std::cout << "[ ] Read model "<<vertices.size() << " VN:" <<  normals_to_vert.size() << std::endl;
+	vertex_normals_exist = normals_to_vert.size() != 0;
 	if(!vertex_normals_exist){
-		std::cout << "[X] Vertex normals failed! V:"<<vertices.size() << " VN:" <<  normals_to_vert.size() << std::endl;
 		vertex_normals_exist = true;
 	}
 	// iterate through all stored faces and create triangles
@@ -136,7 +136,7 @@ void MeshModel::loadFile(string fileName)
 		for (int i = 0; i < 3; i++)
 		{
 			if(vertex_normals_exist){
-				normals_to_vertices[k] = normals_to_vert[it->v[i] - 1];
+				normals_to_vertices[k] = normals_to_vert[it->vn[i] - 1];
 			}
 			vertex_positions[k++] = vertices[it->v[i] - 1]; 	//Take the face indexes from the vertix array BUG FIXED
 			vertex_count++;
