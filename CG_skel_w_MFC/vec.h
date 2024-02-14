@@ -173,22 +173,7 @@ vec2 normalize(const vec2& v) {
     }
 }
 
-vec2 normalizeVectorWithFixedPoint(const vec2& fixedPoint, const vec2& pointToNormalize)
-{
-	float directionX = pointToNormalize.x - fixedPoint.x;
-	float directionY = pointToNormalize.y - fixedPoint.y;
 
-	float length = std::sqrt(directionX * directionX + directionY * directionY);
-
-	// Check if the length is not zero to avoid division by zero
-	if (length > 0.0f) {
-		// Normalize the direction vector and scale it to the original length
-		return vec2(fixedPoint.x + directionX / length, fixedPoint.y + directionY / length);
-	}
-
-	// Return the original point if the length is zero
-	return pointToNormalize;
-}
 
 //////////////////////////////////////////////////////////////////////////////
 //

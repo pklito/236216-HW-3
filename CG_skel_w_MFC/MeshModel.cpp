@@ -302,6 +302,9 @@ void MeshModel::setShowNormals(bool change)
 	show_face_normals = change;
 }
 
+void MeshModel::setShowNormalsToVertices(bool change){
+	show_vertex_normals = change;
+}
 void MeshModel::setShowBox(bool change)
 {
 	show_box = change;

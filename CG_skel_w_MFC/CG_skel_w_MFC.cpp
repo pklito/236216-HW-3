@@ -293,12 +293,12 @@ void motion(int x, int y)
 //----------------------------------------------------------------------------
 
 void primMenu(int id) {
-	if (scene) {
+	/*if (scene) {
 		switch (id)
 		{
 		case DRAW_CUBE:
 			// Logic to draw the cube
-			scene->setDrawCube(true);
+			scene->addMeshModel(PrimMeshModel());
 			break;
 		case HIDE_CUBE:
 			// Logic to draw the cube
@@ -313,7 +313,7 @@ void primMenu(int id) {
 			scene->setDrawSphere(false);
 			break;
 		}
-	}
+	}*/
 }
 
 void fileMenu(int id)

@@ -240,6 +240,22 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
     	}
 	}
 }
+vec2 normalizeVectorWithFixedPoint(const vec2& fixedPoint, const vec2& pointToNormalize)
+{
+	float directionX = pointToNormalize.x - fixedPoint.x;
+	float directionY = pointToNormalize.y - fixedPoint.y;
+
+	float length = std::sqrt(directionX * directionX + directionY * directionY);
+
+	// Check if the length is not zero to avoid division by zero
+	if (length > 0.0f) {
+		// Normalize the direction vector and scale it to the original length
+		return vec2(fixedPoint.x + directionX / length, fixedPoint.y + directionY / length);
+	}
+
+	// Return the original point if the length is zero
+	return pointToNormalize;
+}
 
 void Renderer::DrawNormalsToVertices(const vector<vec3>* vertices, const vector<vec3>* vertex_normals, bool draw_normals)
 {
@@ -261,6 +277,7 @@ void Renderer::DrawNormalsToVertices(const vector<vec3>* vertices, const vector<
         normCoor = toEuclidian(mat_project * (mat_transform_inverse * normCoor));
 
         // Normalize the vector without applying the range
+		//vec2 normalized_end_point = normalize(vec2(normCoor.x,normCoor.y)) + vec2(vert1.x,vert1.y);
 		vec2 normalized_end_point = normalizeVectorWithFixedPoint(vec2(vert1.x + normCoor.x, vert1.y + normCoor.y), vec2(vert1.x, vert1.y));
 
 		// Scale down the normalized vector (make the normals smaller)
