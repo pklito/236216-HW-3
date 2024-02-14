@@ -182,7 +182,7 @@ void Renderer::DrawPixelSafe(int x, int y, float r, float g, float b){
  * vertices: vector of the camera space vertices
  * normals: directions of the respective world space normals.
  */
-void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, const vector<vec3>* edge_normals, bool draw_normals)
+void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, const vector<vec3>* edge_normals, bool draw_normals, float r, float g, float b)
 {
 	// Clear the buffer before drawing new content
 
@@ -230,9 +230,9 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		vec2 n1 = vec2(RANGE(normCoor1.x, -1, 1, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height));
 		vec2 n2 = vec2(RANGE(normCoor2.x, -1, 1, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height));
 
-		DrawLine(p1, p2);
-		DrawLine(p2, p3);
-		DrawLine(p3, p1);
+		DrawLine(p1, p2, r, g, b);
+		DrawLine(p2, p3, r, g, b);
+		DrawLine(p3, p1, r, g, b);
 
 		//Normal:
 		if(draw_normals){
