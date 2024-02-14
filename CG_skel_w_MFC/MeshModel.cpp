@@ -184,18 +184,11 @@ void MeshModel::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale)
 	calculateBoundingBox();
 }
 
-float Radians(float degrees) 
+void MeshModel::rotate(GLfloat theta, int mode)
 {
-	return degrees * (M_PI / 180.0f);
-}
-
-
-void MeshModel::rotate(GLfloat theta_degree, int mode)
-{
-	if (theta_degree == 0) {
+	if (theta == 0) {
 		return;
 	}
-	float theta = Radians(theta_degree);
 	//mode = 0 is around x, mode = 1 is around y, mode = 2 is around z
 	int i = 0;
 	mat4 rotation_matrix;
