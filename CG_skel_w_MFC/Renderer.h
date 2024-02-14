@@ -45,7 +45,7 @@ public:
 	void FillEdges(float amount, float r, float g, float b);
 	void ResizeBuffers(int new_width, int new_height);
 	void Init();
-	void DrawLine(vec2 vert1, vec2 vert2, int special_color = 0, bool clear = false);
+	void DrawLine(vec2 vert1, vec2 vert2, float r = 1, float g = 1, float b = 1);
 	void DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, const vector<vec3>* edge_normals = NULL, bool draw_normals = false);
 	void DrawBoundingBox(const vec3* bounding_box, const mat4& world_transform, bool draw_box = false);
 	void DrawPixel(int x, int y, float r, float g, float b);
