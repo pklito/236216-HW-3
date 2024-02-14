@@ -67,55 +67,55 @@ void swapCameras(){
 	glutPostRedisplay();
 }
 
-#define TRY_FLOAT(var, text) try { var = std::stof(text); } catch (const std::invalid_argument& e) {return;} catch (const std::out_of_range& e) {return;}
+#define TRY_FLOAT(var, text) try { var = std::stof(text); } catch (const std::invalid_argument& e) {std::cout<<"BAD_INPUT"<<std::endl;return;} catch (const std::out_of_range& e) {return;}
 void addProjCamera(){
-	int result = AfxMessageBox(_T("Enter Projection data in the TERMINAL.\npress CANCEL if you do not wish to continue."), MB_ICONINFORMATION | MB_OKCANCEL);
+	int result = AfxMessageBox(_T("Enter a Projection camera?\n - Press YES to input settings\n - Press NO to use a default\n - Press CANCEL if you do not wish to continue."), MB_ICONINFORMATION | MB_YESNOCANCEL);
 	if(result == IDCANCEL){
 		return;
 	}
-
+	
 	Camera* camera = new Camera();
-
-	std::cout << "enter aspect ratio: ";
-	std::string userInput;
-	std::cin >> userInput;
+	float fov_degrees = 70;
 	float aspect_ratio = 1;
-	TRY_FLOAT(aspect_ratio, userInput);
-	
-	
+	float zNear = 0.5;
+	float zFar = 5;
+	if(result == IDYES){
+
+		renderer->FillEdges(0.1,0.9,0.1,0.1);
+		display();
+		std::string userInput;
+		
+		std::cout << "enter field of view (degrees, width axis): ";
+		std::cin >> userInput;
+		TRY_FLOAT(fov_degrees, userInput);
+		std::cout << "enter aspect ratio: ";
+		std::cin >> userInput;
+		TRY_FLOAT(aspect_ratio, userInput);
+		std::cout << "enter zNear: ";
+		std::cin >> userInput;
+		TRY_FLOAT(zNear, userInput);
+		std::cout << "enter zFar: ";
+		std::cin >> userInput;
+		TRY_FLOAT(zFar, userInput);
+	}
 	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
 	//TEMP ORTHOGRAPHIC
-	camera->Perspective(1,1,0.5,4);
+	camera->Perspective(fov_degrees,aspect_ratio,zNear,zFar);
 	scene->addCamera(camera);
 	glutPostRedisplay();
 }
 
 void addOrthoCamera(){
 
-	int result = AfxMessageBox(_T("You will be sent to the CMD to input the Orthographic specs.\npress CANCEL if you do not wish to continue."), MB_ICONINFORMATION | MB_OKCANCEL);
+	int result = AfxMessageBox(_T("Enter a Orthographic camera?\n - Press YES to input settings\n - Press NO to use a default\n - Press CANCEL if you do not wish to continue."), MB_ICONEXCLAMATION | MB_YESNOCANCEL);
 	if(result == IDCANCEL){
 		return;
 	}
-
-	renderer->FillEdges(0.05,0.9,0.1,0.1);
-	glutPostRedisplay();
+	if(result == IDYES){
+		
+	}
 	Camera* camera = new Camera();
 
-	std::cout << "enter aspect ratio: ";
-	std::string userInput;
-	std::cin >> userInput;
-	float aspect_ratio = 1;
-	try {
-        // Try to convert the input string to a float
-        aspect_ratio = std::stof(userInput);
-        
-    } catch (const std::invalid_argument& e) {
-        std::cerr << "Invalid argument: " << e.what() << std::endl;
-		return;
-    } catch (const std::out_of_range& e) {
-        std::cerr << "Out of range: " << e.what() << std::endl;
-        return;
-    }
 
 	//std::cout << "enter z-min: ";
 	//std::string userInput2;
