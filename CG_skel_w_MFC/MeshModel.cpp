@@ -174,8 +174,9 @@ void MeshModel::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
 		vertex_positions[i].x += x_trans;
 		vertex_positions[i].y += y_trans;
 		vertex_positions[i].z += z_trans;
-		
-		normals_to_vertices[i] =  normals_to_vertices[i] + vec3(x_trans,y_trans,z_trans);
+		if(vertex_normals_exist){
+			normals_to_vertices[i] =  normals_to_vertices[i] + vec3(x_trans,y_trans,z_trans);
+		}
 		i++;
 	}
 	calculateBoundingBox();
@@ -194,7 +195,10 @@ void MeshModel::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale)
 		vertex_positions[i].y *= y_scale;
 		vertex_positions[i].z *= z_scale;
 
+
+		if(vertex_normals_exist){
 		normals_to_vertices[i] =  normals_to_vertices[i] * vec3(x_scale,y_scale,z_scale);
+		}
 		i++;
 	}
 	calculateBoundingBox();
@@ -227,7 +231,10 @@ void MeshModel::rotate(GLfloat theta, int mode)
 		
 		vertex_positions[i] = vec3(curr_rotated_point.x, curr_rotated_point.y, curr_rotated_point.z);
 
-		normals_to_vertices[i] = toVec3(rotation_matrix * normals_to_vertices[i]);
+		
+		if(vertex_normals_exist){
+			normals_to_vertices[i] = toVec3(rotation_matrix * normals_to_vertices[i]);
+		}
 		i++;
 	}
 	calculateBoundingBox();
