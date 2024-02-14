@@ -21,7 +21,7 @@ public:
 	virtual void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans) = 0;
 	virtual void rotate(GLfloat theta_angle, int axis) = 0;
 	virtual void scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) = 0;
-
+	virtual mat4 getWorldTransformation() = 0;
 	virtual void applyWorldTransformation(const mat4& transformation) = 0;
 	virtual void applyModelTransformation(const mat4& transformation) = 0;
 	void setData(int dat) {data = dat;}

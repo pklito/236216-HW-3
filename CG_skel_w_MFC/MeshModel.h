@@ -33,6 +33,7 @@ public:
 	void loadFile(string fileName);
 	void draw(Renderer* renderer) override;
 
+	mat4 getWorldTransformation();
 	void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans) override;
 	void rotate(GLfloat theta_angle, int mode) override;
 	void scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) override;

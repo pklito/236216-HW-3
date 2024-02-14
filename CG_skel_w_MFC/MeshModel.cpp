@@ -145,6 +145,10 @@ void MeshModel::loadFile(string fileName)
 	calculateBoundingBox();
 }
 
+mat4 MeshModel::getWorldTransformation(){
+	return _world_transform;
+}
+
 void MeshModel::draw(Renderer* renderer)
 {
 	std::vector<vec3> vec(vertex_positions, vertex_positions + (3 * face_count));

@@ -119,7 +119,7 @@ void Scene::draw()
 		}
 		i++;
 	}
-
+	m_renderer->DrawSymbol(vec3(0,0,0),models[activeModel]->getWorldTransformation(),SYM_STAR,1);
 	// 1. Send the renderer the current camera transform and the projection
 	// 2. Tell all models to draw themselves
 	for(auto it = models.begin(); it != models.end(); it++){
