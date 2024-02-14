@@ -9,8 +9,16 @@ float radians(float degrees) {
 	return degrees * (M_PI / 180.0f);
 }
 
-void Model::setShowNormals(bool show) {
-	return;
+void Scene::setShowNormalsToVerticesForMeshModels(bool change) {
+	for (Model* model : models) {
+		// Check if the model is of type MeshModel
+		MeshModel* meshModel = dynamic_cast<MeshModel*>(model);
+		if (meshModel != nullptr) {
+			// It's a MeshModel, call setShowNormals
+			meshModel->setShowNormalsToVertices(change);
+		}
+		// You can handle other types of models here if needed
+	}
 }
 
 void Camera::Perspective(float fovy, float aspect, float zNear, float zFar) {
