@@ -98,6 +98,7 @@ void addProjCamera(){
 		std::cin >> userInput;
 		TRY_FLOAT(zFar, userInput);
 	}
+	fov_degrees = Radians(fov_degrees);
 	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
 	//TEMP ORTHOGRAPHIC
 	camera->Perspective(fov_degrees,aspect_ratio,zNear,zFar);
