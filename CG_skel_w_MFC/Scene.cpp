@@ -172,19 +172,19 @@ void Camera::LookAt(const vec4& eye, const vec4& at, const vec4& up ){
 }
 
 void Camera::Ortho( const float left, const float right, const float bottom, const float top, const float zNear, const float zFar ){
-	projection = mat4(2/(right-left),   0, 				0, 		-(left+right)/(right-left),
-					  0,				2/(top-bottom), 0, 		-(top+bottom)/(top-bottom),
-					  0,				0,	-2/(zFar-zNear),	-(zFar + zNear)/(zFar - zNear),
-					  0,				0,				0,		1);
+	projection = mat4(vec4(2/(right-left),   0, 				0, 		-(left+right)/(right-left)),
+					  vec4(0,				2/(top-bottom), 0, 		-(top+bottom)/(top-bottom)),
+					  vec4(0,				0,	-2/(zFar-zNear),	-(zFar + zNear)/(zFar - zNear)),
+					  vec4(0,				0,				0,		1));
 }
 
 
 void Camera::Frustum(const float left, const float right, const float bottom, const float top, const float zNear, const float zFar) {
     projection = mat4(
-        (2*zNear)/(right-left),  0,                      (right+left)/(right-left),      0,
-        0,                        (2*zNear)/(top-bottom), (top+bottom)/(top-bottom),      0,
-        0,                        0,                      -(zFar+zNear)/(zFar-zNear),    -2*zFar*zNear/(zFar-zNear),
-        0,                        0,                      -1,                            0
+       vec4( (2*zNear)/(right-left),  0,                      (right+left)/(right-left),      0),
+        vec4(0,                        (2*zNear)/(top-bottom), (top+bottom)/(top-bottom),      0),
+        vec4(0,                        0,                      -(zFar+zNear)/(zFar-zNear),    -2*zFar*zNear/(zFar-zNear)),
+        vec4(0,                        0,                      -1,                            0)
     );
 }
 

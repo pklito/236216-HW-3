@@ -190,10 +190,10 @@ void keyboard( unsigned char key, int x, int y )
 	case 9:
 		scene->cycleSelectedObject();
 		break;
-	case 'c':
+	case 't':
 		scene->scaleObject(1.3f); // Increase scale by 30%
 		break;
-	case 'x':
+	case 'r':
 		scene->scaleObject(0.7f); // Decrease scale by 30%
 		break;
 	case 'a':
@@ -203,10 +203,10 @@ void keyboard( unsigned char key, int x, int y )
 		scene->translateObject(0.2, 0, 0);
 		break;
 	case 'w':
-		scene->translateObject(0, 0, 0.2);
+		scene->translateObject(0, 0, -0.2);
 		break;
 	case 's':
-		scene->translateObject(0, 0, -0.2);
+		scene->translateObject(0, 0, 0.2);
 		break;
 	case 'e':
 		scene->translateObject(0, 0.2, 0);
@@ -446,13 +446,14 @@ int my_main(int argc, char** argv)
 	Camera* camera = new Camera();
 
 	std::cout << "[ ] Camera transform: " << std::endl;
-	camera->LookAt(vec3(0,0,1),vec3(0,0,-1),vec3(0,1,0));
-	camera->Ortho(-1,1,-1,1,-0.5,-5);
+	camera->LookAt(vec3(1,1,1),vec3(0,0,-1),vec3(0,1,0));
+	camera->Ortho(-1,1,-1,1,0,5);
 	scene->addCamera(camera);
+	std::cout <<"!"<< camera->getProjection();
 	renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
 
 	std::cout << "[ ] Reading mesh files... ";
-	MeshModel* demo_object = new MeshModel("meshes/fox.obj");
+	MeshModel* demo_object = new MeshModel("meshes/obj_example.obj");
 	scene->addMeshModel(demo_object);
 	std::cout << " Done!" << std::endl;
 	//----------------------------------------------------------------------------

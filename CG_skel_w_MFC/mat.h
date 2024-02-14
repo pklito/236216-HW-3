@@ -390,6 +390,7 @@ public:
         _m[0] = a;  _m[1] = b;  _m[2] = c;  _m[3] = d;
     }
 
+    //THIS INPUT IS REALLY STUPID, NEVER USE IT.
     mat4(GLfloat m00, GLfloat m10, GLfloat m20, GLfloat m30,
         GLfloat m01, GLfloat m11, GLfloat m21, GLfloat m31,
         GLfloat m02, GLfloat m12, GLfloat m22, GLfloat m32,

@@ -185,7 +185,7 @@ void Renderer::DrawPixelSafe(int x, int y, float r, float g, float b){
 void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, const vector<vec3>* edge_normals, bool draw_normals)
 {
 	// Clear the buffer before drawing new content
-	
+
 	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
 	vector<vec3>::const_iterator normal = edge_normals != NULL ? edge_normals->begin() : vertices->begin();
 	for(auto it = vertices->begin(); it != vertices->end(); ++it, ++normal){
