@@ -503,7 +503,7 @@ void initMenu()
 	glutAddSubMenu("View", optionsSubMenu);
 	glutAddSubMenu("Window", rescaleMenu);
 	glutAddMenuEntry("Demo", MAIN_DEMO);
-	glutAddMenuEntry("About", MAIN_ABOUT);
+	glutAddMenuEntry("Help", MAIN_ABOUT);
 	
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 
@@ -525,7 +525,7 @@ int my_main(int argc, char** argv)
 	glutInitWindowSize(1024, 1024);
 	glutInitContextVersion(3, 2);
 	glutInitContextProfile(GLUT_CORE_PROFILE);
-	glutCreateWindow("CG - press r/t to rescale, a,d,w,s to rotate");
+	glutCreateWindow("Wireframe render - RightClick for options");
 	glewExperimental = GL_TRUE;
 	glewInit();
 	GLenum err = glewInit();
