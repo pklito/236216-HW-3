@@ -137,7 +137,7 @@ void MeshModel::loadFile(string fileName)
 		for (int i = 0; i < 3; i++)
 		{
 			if(vertex_normals_exist){
-				normals_to_vertices[k] = normals_to_vert[it->vn[i] - 1];
+				normals_to_vertices[k] = 0.1*normals_to_vert[it->vn[i] - 1] + vertices[it->v[i] - 1];
 			}
 			vertex_positions[k++] = vertices[it->v[i] - 1]; 	//Take the face indexes from the vertix array BUG FIXED
 		}
@@ -153,17 +153,16 @@ void MeshModel::draw(Renderer* renderer)
 {
 	std::vector<vec3> vec(vertex_positions, vertex_positions + (3 * face_count));
 
-	if(data == 1){
-		renderer->DrawTriangles(&vec, _world_transform, NULL, show_face_normals);
-	}
-	else{
-		renderer->DrawTriangles(&vec, _world_transform, NULL, show_face_normals,0.6,0.6,0.6);
-	}
-	
+	float color = data == 1 ? 1 : 0.6;
+
 	if(vertex_normals_exist){
 		std::vector<vec3> norm_to_vert(normals_to_vertices, normals_to_vertices + (3 * face_count));
-		renderer->DrawNormalsToVertices(&vec, &norm_to_vert, show_vertex_normals);
+		renderer->DrawTriangles(&vec, _world_transform, &norm_to_vert, show_face_normals, color, color, color);
 	}
+	else{
+		renderer->DrawTriangles(&vec, _world_transform, NULL, show_face_normals,color,color,color);
+	}
+
 	renderer->DrawBoundingBox(bounding_box, _world_transform, show_box);
 }
 

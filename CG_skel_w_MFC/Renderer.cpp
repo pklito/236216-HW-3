@@ -187,8 +187,8 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 	// Clear the buffer before drawing new content
 
 	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
-	vector<vec3>::const_iterator normal = edge_normals != NULL ? edge_normals->begin() : vertices->begin();
-	for(auto it = vertices->begin(); it != vertices->end(); ++it, ++normal){
+	vector<vec3>::const_iterator normal_it = edge_normals != NULL ? edge_normals->begin() : vertices->begin();
+	for(auto it = vertices->begin(); it != vertices->end(); ++it, ++normal_it){
 		//get the next face
 		vec4 vert1 = vec4(*it);
 		vec4 vert2 = vec4(*(it+1));
@@ -196,13 +196,22 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		it = it + 2;
 
 		vec4 normCoor1, normCoor2;
-		
+
+		vec4 vn1 = vec4(*normal_it);
+		vec4 vn2 = vec4(*(normal_it+1));
+		vec4 vn3 = vec4(*(normal_it+2));
+		normal_it += 2;
+
 		/*
 		TRANSFORMATIONS + PROJECTION ( P * Tc-1 * v)
 		*/
 		vert1 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vert1));
 		vert2 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vert2));
 		vert3 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vert3));
+
+		vn1 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vn1));
+		vn2 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vn2));
+		vn3 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vn3));
 
 		if(vert1.z < -1 || vert1.z > 1 || vert2.z < -1 || vert2.z > 1 || vert3.z < -1 || vert3.z > 1){
 			continue;
@@ -230,10 +239,19 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		vec2 n1 = vec2(RANGE(normCoor1.x, -1, 1, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height));
 		vec2 n2 = vec2(RANGE(normCoor2.x, -1, 1, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height));
 
+
 		DrawLine(p1, p2, r, g, b);
 		DrawLine(p2, p3, r, g, b);
 		DrawLine(p3, p1, r, g, b);
 
+		if(edge_normals != NULL){
+			vec2 a1 = vec2(RANGE(vn1.x,-1,1,0,m_width), RANGE(vn1.y,-1,1,0,m_height));
+			vec2 a2 = vec2(RANGE(vn2.x,-1,1,0,m_width), RANGE(vn2.y,-1,1,0,m_height));
+			vec2 a3 = vec2(RANGE(vn3.x,-1,1,0,m_width), RANGE(vn3.y,-1,1,0,m_height));
+			DrawLine(p1, a1, 0, 0, b);
+			DrawLine(p2, a2, 0, 0, b);
+			DrawLine(p3, a3, 0, 0, b);
+		}
 		//Normal:
 		if(draw_normals){
 		  DrawLine(n1, n2, 1, 0, 1);
