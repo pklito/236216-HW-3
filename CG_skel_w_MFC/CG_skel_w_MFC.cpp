@@ -162,16 +162,16 @@ void reshape( int width, int height )
 void keyboard_special( int key, int x, int y ){
 	switch (key) {
 		case GLUT_KEY_LEFT:
-			scene->getActiveCamera()->translate(-0.1,0,0);
+			scene->getActiveCamera()->translate(-0.1, 0, 0, scene->getWorldControl());
 			break;
 		case GLUT_KEY_RIGHT:
-			scene->getActiveCamera()->translate(0.1,0,0);
+			scene->getActiveCamera()->translate(0.1, 0, 0, scene->getWorldControl());
 			break;
 		case GLUT_KEY_UP:
-			scene->getActiveCamera()->translate(0,0.1,0);
+			scene->getActiveCamera()->translate(0, 0.1, 0, scene->getWorldControl());
 			break;
 		case GLUT_KEY_DOWN:
-			scene->getActiveCamera()->translate(0,-0.1,0);
+			scene->getActiveCamera()->translate(0, -0.1, 0, scene->getWorldControl());
 			break;
 		default:
 			//fail

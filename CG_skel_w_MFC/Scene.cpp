@@ -144,30 +144,49 @@ Camera* Scene::getActiveCamera()
 void Camera::setInverseTransformation(const mat4& InvTransform){
 	cTransformInverse = InvTransform;
 }
-void Camera::applyInverseTransformation(const mat4& InvMatrix){
-	cTransformInverse = InvMatrix * cTransformInverse;
+void Camera::applyWorldInverseTransformation(const mat4& InvMatrix){
+	cTransformInverse = cTransformInverse * InvMatrix;
 }
 
-void Camera::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
+void Camera::applyScreenInverseTransformation(const mat4& InvMatrix){
+	cTransformInverse =  InvMatrix * cTransformInverse;
+}
+
+void Camera::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, bool in_world)
 {
 	//Inverse of Translate
-	applyInverseTransformation(Translate(-x_trans,-y_trans,-z_trans));
+	if(in_world){
+		applyWorldInverseTransformation(Translate(-x_trans,-y_trans,-z_trans));
+	}
+	else{
+		applyScreenInverseTransformation(Translate(-x_trans,-y_trans,-z_trans));
+	}
 }
 
-void Camera::rotate(GLfloat theta_angle, int axis)
+void Camera::rotate(GLfloat theta_angle, int axis, bool in_world)
 {
 	//Inverse of Rotate
-	applyInverseTransformation(RotateAxis(-theta_angle,axis));
+	if(in_world){
+		applyWorldInverseTransformation(RotateAxis(-theta_angle,axis));
+	}
+	else{
+		applyScreenInverseTransformation(RotateAxis(-theta_angle,axis));
+	}
 
 }
 
-void Camera::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale)
+void Camera::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale, bool in_world)
 {
 	if(abs(x_scale)<0.01 || abs(y_scale)<0.01 || abs(z_scale)<0.01)
 		return;
 
 	//Inverse of Scale
-	applyInverseTransformation(Scale(1/x_scale,1/y_scale,1/z_scale));
+	if(in_world){
+		applyWorldInverseTransformation(Scale(1/x_scale,1/y_scale,1/z_scale));
+	}
+	else{
+		applyWorldInverseTransformation(Scale(1/x_scale,1/y_scale,1/z_scale));
+	}
 }
 
 void Camera::setTransformation(const mat4& transform) {
