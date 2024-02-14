@@ -74,8 +74,8 @@ class Scene {
 	bool moving_model;
 
 public:
-	Scene() {activeModel = 0; activeLight = 0; activeCamera = 0;};
-	Scene(Renderer *renderer) : m_renderer(renderer) {activeModel = 0; activeLight = 0; activeCamera = 0;};
+	Scene() : world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0) {};
+	Scene(Renderer *renderer) : m_renderer(renderer), world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0) {};
 	void loadOBJModel(string fileName);
 	void addMeshModel(Model* model);
 	void addCamera(Camera* camera);

@@ -115,7 +115,6 @@ void Scene::draw()
 	for(auto it = models.begin(); it != models.end(); it++){
 		(*(it))->draw(m_renderer);
 	}
-	m_renderer->SwapBuffers();
 }
 
 void Scene::drawDemo()
@@ -146,7 +145,7 @@ void Camera::setInverseTransformation(const mat4& InvTransform){
 	cTransformInverse = InvTransform;
 }
 void Camera::applyInverseTransformation(const mat4& InvMatrix){
-	cTransformInverse = cTransformInverse * InvMatrix;
+	cTransformInverse = InvMatrix * cTransformInverse;
 }
 
 void Camera::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)

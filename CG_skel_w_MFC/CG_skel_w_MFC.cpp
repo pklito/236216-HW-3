@@ -140,6 +140,7 @@ void display( void ){
 		renderer->FillEdges(0.02,0.1,0.1,0.5);
 	}
 	scene->draw();
+	renderer->SwapBuffers();
 }
 
 void reshape( int width, int height )
@@ -471,6 +472,8 @@ int my_main(int argc, char** argv)
 	
 	//Init the renderer
 	renderer->Init();
+
+	std::cout << scene->getWorldControl() << " : (#)" << std::endl;
 	
 	//Set the camera projection we want and send it to renderer (vec3 cast to vec4)
 
