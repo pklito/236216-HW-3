@@ -52,7 +52,7 @@ public:
 	void DrawBoundingBox(const vec3* bounding_box, const mat4& world_transform, bool draw_box = false);
 	void DrawPixel(int x, int y, float r, float g, float b);
 	void DrawPixelSafe(int x, int y, float r, float g, float b);
-	void DrawSymbol(const vec3& vertex ,const mat4& =  mat4(), SYMBOL_TYPE symbol = SYM_STAR, float scale = 1);
+	void DrawSymbol(const vec3& vertex ,const mat4& =  mat4(), SYMBOL_TYPE symbol = SYM_STAR, float scale = 1, vec3 colors = vec3(0.6, 0.9, 0.4));
 	void SetCameraTransformInverse(const mat4& cTransform);
 	void SetProjection(const mat4& projection);
 	void setCameraMatrixes(const mat4& cTransform, const mat4& Projection);

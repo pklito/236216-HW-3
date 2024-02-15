@@ -62,8 +62,10 @@ vec2 vec2fFromStream(std::istream& aStream)
 
 MeshModel::MeshModel(string fileName)
 {
-	loadFile(fileName);
+	vertex_normals_exist = false;
+	show_vertex_normals = false;
 	show_face_normals = false;
+	loadFile(fileName);
 }
 
 MeshModel::~MeshModel(void)
@@ -135,7 +137,7 @@ void MeshModel::loadFile(string fileName)
 		for (int i = 0; i < 3; i++)
 		{
 			if(vertex_normals_exist){
-				normals_to_vertices[k] = normals_to_vert[it->vn[i] - 1];
+				normals_to_vertices[k] = 0.1*normals_to_vert[it->vn[i] - 1] + vertices[it->v[i] - 1];
 			}
 			vertex_positions[k++] = vertices[it->v[i] - 1]; 	//Take the face indexes from the vertix array BUG FIXED
 		}
@@ -143,22 +145,24 @@ void MeshModel::loadFile(string fileName)
 	calculateBoundingBox();
 }
 
+mat4 MeshModel::getWorldTransformation(){
+	return _world_transform;
+}
+
 void MeshModel::draw(Renderer* renderer)
 {
 	std::vector<vec3> vec(vertex_positions, vertex_positions + (3 * face_count));
 
-	std::vector<vec3> norm(normals, normals + (3 * face_count));
-	if(data == 1){
-		renderer->DrawTriangles(&vec, _world_transform, NULL, show_face_normals);
+	float color = data == 1 ? 1 : 0.6;
+
+	if(vertex_normals_exist && show_vertex_normals){
+		std::vector<vec3> norm_to_vert(normals_to_vertices, normals_to_vertices + (3 * face_count));
+		renderer->DrawTriangles(&vec, _world_transform, &norm_to_vert, show_face_normals, color, color, color);
 	}
 	else{
-		renderer->DrawTriangles(&vec, _world_transform, NULL, show_face_normals,0.6,0.6,0.6);
+		renderer->DrawTriangles(&vec, _world_transform, NULL, show_face_normals,color,color,color);
 	}
-	
-	if(vertex_normals_exist){
-		std::vector<vec3> norm_to_vert(normals_to_vertices, normals_to_vertices + (3 * face_count));
-		renderer->DrawNormalsToVertices(&vec, &norm_to_vert, show_vertex_normals);
-	}
+
 	renderer->DrawBoundingBox(bounding_box, _world_transform, show_box);
 }
 
@@ -170,6 +174,9 @@ void MeshModel::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
 		vertex_positions[i].x += x_trans;
 		vertex_positions[i].y += y_trans;
 		vertex_positions[i].z += z_trans;
+		if(vertex_normals_exist){
+			normals_to_vertices[i] =  normals_to_vertices[i] + vec3(x_trans,y_trans,z_trans);
+		}
 		i++;
 	}
 	calculateBoundingBox();
@@ -187,6 +194,11 @@ void MeshModel::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale)
 		vertex_positions[i].x *= x_scale;
 		vertex_positions[i].y *= y_scale;
 		vertex_positions[i].z *= z_scale;
+
+
+		if(vertex_normals_exist){
+		normals_to_vertices[i] =  normals_to_vertices[i] * vec3(x_scale,y_scale,z_scale);
+		}
 		i++;
 	}
 	calculateBoundingBox();
@@ -218,6 +230,11 @@ void MeshModel::rotate(GLfloat theta, int mode)
 		vec4 curr_rotated_point = vec4(rotation_matrix * vec4(current_vertex, 1.0f));
 		
 		vertex_positions[i] = vec3(curr_rotated_point.x, curr_rotated_point.y, curr_rotated_point.z);
+
+		
+		if(vertex_normals_exist){
+			normals_to_vertices[i] = toVec3(rotation_matrix * normals_to_vertices[i]);
+		}
 		i++;
 	}
 	calculateBoundingBox();

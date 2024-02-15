@@ -112,11 +112,27 @@ void Scene::rotateObject(GLfloat theta_angle, int axis)
 
 void Scene::draw()
 {
+	int i = 0;
+	for(auto it = cameras.begin(); it != cameras.end(); it++){
+		if(i!=activeCamera){
+			(*it)->draw(m_renderer);
+		}
+		i++;
+	}
+	
 	// 1. Send the renderer the current camera transform and the projection
 	// 2. Tell all models to draw themselves
 	for(auto it = models.begin(); it != models.end(); it++){
 		(*(it))->draw(m_renderer);
 	}
+
+	if(world_control){
+		m_renderer->DrawSymbol(vec3(0,0,0),mat4(),SYM_PLUS,1,vec3(0.1,0.5,0.9));
+	}
+	else{
+		m_renderer->DrawSymbol(vec3(0,0,0),models[activeModel]->getWorldTransformation(),SYM_PLUS,1,vec3(0.1,0.5,0.9));
+	}
+
 }
 
 void Scene::drawDemo()
@@ -156,9 +172,25 @@ Camera* Scene::getActiveCamera()
 	return cameras[activeCamera];
 }
 
+void Scene::rotateCameraToSelectedObject(){
+	vec4 model_center = models[activeModel]->getWorldTransformation()*vec4(0,0,0,1);
+	vec4 camera_location = cameras[activeCamera]->getCameraPosition();
+	cameras[activeCamera]->LookAt(camera_location,model_center,vec3(0,1,0));
+}
+
 //---------------------
 //   CAMERA
 //---------------------
+
+
+void Camera::draw(Renderer* renderer){
+	renderer->DrawSymbol(getCameraPosition(),mat4(),SYM_SQUARE, 1);
+}
+vec3 Camera::getCameraPosition(){
+	vec4 point = cTransformInverse * vec4(0,0,0,1);
+	return vec3(-point.x, -point.y, -point.z);
+}
+
 void Camera::setInverseTransformation(const mat4& InvTransform){
 	cTransformInverse = InvTransform;
 }

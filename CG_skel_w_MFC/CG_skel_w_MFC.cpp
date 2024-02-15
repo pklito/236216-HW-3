@@ -39,6 +39,8 @@ enum MENU_STATES {
 	RESCALE_WINDOW_MENU_ITEM_UP,
 	RESCALE_WINDOW_MENU_ITEM_DOWN,
 
+	CHANGE_INCREMENT,
+
 	DRAW_NORMALS,
 	HIDE_NORMALS,
 	DRAW_VERTEX_NORMALS,
@@ -57,6 +59,8 @@ float m_time;
 int last_x,last_y;
 bool lb_down,rb_down,mb_down;
 
+float increment = 0.2;
+
 //----------------------------------------------------------------------------
 // Camera + Scene modiications
 //----------------------------------------------------------------------------
@@ -67,62 +71,93 @@ void swapCameras(){
 	glutPostRedisplay();
 }
 
-#define TRY_FLOAT(var, text) try { var = std::stof(text); } catch (const std::invalid_argument& e) {return;} catch (const std::out_of_range& e) {return;}
+#define TRY_FLOAT(var, text) try { var = std::stof(text); } catch (const std::invalid_argument& e) {std::cout<<"BAD_INPUT"<<std::endl;return;} catch (const std::out_of_range& e) {return;}
+
+void changeIncrement(){
+	renderer->FillEdges(0.1,0.9,0.1,0.1);
+	display();
+	std::string userInput;
+	
+	std::cout << "Set increment (default=0.2): ";
+	std::cin >> userInput;
+	TRY_FLOAT(increment, userInput);
+}
+
 void addProjCamera(){
-	int result = AfxMessageBox(_T("Enter Projection data in the TERMINAL.\npress CANCEL if you do not wish to continue."), MB_ICONINFORMATION | MB_OKCANCEL);
+	int result = AfxMessageBox(_T("Enter a Projection camera?\n - Press YES to input settings\n - Press NO to use a default\n - Press CANCEL if you do not wish to continue."), MB_ICONINFORMATION | MB_YESNOCANCEL);
 	if(result == IDCANCEL){
 		return;
 	}
-
+	
 	Camera* camera = new Camera();
-
-	std::cout << "enter aspect ratio: ";
-	std::string userInput;
-	std::cin >> userInput;
+	float fov_degrees = 70;
 	float aspect_ratio = 1;
-	TRY_FLOAT(aspect_ratio, userInput);
-	
-	
+	float zNear = 0.5;
+	float zFar = 5;
+	if(result == IDYES){
+
+		renderer->FillEdges(0.1,0.9,0.1,0.1);
+		display();
+		std::string userInput;
+		
+		std::cout << "enter field of view (degrees, width axis): ";
+		std::cin >> userInput;
+		TRY_FLOAT(fov_degrees, userInput);
+		std::cout << "enter aspect ratio: ";
+		std::cin >> userInput;
+		TRY_FLOAT(aspect_ratio, userInput);
+		std::cout << "enter zNear: ";
+		std::cin >> userInput;
+		TRY_FLOAT(zNear, userInput);
+		std::cout << "enter zFar: ";
+		std::cin >> userInput;
+		TRY_FLOAT(zFar, userInput);
+	}
+	fov_degrees = Radians(fov_degrees);
 	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
 	//TEMP ORTHOGRAPHIC
-	camera->Perspective(1,1,0.5,4);
+	camera->Perspective(fov_degrees,aspect_ratio,zNear,zFar);
 	scene->addCamera(camera);
 	glutPostRedisplay();
 }
 
 void addOrthoCamera(){
 
-	int result = AfxMessageBox(_T("You will be sent to the CMD to input the Orthographic specs.\npress CANCEL if you do not wish to continue."), MB_ICONINFORMATION | MB_OKCANCEL);
+	int result = AfxMessageBox(_T("Enter a Orthographic camera?\n - Press YES to input settings\n - Press NO to use a default\n - Press CANCEL if you do not wish to continue."), MB_ICONEXCLAMATION | MB_YESNOCANCEL);
 	if(result == IDCANCEL){
 		return;
 	}
-
-	renderer->FillEdges(0.05,0.9,0.1,0.1);
-	glutPostRedisplay();
+	float width = 2;
+	float height = 2;
+	float zNear = 0.5;
+	float zFar = 5;
+	if(result == IDYES){
+		renderer->FillEdges(0.1,0.9,0.1,0.1);
+		display();
+		std::string userInput;
+		
+		std::cout << "width: (right-left) ";
+		std::cin >> userInput;
+		TRY_FLOAT(width, userInput);
+		std::cout << "height (top - bottom): ";
+		std::cin >> userInput;
+		TRY_FLOAT(height, userInput);
+		std::cout << "enter zNear: ";
+		std::cin >> userInput;
+		TRY_FLOAT(zNear, userInput);
+		std::cout << "enter zFar: ";
+		std::cin >> userInput;
+		TRY_FLOAT(zFar, userInput);
+	}
 	Camera* camera = new Camera();
 
-	std::cout << "enter aspect ratio: ";
-	std::string userInput;
-	std::cin >> userInput;
-	float aspect_ratio = 1;
-	try {
-        // Try to convert the input string to a float
-        aspect_ratio = std::stof(userInput);
-        
-    } catch (const std::invalid_argument& e) {
-        std::cerr << "Invalid argument: " << e.what() << std::endl;
-		return;
-    } catch (const std::out_of_range& e) {
-        std::cerr << "Out of range: " << e.what() << std::endl;
-        return;
-    }
 
 	//std::cout << "enter z-min: ";
 	//std::string userInput2;
 	//std::cin >> userInput2;
 	
 	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
-	camera->Ortho(-1,1,-1,1,-0.5,-5);
+	camera->Ortho(-width/2,width/2,-height/2,height/2,zNear,zFar);
 	scene->addCamera(camera);
 	glutPostRedisplay();
 }
@@ -205,6 +240,10 @@ void keyboard( unsigned char key, int x, int y )
 		scene->getActiveCamera()->translate(0, 0, 0.1, scene->getWorldControl());
 		renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
 		break;
+	case 'v':
+		scene->rotateCameraToSelectedObject();
+		renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
+		break;
 	case 't':
 		scene->scaleObject(1.3f); // Increase scale by 30%
 		break;
@@ -212,22 +251,22 @@ void keyboard( unsigned char key, int x, int y )
 		scene->scaleObject(0.77f); // Decrease scale by 30%
 		break;
 	case 'a':
-		scene->translateObject(-0.2, 0, 0);
+		scene->translateObject(-increment, 0, 0);
 		break;
 	case 'd':
-		scene->translateObject(0.2, 0, 0);
+		scene->translateObject(increment, 0, 0);
 		break;
 	case 'w':
-		scene->translateObject(0, 0, -0.2);
+		scene->translateObject(0, 0, -increment);
 		break;
 	case 's':
-		scene->translateObject(0, 0, 0.2);
+		scene->translateObject(0, 0, increment);
 		break;
 	case 'e':
-		scene->translateObject(0, 0.2, 0);
+		scene->translateObject(0, increment, 0);
 		break;
 	case 'q':
-		scene->translateObject(0, -0.2, 0);
+		scene->translateObject(0, -increment, 0);
 		break;
 	case 'j':
 		scene->rotateObject(-30, 1);
@@ -377,7 +416,7 @@ void mainMenu(int id)
 		scene->drawDemo();
 		break;
 	case MAIN_ABOUT:
-		AfxMessageBox(_T("Computer Graphics"));
+		AfxMessageBox(_T("Controls:\n\nTab - Cycle selected Mesh\nWASDQE - Move the selected mesh.\nJKLI - Rotate selected mesh\nF - Toggle world/model space controls\n\nSpace - Cycle active camera\n[Arrows , .] - Move camera\n\nBlue outline means World space\nRed outline means an input needs to be put"));
 		break;
 	}
 }
@@ -418,6 +457,9 @@ void menuCallback(int menuItem)
 	case RESCALE_WINDOW_MENU_ITEM_DOWN:
 		rescaleWindow(false);
 		break;
+	case CHANGE_INCREMENT:
+		changeIncrement();
+		break;
 	}
 
 }
@@ -449,6 +491,8 @@ void initMenu()
 	int rescaleMenu = glutCreateMenu(menuCallback);
 	glutAddMenuEntry("Rescale Window Up", RESCALE_WINDOW_MENU_ITEM_UP);
 	glutAddMenuEntry("Rescale Window Down", RESCALE_WINDOW_MENU_ITEM_DOWN);
+	
+	glutAddMenuEntry("Change increment", CHANGE_INCREMENT);
 
 	int deleteSubMenu = glutCreateMenu(deleteMenu);
 	glutAddMenuEntry("Delete Sel. Mesh", DELETE_MESH);
@@ -460,7 +504,7 @@ void initMenu()
 	glutAddSubMenu("View", optionsSubMenu);
 	glutAddSubMenu("Window", rescaleMenu);
 	glutAddMenuEntry("Demo", MAIN_DEMO);
-	glutAddMenuEntry("About", MAIN_ABOUT);
+	glutAddMenuEntry("Help", MAIN_ABOUT);
 	
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 
@@ -482,7 +526,7 @@ int my_main(int argc, char** argv)
 	glutInitWindowSize(1024, 1024);
 	glutInitContextVersion(3, 2);
 	glutInitContextProfile(GLUT_CORE_PROFILE);
-	glutCreateWindow("CG - press r/t to rescale, a,d,w,s to rotate");
+	glutCreateWindow("Wireframe render - RightClick for options");
 	glewExperimental = GL_TRUE;
 	glewInit();
 	GLenum err = glewInit();

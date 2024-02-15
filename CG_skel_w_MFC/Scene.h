@@ -21,7 +21,7 @@ public:
 	virtual void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans) = 0;
 	virtual void rotate(GLfloat theta_angle, int axis) = 0;
 	virtual void scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) = 0;
-
+	virtual mat4 getWorldTransformation() = 0;
 	virtual void applyWorldTransformation(const mat4& transformation) = 0;
 	virtual void applyModelTransformation(const mat4& transformation) = 0;
 	void setData(int dat) {data = dat;}
@@ -50,6 +50,8 @@ public:
 	mat4 getTransform();
 	mat4 getTransformInverse();
 
+	void draw(Renderer* renderer);
+	vec3 getCameraPosition();
 	void setInverseTransformation(const mat4& InvTransform);
 	void applyWorldInverseTransformation(const mat4& InvMatrix);
 	void applyScreenInverseTransformation(const mat4& InvMatrix);
@@ -99,6 +101,7 @@ public:
 	void removeSelectedObject();
 	void removeSelectedCamera();
 	Camera* getActiveCamera();
+	void rotateCameraToSelectedObject();
 
 	void setWorldControl(bool ctrl);
 	bool getWorldControl();
