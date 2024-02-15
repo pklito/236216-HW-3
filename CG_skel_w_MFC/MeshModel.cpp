@@ -246,7 +246,7 @@ vec3 calculateNormal(vec3 first_point, vec3 second_point, vec3 third_point)
 	vec3 a = third_point - first_point;
 	vec3 b = second_point - first_point;
 
-	vec3 c = cross(a, b);
+	vec3 c = cross(b, a);
 
 	return normalize(c);
 }
