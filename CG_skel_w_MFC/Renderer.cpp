@@ -229,15 +229,16 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 			continue;
 		}
 
+		float aspect_ratio = (float)(m_width)/(float)(m_height);
 		/*
 		Clipspace coordinates to screenspace coordinates
 		*/
-		vec2 p1 = vec2(RANGE(vert1.x,-1,1,0,m_width), RANGE(vert1.y,-1,1,0,m_height));
-		vec2 p2 = vec2(RANGE(vert2.x,-1,1,0,m_width), RANGE(vert2.y,-1,1,0,m_height));
-		vec2 p3 = vec2(RANGE(vert3.x,-1,1,0,m_width), RANGE(vert3.y,-1,1,0,m_height));
+		vec2 p1 = vec2(RANGE(vert1.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vert1.y,-1,1,0,m_height));
+		vec2 p2 = vec2(RANGE(vert2.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vert2.y,-1,1,0,m_height));
+		vec2 p3 = vec2(RANGE(vert3.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vert3.y,-1,1,0,m_height));
 
-		vec2 n1 = vec2(RANGE(normCoor1.x, -1, 1, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height));
-		vec2 n2 = vec2(RANGE(normCoor2.x, -1, 1, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height));
+		vec2 n1 = vec2(RANGE(normCoor1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height));
+		vec2 n2 = vec2(RANGE(normCoor2.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height));
 
 
 		DrawLine(p1, p2, r, g, b);
@@ -245,9 +246,9 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		DrawLine(p3, p1, r, g, b);
 
 		if(edge_normals != NULL){
-			vec2 a1 = vec2(RANGE(vn1.x,-1,1,0,m_width), RANGE(vn1.y,-1,1,0,m_height));
-			vec2 a2 = vec2(RANGE(vn2.x,-1,1,0,m_width), RANGE(vn2.y,-1,1,0,m_height));
-			vec2 a3 = vec2(RANGE(vn3.x,-1,1,0,m_width), RANGE(vn3.y,-1,1,0,m_height));
+			vec2 a1 = vec2(RANGE(vn1.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vn1.y,-1,1,0,m_height));
+			vec2 a2 = vec2(RANGE(vn2.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vn2.y,-1,1,0,m_height));
+			vec2 a3 = vec2(RANGE(vn3.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vn3.y,-1,1,0,m_height));
 			DrawLine(p1, a1, 0, 0, b);
 			DrawLine(p2, a2, 0, 0, b);
 			DrawLine(p3, a3, 0, 0, b);
@@ -300,12 +301,13 @@ void Renderer::DrawNormalsToVertices(const vector<vec3>* vertices, const vector<
 		
 		// Scale down the normalized vector (make the normals smaller)
 
+		float aspect_ratio = (float)(m_width)/(float)(m_height);
 		// Apply the range to the normalized point
-		vec2 first_point = vec2(RANGE(normCoor.x, -1, 1, 0, m_width), RANGE(normCoor.y, -1, 1, 0, m_height));
+		vec2 first_point = vec2(RANGE(normCoor.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(normCoor.y, -1, 1, 0, m_height));
 
 		// Normal:
 		if (draw_normals) {
-			DrawLine(first_point, vec2(RANGE(vert1.x, -1, 1, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height)), 0.2,0.5,1);
+			DrawLine(first_point, vec2(RANGE(vert1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height)), 0.2,0.5,1);
 		}
     }
 }
@@ -321,10 +323,12 @@ void Renderer::DrawBoundingBox(const vec3* bounding_box, const mat4& world_trans
 	for (int i = 0; i < 8; i++) {
 		// Convert 3D point to homogeneous coordinates
 		vec4 homogeneous_point = vec4(bounding_box[i], 1.0f);
+		
+		float aspect_ratio = (float)(m_width)/(float)(m_height);
 
 		// Apply transformations
 		new_bounding_box[i] = toEuclidian(mat_project * (mat_transform_inverse * world_transform * homogeneous_point));
-		bounding_box_in_vectwo[i] = vec2(RANGE(new_bounding_box[i].x, -1, 1, 0, m_width), RANGE(new_bounding_box[i].y, -1, 1, 0, m_height));
+		bounding_box_in_vectwo[i] = vec2(RANGE(new_bounding_box[i].x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(new_bounding_box[i].y, -1, 1, 0, m_height));
 		//bounding_box_in_vectwo[i] = vec2(new_bounding_box[i].x, new_bounding_box[i].y);
 
 	}
