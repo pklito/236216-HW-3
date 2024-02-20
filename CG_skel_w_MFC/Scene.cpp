@@ -181,8 +181,8 @@ void Camera::draw(Renderer* renderer){
 	renderer->DrawSymbol(getCameraPosition(),mat4(),SYM_SQUARE, 1);
 }
 vec3 Camera::getCameraPosition(){
-	vec4 point = cTransformInverse * vec4(0,0,0,1);
-	return vec3(-point.x, -point.y, -point.z);
+	vec4 point = cTransform * vec4(0,0,0,1);
+	return toVec3(point);
 }
 
 void Camera::_applyWorldTransformInverse(const mat4& InvMatrix){
@@ -206,9 +206,11 @@ void Camera::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, bool i
 	//Inverse of Translate
 	if(in_world){
 		_applyWorldTransformInverse(Translate(-x_trans,-y_trans,-z_trans));
+		_applyWorldTransform(Translate(x_trans,y_trans,z_trans));
 	}
 	else{
 		_applyScreenTransformInverse(Translate(-x_trans,-y_trans,-z_trans));
+		_applyScreenTransform(Translate(x_trans,y_trans,z_trans));
 	}
 }
 
@@ -217,9 +219,11 @@ void Camera::rotate(GLfloat theta_angle, int axis, bool in_world)
 	//Inverse of Rotate
 	if(in_world){
 		_applyWorldTransformInverse(RotateAxis(-theta_angle,axis));
+		_applyWorldTransform(RotateAxis(theta_angle,axis));
 	}
 	else{
 		_applyScreenTransformInverse(RotateAxis(-theta_angle,axis));
+		_applyScreenTransform(RotateAxis(theta_angle,axis));
 	}
 
 }
@@ -232,9 +236,11 @@ void Camera::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale, bool in_wo
 	//Inverse of Scale
 	if(in_world){
 		_applyWorldTransformInverse(Scale(1/x_scale,1/y_scale,1/z_scale));
+		_applyWorldTransform(Scale(x_scale,y_scale,z_scale));
 	}
 	else{
-		_applyWorldTransformInverse(Scale(1/x_scale,1/y_scale,1/z_scale));
+		_applyScreenTransformInverse(Scale(1/x_scale,1/y_scale,1/z_scale));
+		_applyScreenTransform(Scale(x_scale,y_scale,z_scale));
 	}
 }
 
