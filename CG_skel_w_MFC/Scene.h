@@ -33,7 +33,6 @@ class Light {
 };
 
 class Camera {
-	mat4 cTransform;
 	mat4 cTransformInverse;
 	mat4 projection;
 
@@ -43,11 +42,9 @@ class Camera {
 	static constexpr float FAR_CLIPPING_PLANE = 100.0f;
 
 public:
-	void setTransformation(const mat4& transform);
 	void setProjection(const mat4& perspective);
 	void UpdateProjectionMatrix(float aspect_ratio);
 	mat4 getProjection();
-	mat4 getTransform();
 	mat4 getTransformInverse();
 
 	void draw(Renderer* renderer);

@@ -239,18 +239,12 @@ void Camera::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale, bool in_wo
 	}
 }
 
-void Camera::setTransformation(const mat4& transform) {
-	cTransform = transform;
-}
 void Camera::setProjection(const mat4& perspective) {
 	projection = perspective;
 }
 
 mat4 Camera::getProjection(){
 	return projection;
-}
-mat4 Camera::getTransform(){
-	return cTransform;
 }
 
 mat4 Camera::getTransformInverse(){
@@ -268,7 +262,6 @@ void Camera::LookAt(const vec4& eye, const vec4& at, const vec4& up ){
 	std::cout << "Transform Matrix: " << Translate(-eye) << std::endl;
 	// set the matrixes stored.
 	cTransformInverse = rotate_inv * Translate(-eye);
-	cTransform = Translate(eye) * transpose(rotate_inv);
 }
 
 void Camera::Ortho( const float left, const float right, const float bottom, const float top, const float zNear, const float zFar ){
