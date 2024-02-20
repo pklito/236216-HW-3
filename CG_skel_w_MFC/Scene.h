@@ -36,25 +36,18 @@ class Camera {
 	mat4 cTransform;
 	mat4 cTransformInverse;
 	mat4 projection;
-
-	// Constants for perspective projection
-	static constexpr float FOV = 60.0f; // Field of View in degrees
-	static constexpr float NEAR_CLIPPING_PLANE = 0.1f;
-	static constexpr float FAR_CLIPPING_PLANE = 100.0f;
+	
+	void applyWorldInverseTransformation(const mat4& InvMatrix);
+	void applyScreenInverseTransformation(const mat4& InvMatrix);
 
 public:
-	void setTransformation(const mat4& transform);
 	void setProjection(const mat4& perspective);
-	void UpdateProjectionMatrix(float aspect_ratio);
 	mat4 getProjection();
 	mat4 getTransform();
 	mat4 getTransformInverse();
 
 	void draw(Renderer* renderer);
 	vec3 getCameraPosition();
-	void setInverseTransformation(const mat4& InvTransform);
-	void applyWorldInverseTransformation(const mat4& InvMatrix);
-	void applyScreenInverseTransformation(const mat4& InvMatrix);
 	void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, bool in_world);
 	void rotate(GLfloat theta_angle, int mode, bool in_world);
 	void scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale, bool in_world);

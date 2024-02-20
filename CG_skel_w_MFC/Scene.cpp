@@ -25,12 +25,6 @@ void Camera::Perspective(float fovy, float aspect, float zNear, float zFar) {
 	Frustum(-fovy*aspect*zNear,fovy*aspect*zNear,-fovy*zNear,fovy*zNear,zNear,zFar);
 }
 
-void Camera::UpdateProjectionMatrix(float aspect_ratio)
-{
-	// Assuming you have member variables like fov, near_clip, and far_clip
-	Perspective(radians(FOV), aspect_ratio, NEAR_CLIPPING_PLANE, FAR_CLIPPING_PLANE);
-}
-
 void Scene::loadOBJModel(string fileName)
 {
 	MeshModel *model = new MeshModel(fileName);
