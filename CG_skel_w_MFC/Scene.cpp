@@ -191,9 +191,6 @@ vec3 Camera::getCameraPosition(){
 	return vec3(-point.x, -point.y, -point.z);
 }
 
-void Camera::setInverseTransformation(const mat4& InvTransform){
-	cTransformInverse = InvTransform;
-}
 void Camera::applyWorldInverseTransformation(const mat4& InvMatrix){
 	cTransformInverse = cTransformInverse * InvMatrix;
 }
@@ -239,9 +236,6 @@ void Camera::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale, bool in_wo
 	}
 }
 
-void Camera::setTransformation(const mat4& transform) {
-	cTransform = transform;
-}
 void Camera::setProjection(const mat4& perspective) {
 	projection = perspective;
 }

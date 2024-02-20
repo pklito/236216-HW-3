@@ -6,6 +6,8 @@
 #include "GL/glew.h"
 using namespace std;
 
+class Camera;
+
 typedef enum {
 	SYM_STAR,
 	SYM_SQUARE,
@@ -56,6 +58,7 @@ public:
 	void SetCameraTransformInverse(const mat4& cTransform);
 	void SetProjection(const mat4& projection);
 	void setCameraMatrixes(const mat4& cTransform, const mat4& Projection);
+	void setCameraMatrixes(Camera* camera);
 	void SetObjectMatrices(const mat4& oTransform, const mat3& nTransform);
 	void SwapBuffers();
 	void ClearColorBuffer();
