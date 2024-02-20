@@ -37,8 +37,11 @@ class Camera {
 	mat4 cTransformInverse;
 	mat4 projection;
 	
-	void applyWorldInverseTransformation(const mat4& InvMatrix);
-	void applyScreenInverseTransformation(const mat4& InvMatrix);
+	void _applyWorldTransformInverse(const mat4& InvMatrix);
+	void _applyScreenTransformInverse(const mat4& InvMatrix);
+
+	void _applyWorldTransform(const mat4& Matrix);
+	void _applyScreenTransform(const mat4& Matrix);
 
 public:
 	void setProjection(const mat4& perspective);

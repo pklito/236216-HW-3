@@ -185,22 +185,30 @@ vec3 Camera::getCameraPosition(){
 	return vec3(-point.x, -point.y, -point.z);
 }
 
-void Camera::applyWorldInverseTransformation(const mat4& InvMatrix){
+void Camera::_applyWorldTransformInverse(const mat4& InvMatrix){
 	cTransformInverse = cTransformInverse * InvMatrix;
 }
 
-void Camera::applyScreenInverseTransformation(const mat4& InvMatrix){
+void Camera::_applyScreenTransformInverse(const mat4& InvMatrix){
 	cTransformInverse =  InvMatrix * cTransformInverse;
+}
+
+void Camera::_applyWorldTransform(const mat4& matrix){
+	cTransform = matrix * cTransform;
+}
+
+void Camera::_applyScreenTransform(const mat4& matrix){
+	cTransform = cTransform * matrix;
 }
 
 void Camera::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, bool in_world)
 {
 	//Inverse of Translate
 	if(in_world){
-		applyWorldInverseTransformation(Translate(-x_trans,-y_trans,-z_trans));
+		_applyWorldTransformInverse(Translate(-x_trans,-y_trans,-z_trans));
 	}
 	else{
-		applyScreenInverseTransformation(Translate(-x_trans,-y_trans,-z_trans));
+		_applyScreenTransformInverse(Translate(-x_trans,-y_trans,-z_trans));
 	}
 }
 
@@ -208,10 +216,10 @@ void Camera::rotate(GLfloat theta_angle, int axis, bool in_world)
 {
 	//Inverse of Rotate
 	if(in_world){
-		applyWorldInverseTransformation(RotateAxis(-theta_angle,axis));
+		_applyWorldTransformInverse(RotateAxis(-theta_angle,axis));
 	}
 	else{
-		applyScreenInverseTransformation(RotateAxis(-theta_angle,axis));
+		_applyScreenTransformInverse(RotateAxis(-theta_angle,axis));
 	}
 
 }
@@ -223,10 +231,10 @@ void Camera::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale, bool in_wo
 
 	//Inverse of Scale
 	if(in_world){
-		applyWorldInverseTransformation(Scale(1/x_scale,1/y_scale,1/z_scale));
+		_applyWorldTransformInverse(Scale(1/x_scale,1/y_scale,1/z_scale));
 	}
 	else{
-		applyWorldInverseTransformation(Scale(1/x_scale,1/y_scale,1/z_scale));
+		_applyWorldTransformInverse(Scale(1/x_scale,1/y_scale,1/z_scale));
 	}
 }
 
