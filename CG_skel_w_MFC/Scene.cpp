@@ -163,6 +163,7 @@ void Scene::removeSelectedCamera(){
 
 Camera* Scene::getActiveCamera()
 {
+	std::cout << " get " << cameras[activeCamera]->getCameraPosition() << std::endl;
 	return cameras[activeCamera];
 }
 
@@ -181,6 +182,8 @@ void Camera::draw(Renderer* renderer){
 	renderer->DrawSymbol(getCameraPosition(),mat4(),SYM_SQUARE, 1);
 }
 vec3 Camera::getCameraPosition(){
+	vec4 base = vec4(1,2,3,1);
+	std::cout << base << ", " << cTransform * base << ", " << cTransformInverse*(cTransform*base) << std::endl;
 	vec4 point = cTransform * vec4(0,0,0,1);
 	return toVec3(point);
 }
@@ -267,10 +270,13 @@ void Camera::LookAt(const vec4& eye, const vec4& at, const vec4& up ){
 	std::cout << "n u v: " << n << u << v << std::endl;
 	mat4 rotate_inv = mat4(u,v,n,vec4(0,0,0,1));
 	std::cout << "Rot Matrix: " << rotate_inv << std::endl;
-	std::cout << "Transform Matrix: " << Translate(-eye) << std::endl;
+	std::cout << "Inverse;" << rotate_inv << std::endl;
+
+	std::cout << "Total (inverse): " << rotate_inv * Translate(-eye) << std::endl;
 	// set the matrixes stored.
 	cTransformInverse = rotate_inv * Translate(-eye);
 	cTransform = Translate(eye) * transpose(rotate_inv);
+	std::cout << "Total  " << cTransform << std::endl;
 }
 
 void Camera::Ortho( const float left, const float right, const float bottom, const float top, const float zNear, const float zFar ){
