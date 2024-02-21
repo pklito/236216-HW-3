@@ -267,16 +267,10 @@ void Camera::LookAt(const vec4& eye, const vec4& at, const vec4& up ){
 	vec4 n = vec4(normalize(toVec3(eye - at)),0);	//I make it Vec3 because normalizing with W would be wrong
 	vec4 u = vec4(cross(up, n),0);
 	vec4 v = vec4(cross(n, u),0);
-	std::cout << "n u v: " << n << u << v << std::endl;
 	mat4 rotate_inv = mat4(u,v,n,vec4(0,0,0,1));
-	std::cout << "Rot Matrix: " << rotate_inv << std::endl;
-	std::cout << "Inverse;" << rotate_inv << std::endl;
-
-	std::cout << "Total (inverse): " << rotate_inv * Translate(-eye) << std::endl;
 	// set the matrixes stored.
 	cTransformInverse = rotate_inv * Translate(-eye);
 	cTransform = Translate(eye) * transpose(rotate_inv);
-	std::cout << "Total  " << cTransform << std::endl;
 }
 
 void Camera::Ortho( const float left, const float right, const float bottom, const float top, const float zNear, const float zFar ){
