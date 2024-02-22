@@ -39,6 +39,8 @@ enum MENU_STATES {
 	RESCALE_WINDOW_MENU_ITEM_UP,
 	RESCALE_WINDOW_MENU_ITEM_DOWN,
 
+	CHANGE_INCREMENT,
+
 	DRAW_NORMALS,
 	HIDE_NORMALS,
 	DRAW_VERTEX_NORMALS,
@@ -57,6 +59,8 @@ float m_time;
 int last_x,last_y;
 bool lb_down,rb_down,mb_down;
 
+float increment = 0.2;
+
 //----------------------------------------------------------------------------
 // Camera + Scene modiications
 //----------------------------------------------------------------------------
@@ -68,6 +72,17 @@ void swapCameras(){
 }
 
 #define TRY_FLOAT(var, text) try { var = std::stof(text); } catch (const std::invalid_argument& e) {std::cout<<"BAD_INPUT"<<std::endl;return;} catch (const std::out_of_range& e) {return;}
+
+void changeIncrement(){
+	renderer->FillEdges(0.1,0.9,0.1,0.1);
+	display();
+	std::string userInput;
+	
+	std::cout << "Set increment (default=0.2): ";
+	std::cin >> userInput;
+	TRY_FLOAT(increment, userInput);
+}
+
 void addProjCamera(){
 	int result = AfxMessageBox(_T("Enter a Projection camera?\n - Press YES to input settings\n - Press NO to use a default\n - Press CANCEL if you do not wish to continue."), MB_ICONINFORMATION | MB_YESNOCANCEL);
 	if(result == IDCANCEL){
@@ -98,6 +113,7 @@ void addProjCamera(){
 		std::cin >> userInput;
 		TRY_FLOAT(zFar, userInput);
 	}
+	fov_degrees = Radians(fov_degrees);
 	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
 	//TEMP ORTHOGRAPHIC
 	camera->Perspective(fov_degrees,aspect_ratio,zNear,zFar);
@@ -220,8 +236,16 @@ void keyboard( unsigned char key, int x, int y )
 		scene->getActiveCamera()->translate(0, 0, -0.1, scene->getWorldControl());
 		renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
 		break;
+	case 'z':
+		scene->returnModelToCenter();
+		std::cout << "pressed delete" << std::endl;
+		break;
 	case '.':
 		scene->getActiveCamera()->translate(0, 0, 0.1, scene->getWorldControl());
+		renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
+		break;
+	case 'v':
+		scene->rotateCameraToSelectedObject();
 		renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
 		break;
 	case 't':
@@ -231,22 +255,22 @@ void keyboard( unsigned char key, int x, int y )
 		scene->scaleObject(0.77f); // Decrease scale by 30%
 		break;
 	case 'a':
-		scene->translateObject(-0.2, 0, 0);
+		scene->translateObject(-increment, 0, 0);
 		break;
 	case 'd':
-		scene->translateObject(0.2, 0, 0);
+		scene->translateObject(increment, 0, 0);
 		break;
 	case 'w':
-		scene->translateObject(0, 0, -0.2);
+		scene->translateObject(0, 0, -increment);
 		break;
 	case 's':
-		scene->translateObject(0, 0, 0.2);
+		scene->translateObject(0, 0, increment);
 		break;
 	case 'e':
-		scene->translateObject(0, 0.2, 0);
+		scene->translateObject(0, increment, 0);
 		break;
 	case 'q':
-		scene->translateObject(0, -0.2, 0);
+		scene->translateObject(0, -increment, 0);
 		break;
 	case 'j':
 		scene->rotateObject(-30, 1);
@@ -396,7 +420,7 @@ void mainMenu(int id)
 		scene->drawDemo();
 		break;
 	case MAIN_ABOUT:
-		AfxMessageBox(_T("Controls:\n\nWASDQE - Move the selected mesh.\nJKLI - Rotate selected mesh\nF - Toggle world/model space controls\nTab - Cycle selected Mesh\n\nSpace - Cycle active camera\n[Arrows , .] - Move camera"));
+		AfxMessageBox(_T("Controls:\n\nTab - Cycle selected Mesh\nWASDQE - Move the selected mesh.\nJKLI - Rotate selected mesh\nF - Toggle world/model space controls\n\nSpace - Cycle active camera\n[Arrows , .] - Move camera\n\nBlue outline means World space\nRed outline means an input needs to be put"));
 		break;
 	}
 }
@@ -437,6 +461,9 @@ void menuCallback(int menuItem)
 	case RESCALE_WINDOW_MENU_ITEM_DOWN:
 		rescaleWindow(false);
 		break;
+	case CHANGE_INCREMENT:
+		changeIncrement();
+		break;
 	}
 
 }
@@ -468,6 +495,8 @@ void initMenu()
 	int rescaleMenu = glutCreateMenu(menuCallback);
 	glutAddMenuEntry("Rescale Window Up", RESCALE_WINDOW_MENU_ITEM_UP);
 	glutAddMenuEntry("Rescale Window Down", RESCALE_WINDOW_MENU_ITEM_DOWN);
+	
+	glutAddMenuEntry("Change increment", CHANGE_INCREMENT);
 
 	int deleteSubMenu = glutCreateMenu(deleteMenu);
 	glutAddMenuEntry("Delete Sel. Mesh", DELETE_MESH);
@@ -479,7 +508,7 @@ void initMenu()
 	glutAddSubMenu("View", optionsSubMenu);
 	glutAddSubMenu("Window", rescaleMenu);
 	glutAddMenuEntry("Demo", MAIN_DEMO);
-	glutAddMenuEntry("About", MAIN_ABOUT);
+	glutAddMenuEntry("Help", MAIN_ABOUT);
 	
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 
@@ -501,7 +530,7 @@ int my_main(int argc, char** argv)
 	glutInitWindowSize(1024, 1024);
 	glutInitContextVersion(3, 2);
 	glutInitContextProfile(GLUT_CORE_PROFILE);
-	glutCreateWindow("CG - press r/t to rescale, a,d,w,s to rotate");
+	glutCreateWindow("Wireframe render - RightClick for options");
 	glewExperimental = GL_TRUE;
 	glewInit();
 	GLenum err = glewInit();

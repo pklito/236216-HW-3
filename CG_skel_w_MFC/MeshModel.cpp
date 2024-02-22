@@ -174,8 +174,9 @@ void MeshModel::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
 		vertex_positions[i].x += x_trans;
 		vertex_positions[i].y += y_trans;
 		vertex_positions[i].z += z_trans;
-		
-		normals_to_vertices[i] =  normals_to_vertices[i] + vec3(x_trans,y_trans,z_trans);
+		if(vertex_normals_exist){
+			normals_to_vertices[i] =  normals_to_vertices[i] + vec3(x_trans,y_trans,z_trans);
+		}
 		i++;
 	}
 	calculateBoundingBox();
@@ -194,7 +195,10 @@ void MeshModel::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale)
 		vertex_positions[i].y *= y_scale;
 		vertex_positions[i].z *= z_scale;
 
+
+		if(vertex_normals_exist){
 		normals_to_vertices[i] =  normals_to_vertices[i] * vec3(x_scale,y_scale,z_scale);
+		}
 		i++;
 	}
 	calculateBoundingBox();
@@ -227,7 +231,10 @@ void MeshModel::rotate(GLfloat theta, int mode)
 		
 		vertex_positions[i] = vec3(curr_rotated_point.x, curr_rotated_point.y, curr_rotated_point.z);
 
-		normals_to_vertices[i] = toVec3(rotation_matrix * normals_to_vertices[i]);
+		
+		if(vertex_normals_exist){
+			normals_to_vertices[i] = toVec3(rotation_matrix * normals_to_vertices[i]);
+		}
 		i++;
 	}
 	calculateBoundingBox();
@@ -239,7 +246,7 @@ vec3 calculateNormal(vec3 first_point, vec3 second_point, vec3 third_point)
 	vec3 a = third_point - first_point;
 	vec3 b = second_point - first_point;
 
-	vec3 c = cross(a, b);
+	vec3 c = cross(b, a);
 
 	return normalize(c);
 }
@@ -324,6 +331,33 @@ void MeshModel::setShowNormalsToVertices(bool change){
 void MeshModel::setShowBox(bool change)
 {
 	show_box = change;
+}
+
+vec3 MeshModel::calculateBoundingBoxCenter() 
+{
+	if (bounding_box == nullptr) {
+		// Handle the case where the bounding box is not initialized
+		return (0,0,0);
+	}
+
+	// Initialize min and max coordinates with the first point
+	vec3 minCoord = bounding_box[0];
+	vec3 maxCoord = bounding_box[0];
+
+	// Find the minimum and maximum coordinates
+	for (int i = 1; i < 8; ++i) {
+		minCoord = min(minCoord, bounding_box[i]);
+		maxCoord = max(maxCoord, bounding_box[i]);
+	}
+
+	// Calculate the center as the average of min and max coordinates
+	return (minCoord + maxCoord) * 0.5f;
+}
+
+void MeshModel::resetToCenter() {
+	// Set the model's position to the world center (0, 0, 0)
+	vec3 bounding_box_center = calculateBoundingBoxCenter();
+	translate(-bounding_box_center.x, -bounding_box_center.y, -bounding_box_center.z);
 }
 
 //------------
