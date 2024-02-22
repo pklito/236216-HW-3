@@ -333,6 +333,33 @@ void MeshModel::setShowBox(bool change)
 	show_box = change;
 }
 
+vec3 MeshModel::calculateBoundingBoxCenter() 
+{
+	if (bounding_box == nullptr) {
+		// Handle the case where the bounding box is not initialized
+		return (0,0,0);
+	}
+
+	// Initialize min and max coordinates with the first point
+	vec3 minCoord = bounding_box[0];
+	vec3 maxCoord = bounding_box[0];
+
+	// Find the minimum and maximum coordinates
+	for (int i = 1; i < 8; ++i) {
+		minCoord = min(minCoord, bounding_box[i]);
+		maxCoord = max(maxCoord, bounding_box[i]);
+	}
+
+	// Calculate the center as the average of min and max coordinates
+	return (minCoord + maxCoord) * 0.5f;
+}
+
+void MeshModel::resetToCenter() {
+	// Set the model's position to the world center (0, 0, 0)
+	vec3 bounding_box_center = calculateBoundingBoxCenter();
+	translate(-bounding_box_center.x, -bounding_box_center.y, -bounding_box_center.z);
+}
+
 //------------
 // PRIM
 //------------

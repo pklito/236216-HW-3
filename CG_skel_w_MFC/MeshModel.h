@@ -47,6 +47,9 @@ public:
 	void setShowNormals(bool change) override;
 	void setShowNormalsToVertices(bool change) override;
 	void setShowBox(bool change) override;
+
+	void resetToCenter();
+	vec3 calculateBoundingBoxCenter();
 };
 
 typedef enum{

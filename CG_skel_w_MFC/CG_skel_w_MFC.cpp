@@ -236,6 +236,10 @@ void keyboard( unsigned char key, int x, int y )
 		scene->getActiveCamera()->translate(0, 0, -0.1, scene->getWorldControl());
 		renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
 		break;
+	case 'z':
+		scene->returnModelToCenter();
+		std::cout << "pressed delete" << std::endl;
+		break;
 	case '.':
 		scene->getActiveCamera()->translate(0, 0, 0.1, scene->getWorldControl());
 		renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
