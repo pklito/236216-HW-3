@@ -101,6 +101,7 @@ public:
 	void removeSelectedObject();
 	void removeSelectedCamera();
 	Camera* getActiveCamera();
+	void rotateCameraToSelectedObject();
 
 	void setWorldControl(bool ctrl);
 	bool getWorldControl();

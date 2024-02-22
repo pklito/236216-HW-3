@@ -172,6 +172,12 @@ Camera* Scene::getActiveCamera()
 	return cameras[activeCamera];
 }
 
+void Scene::rotateCameraToSelectedObject(){
+	vec4 model_center = models[activeModel]->getWorldTransformation()*vec4(0,0,0,1);
+	vec4 camera_location = cameras[activeCamera]->getCameraPosition();
+	cameras[activeCamera]->LookAt(camera_location,model_center,vec3(0,1,0));
+}
+
 //---------------------
 //   CAMERA
 //---------------------
