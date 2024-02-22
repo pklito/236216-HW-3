@@ -6,6 +6,8 @@
 #include "GL/glew.h"
 using namespace std;
 
+class Camera;
+
 typedef enum {
 	SYM_STAR,
 	SYM_SQUARE,
@@ -56,25 +58,13 @@ public:
 	void SetCameraTransformInverse(const mat4& cTransform);
 	void SetProjection(const mat4& projection);
 	void setCameraMatrixes(const mat4& cTransform, const mat4& Projection);
-	void SetObjectMatrices(const mat4& oTransform, const mat3& nTransform);
+	void setCameraMatrixes(Camera* camera);
 	void SwapBuffers();
-	void ClearColorBuffer();
-	void ClearDepthBuffer();
+	//void ClearColorBuffer();
+	//void ClearDepthBuffer();
 	void SetDemoBuffer();
-
-	void Render();
-	void HandleInput();
 };
 
 #define CLAMP(x,min,max) ((x) > (max) ? (max) : ((x) < (min) ? (min) : (x)))
 
 #define RANGE(x,min,max,new_min,new_max) (((((x)-(min))*((new_max)-(new_min))/((max)-(min))))+(new_min))
-
-/*
-Macro set pixels
-#define SET_CHANNEL(array,x,y,width,channel,value) ((array)[INDEX((width),(x),(y),(channel))]=value)
-#define SET_PIXEL(array,x,y,width,r,g,b)	SET_CHANNEL((array),(x),(y),(width),0,(r)); SET_CHANNEL((array),(x),(y),(width),1,(g)); SET_CHANNEL((array),(x),(y),(width),2,(b))
-
-#define SET_CHANNEL_CLAMPED(array,x,y,width,height,channel,value) SET_CHANNEL(array,CLAMP((x),0,(width)),CLAMP((y),0,(height)),(width),(channel),(value))
-#define SET_PIXEL_CLAMPED(array,x,y,width,height,r,g,b) SET_PIXEL((array),CLAMP((x),0,(width)),CLAMP((y),0,(height)),(width),(r),(g),(b))
-*/
