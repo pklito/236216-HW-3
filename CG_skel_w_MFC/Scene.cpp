@@ -214,11 +214,17 @@ Camera* Scene::getActiveCamera()
 }
 
 void Scene::rotateCameraToSelectedObject(){
+<<<<<<< HEAD
 	if (models.size() >= 1) {
 		vec4 model_center = models[activeModel]->getWorldTransformation() * vec4(0, 0, 0, 1);
 		vec4 camera_location = cameras[activeCamera]->getCameraPosition();
 		cameras[activeCamera]->LookAt(camera_location, model_center, vec3(0, 1, 0));
 	}
+=======
+	vec4 model_center = models[activeModel]->getWorldTransformation()*vec4(0,0,0,1);
+	vec4 camera_location = cameras[activeCamera]->getCameraPosition();
+	cameras[activeCamera]->LookAt(camera_location,model_center,vec3(0,1,0));
+>>>>>>> 4ed9f639f1a7ad0b4645ec3039da541f900af9c1
 }
 
 //---------------------
