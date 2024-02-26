@@ -236,9 +236,8 @@ void keyboard( unsigned char key, int x, int y )
 		scene->getActiveCamera()->translate(0, 0, -0.1, scene->getWorldControl());
 		renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
 		break;
-	case 'z':
+	case 'z': //return model to center
 		scene->returnModelToCenter();
-		std::cout << "pressed delete" << std::endl;
 		break;
 	case '.':
 		scene->getActiveCamera()->translate(0, 0, 0.1, scene->getWorldControl());
@@ -289,6 +288,12 @@ void keyboard( unsigned char key, int x, int y )
 		break;
 	case ' ':
 		swapCameras();
+		break;
+	case '1':
+		scene->setFillObj(!scene->getFillObj());
+		break;
+	case '2':
+		scene->changeCurrsColor();
 		break;
 	default:
 		return;

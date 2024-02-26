@@ -17,6 +17,7 @@ public:
 	void virtual draw(Renderer* renderer) = 0;
 	virtual void setShowNormals(bool change) = 0;
 	virtual void setShowNormalsToVertices(bool change) = 0;
+	virtual void setFillObj(bool fill) = 0;
 	virtual void setShowBox(bool change) = 0;
 	virtual void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans) = 0;
 	virtual void rotate(GLfloat theta_angle, int axis) = 0;
@@ -25,6 +26,7 @@ public:
 	virtual void applyWorldTransformation(const mat4& transformation) = 0;
 	virtual void applyModelTransformation(const mat4& transformation) = 0;
 	void setData(int dat) {data = dat;}
+	virtual void resetToCenter() = 0;
 };
 
 
@@ -80,9 +82,10 @@ class Scene {
 
 	bool world_control;
 	bool moving_model;
+	bool fillCurrObj;
 
 public:
-	Scene() : world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0) {};
+	Scene() : world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false) {};
 	Scene(Renderer *renderer) : m_renderer(renderer), world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0) {};
 	void loadOBJModel(string fileName);
 	void addMeshModel(Model* model);
@@ -94,6 +97,7 @@ public:
 	void setShowNormalsToVerticesForMeshModels(bool change);
 	void setShowBoxForMeshModels(bool change);
 	void translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans);
+	void returnModelToCenter();
 	void scaleObject(GLfloat scale);
 	void rotateObject(GLfloat theta_angle, int axis);
 	void cycleSelectedObject();
@@ -101,9 +105,14 @@ public:
 	void removeSelectedObject();
 	void removeSelectedCamera();
 	Camera* getActiveCamera();
+	void rotateCameraToSelectedObject();
 
 	void setWorldControl(bool ctrl);
 	bool getWorldControl();
+
+	void setFillObj(bool fill);
+	bool getFillObj();
+	void changeCurrsColor();
 
 	int activeModel;
 	int activeLight;
