@@ -75,33 +75,57 @@ void Scene::setShowBoxForMeshModels(bool change) {
 void Scene::translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
 {
 	if(world_control){
-		models[activeModel]->applyWorldTransformation(Translate(x_trans,y_trans,z_trans));
+		if (models.size() >= 1) {
+			models[activeModel]->applyWorldTransformation(Translate(x_trans, y_trans, z_trans));
+		}
 	}
 	else {
 		//should be: models[activeModel]->applyModelTransformation(Translate(x_trans,y_trans,z_trans));
-		models[activeModel]->translate(x_trans,y_trans,z_trans);
+		if (models.size() >= 1) {
+			models[activeModel]->translate(x_trans, y_trans, z_trans);
+		}
 	}
 
+}
+
+void Scene::returnModelToCenter()
+{
+	if (models.size() >= 1) {
+		models[activeModel]->resetToCenter();
+	}
 }
 
 void Scene::scaleObject(GLfloat scale)
 {
 	if(world_control){
-		models[activeModel]->applyWorldTransformation(Scale(scale,scale,scale));
+		if (models.size() >= 1) {
+			models[activeModel]->applyWorldTransformation(Scale(scale, scale, scale));
+		}
 	}
 	else{
-		models[activeModel]->scale(scale,scale,scale);
+		if (models.size() >= 1) {
+			models[activeModel]->scale(scale, scale, scale);
+		}
 	}
 }
 void Scene::rotateObject(GLfloat theta_angle, int axis)
 {
 	if(world_control){
-		mat4 rotate_mat = RotateAxis(theta_angle,axis);
-		models[activeModel]->applyWorldTransformation(rotate_mat);
+		if (models.size() >= 1) {
+			mat4 rotate_mat = RotateAxis(theta_angle, axis);
+			models[activeModel]->applyWorldTransformation(rotate_mat);
+		}
 	}
 	else{
-		models[activeModel]->rotate(theta_angle,axis);
+		if (models.size() >= 1) {
+			models[activeModel]->rotate(theta_angle, axis);
+		}
 	}
+}
+
+void Scene::changeCurrsColor()
+{
+	m_renderer->changeColor();
 }
 
 void Scene::draw()
@@ -124,7 +148,9 @@ void Scene::draw()
 		m_renderer->DrawSymbol(vec3(0,0,0),mat4(),SYM_PLUS,1,vec3(0.1,0.5,0.9));
 	}
 	else{
-		m_renderer->DrawSymbol(vec3(0,0,0),models[activeModel]->getWorldTransformation(),SYM_PLUS,1,vec3(0.1,0.5,0.9));
+		if (models.size() >= 1) {
+			m_renderer->DrawSymbol(vec3(0, 0, 0), models[activeModel]->getWorldTransformation(), SYM_PLUS, 1, vec3(0.1, 0.5, 0.9));
+		}
 	}
 
 }
@@ -137,9 +163,11 @@ void Scene::drawDemo()
 
 void Scene::cycleSelectedObject()
 {
-	models[activeModel]->setData(0);
-	activeModel = (activeModel+1) % models.size();
-	models[activeModel]->setData(1);
+	if (models.size() >= 1) {
+		models[activeModel]->setData(0);
+		activeModel = (activeModel + 1) % models.size();
+		models[activeModel]->setData(1);
+	}
 }
 
 void Scene::cycleActiveCamera()
@@ -147,8 +175,21 @@ void Scene::cycleActiveCamera()
 	activeCamera = (activeCamera+1) % cameras.size();
 }
 
+void Scene::setFillObj(bool fill)
+{
+	fillCurrObj = fill;
+	if (models.size() >= 1) {
+		models[activeModel]->setFillObj(fillCurrObj);
+	}
+}
+
+bool Scene::getFillObj()
+{
+	return fillCurrObj;
+}
+
 void Scene::removeSelectedObject(){
-	if(models.size() <= 1)
+	if(models.size() < 1)
 		return;
 	models.erase(models.begin()+activeModel);
 	cycleSelectedObject();
@@ -168,9 +209,11 @@ Camera* Scene::getActiveCamera()
 }
 
 void Scene::rotateCameraToSelectedObject(){
-	vec4 model_center = models[activeModel]->getWorldTransformation()*vec4(0,0,0,1);
-	vec4 camera_location = cameras[activeCamera]->getCameraPosition();
-	cameras[activeCamera]->LookAt(camera_location,model_center,vec3(0,1,0));
+	if (models.size() >= 1) {
+		vec4 model_center = models[activeModel]->getWorldTransformation() * vec4(0, 0, 0, 1);
+		vec4 camera_location = cameras[activeCamera]->getCameraPosition();
+		cameras[activeCamera]->LookAt(camera_location, model_center, vec3(0, 1, 0));
+	}
 }
 
 //---------------------

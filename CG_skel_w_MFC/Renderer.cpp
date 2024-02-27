@@ -8,12 +8,12 @@
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 #define LINE_TOO_LARGE 30
-Renderer::Renderer() :m_width(512), m_height(512)
+Renderer::Renderer() :m_width(512), m_height(512), curr_color(0)
 {
 	InitOpenGLRendering();
 	CreateBuffers(512,512);
 }
-Renderer::Renderer(int width, int height) :m_width(width), m_height(height)
+Renderer::Renderer(int width, int height) :m_width(width), m_height(height), curr_color(0)
 {
 	InitOpenGLRendering();
 	CreateBuffers(width,height);
@@ -23,7 +23,56 @@ Renderer::~Renderer(void)
 {
 }
 
+void BubbleSort(std::vector<int>& intersections) {
+	int n = intersections.size();
+	for (int i = 0; i < n - 1; i++) {
+		for (int j = 0; j < n - i - 1; j++) {
+			if (intersections[j] > intersections[j + 1]) {
+				// Swap if the current element is greater than the next element
+				std::swap(intersections[j], intersections[j + 1]);
+			}
+		}
+	}
+}
 
+void Renderer::changeColor()
+{
+	std::cout << "CURR COLORS NUMBER IS: " << curr_color << std::endl;
+	if (curr_color == 6) {
+		curr_color = 0;
+	}
+	else {
+		curr_color = curr_color + 1;
+	}
+	std::cout << "CURR COLORS NUMBER AFTER CHANGE IS: " << curr_color << std::endl;
+}
+
+vec3 Renderer::GetColorToFill() {
+	int num_of_color = curr_color % 7;
+	switch (num_of_color) {
+	case 0:
+		return vec3(0, 1, 1);
+		break;
+	case 1:
+		return vec3(0, 1, 0);
+		break;
+	case 2:
+		return vec3(1, 0, 1);
+		break;
+	case 3:
+		return vec3(1, 1, 0);
+		break;
+	case 4:
+		return vec3(0.4, 0, 0);
+		break;
+	case 5:
+		return vec3(0, 0.5, 0);
+		break;
+	case 6:
+		return vec3(0, 0, 0.5);
+		break;
+	}
+}
 
 void Renderer::CreateBuffers(int width, int height)
 {
@@ -182,7 +231,7 @@ void Renderer::DrawPixelSafe(int x, int y, float r, float g, float b){
  * vertices: vector of the camera space vertices
  * normals: directions of the respective world space normals.
  */
-void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, const vector<vec3>* edge_normals, bool draw_normals, float r, float g, float b)
+void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, const vector<vec3>* edge_normals, bool draw_normals, float r, float g, float b, bool color)
 {
 	// Clear the buffer before drawing new content
 
@@ -240,6 +289,9 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		vec2 n1 = vec2(RANGE(normCoor1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height));
 		vec2 n2 = vec2(RANGE(normCoor2.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height));
 
+		if (color) {
+			FillPolygon(p1, p2, p3);
+		}
 
 		DrawLine(p1, p2, r, g, b);
 		DrawLine(p2, p3, r, g, b);
@@ -259,6 +311,54 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
     	}
 	}
 }
+
+void Renderer::FillPolygon(const vec2& p1, const vec2& p2, const vec2& p3) 
+{
+	std::vector<vec2> vertices = { p1, p2, p3 };
+
+	// Find the minimum and maximum y-coordinates to determine the scanline range
+	int minY = static_cast<int>(floor(min( p1.y, p2.y)));
+	minY = static_cast<int>(floor(min(minY, p3.y)));
+	int maxY = static_cast<int>(ceil(max( p1.y, p2.y)));
+	maxY = static_cast<int>(ceil(max( maxY, p3.y )));
+
+	// Iterate through each scanline
+	for (int y = max(0, minY); y <= min(m_height - 1, maxY); y++)
+	{
+		std::vector<int> intersections;
+
+		// Check for intersections with each polygon edge
+		for (int i = 0; i < vertices.size(); i++)
+		{
+			const vec2& p1 = vertices[i];
+			const vec2& p2 = vertices[(i + 1) % vertices.size()];
+
+			if ((p1.y <= y && p2.y > y) || (p2.y <= y && p1.y > y)) 
+			{
+				// Calculate the intersection point's x-coordinate
+				int xIntersection = static_cast<int>(p1.x + (static_cast<double>(y - p1.y) / (p2.y - p1.y)) * (p2.x - p1.x));
+				intersections.push_back(xIntersection);
+			}
+		}
+
+		// Sort the intersection points in ascending order
+		BubbleSort(intersections);
+
+		// Fill the pixels between pairs of intersections
+		for (int i = 0; i < intersections.size(); i += 2) 
+		{
+			int startX = max(0, intersections[i]);
+			int endX = min(m_width, intersections[i + 1]); 
+
+			for (int x = startX; x <= endX; x++) 
+			{
+				vec3 curr_color = GetColorToFill();
+				DrawPixel(x, y, curr_color.x, curr_color.y, curr_color.z);
+			}
+		}
+	}
+}
+
 vec2 normalizeVectorWithFixedPoint(const vec2& fixedPoint, const vec2& pointToNormalize)
 {
 	float directionX = pointToNormalize.x - fixedPoint.x;

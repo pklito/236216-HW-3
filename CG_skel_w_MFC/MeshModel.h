@@ -9,7 +9,7 @@ using namespace std;
 class MeshModel : public Model
 {
 protected:
-	MeshModel() : vertex_normals_exist(false), show_vertex_normals(false), show_face_normals(false) {}
+	MeshModel() : vertex_normals_exist(false), show_vertex_normals(false), show_face_normals(false), fill_obj(false) {}
 	vec3* vertex_positions;
 	vec3* normals_to_vertices;
 
@@ -19,6 +19,7 @@ protected:
 	bool show_vertex_normals;
 	bool show_face_normals;
 	bool show_box;
+	bool fill_obj;
 
 	vec3* normals;
 	vec3 bounding_box[8];
@@ -47,6 +48,7 @@ public:
 	void setShowNormals(bool change) override;
 	void setShowNormalsToVertices(bool change) override;
 	void setShowBox(bool change) override;
+	void setFillObj(bool fill);
 
 	void resetToCenter();
 	vec3 calculateBoundingBoxCenter();

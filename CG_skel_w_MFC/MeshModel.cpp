@@ -65,6 +65,7 @@ MeshModel::MeshModel(string fileName)
 	vertex_normals_exist = false;
 	show_vertex_normals = false;
 	show_face_normals = false;
+	fill_obj = false;
 	loadFile(fileName);
 }
 
@@ -142,6 +143,7 @@ void MeshModel::loadFile(string fileName)
 			vertex_positions[k++] = vertices[it->v[i] - 1]; 	//Take the face indexes from the vertix array BUG FIXED
 		}
 	}
+
 	calculateBoundingBox();
 }
 
@@ -157,12 +159,11 @@ void MeshModel::draw(Renderer* renderer)
 
 	if(vertex_normals_exist && show_vertex_normals){
 		std::vector<vec3> norm_to_vert(normals_to_vertices, normals_to_vertices + (3 * face_count));
-		renderer->DrawTriangles(&vec, _world_transform, &norm_to_vert, show_face_normals, color, color, color);
+		renderer->DrawTriangles(&vec, _world_transform, &norm_to_vert, show_face_normals, color, color, color, fill_obj);
 	}
 	else{
-		renderer->DrawTriangles(&vec, _world_transform, NULL, show_face_normals,color,color,color);
+		renderer->DrawTriangles(&vec, _world_transform, NULL, show_face_normals,color,color,color, fill_obj);
 	}
-
 	renderer->DrawBoundingBox(bounding_box, _world_transform, show_box);
 }
 
@@ -352,6 +353,11 @@ vec3 MeshModel::calculateBoundingBoxCenter()
 
 	// Calculate the center as the average of min and max coordinates
 	return (minCoord + maxCoord) * 0.5f;
+}
+
+void MeshModel::setFillObj(bool fill)
+{
+	fill_obj = fill;
 }
 
 void MeshModel::resetToCenter() {
