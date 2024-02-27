@@ -67,7 +67,7 @@ float increment = 0.2;
 
 void swapCameras(){
 	scene->cycleActiveCamera();
-	renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
+	renderer->setCameraMatrixes(scene->getActiveCamera());
 	glutPostRedisplay();
 }
 
@@ -219,7 +219,7 @@ void keyboard_special( int key, int x, int y ){
 	}
 	
 	//if key was accepted
-	renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
+	renderer->setCameraMatrixes(scene->getActiveCamera());
 	glutPostRedisplay();
 }
 
@@ -234,18 +234,26 @@ void keyboard( unsigned char key, int x, int y )
 		break;
 	case ',':
 		scene->getActiveCamera()->translate(0, 0, -0.1, scene->getWorldControl());
-		renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
+		renderer->setCameraMatrixes(scene->getActiveCamera());
 		break;
 	case 'z': //return model to center
 		scene->returnModelToCenter();
 		break;
 	case '.':
 		scene->getActiveCamera()->translate(0, 0, 0.1, scene->getWorldControl());
-		renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
+		renderer->setCameraMatrixes(scene->getActiveCamera());
 		break;
 	case 'v':
 		scene->rotateCameraToSelectedObject();
-		renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
+		renderer->setCameraMatrixes(scene->getActiveCamera());
+		break;
+	case 'm':
+		scene->getActiveCamera()->rotate(-15, 1, scene->getWorldControl());
+		renderer->setCameraMatrixes(scene->getActiveCamera());
+		break;
+	case 'n':
+		scene->getActiveCamera()->rotate(15, 1, scene->getWorldControl());
+		renderer->setCameraMatrixes(scene->getActiveCamera());
 		break;
 	case 'm':
 		scene->getActiveCamera()->rotate(-15, 1, scene->getWorldControl());
@@ -353,7 +361,7 @@ void deleteMenu(int id){
 			break;
 		case DELETE_CAMERA:
 			scene->removeSelectedCamera();
-			renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
+			renderer->setCameraMatrixes(scene->getActiveCamera());
 			break;
 	}
 	glutPostRedisplay();
@@ -564,7 +572,7 @@ int my_main(int argc, char** argv)
 	camera->Ortho(-1,1,-1,1,0,5);
 	scene->addCamera(camera);
 	std::cout <<"!"<< camera->getProjection();
-	renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
+	renderer->setCameraMatrixes(scene->getActiveCamera());
 
 	std::cout << "[ ] Reading mesh files... ";
 	MeshModel* demo_object = new MeshModel("meshes/bunny.obj");
