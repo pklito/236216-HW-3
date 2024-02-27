@@ -255,14 +255,6 @@ void keyboard( unsigned char key, int x, int y )
 		scene->getActiveCamera()->rotate(15, 1, scene->getWorldControl());
 		renderer->setCameraMatrixes(scene->getActiveCamera());
 		break;
-	case 'm':
-		scene->getActiveCamera()->rotate(-15, 1, scene->getWorldControl());
-		renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
-		break;
-	case 'n':
-		scene->getActiveCamera()->rotate(15, 1, scene->getWorldControl());
-		renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
-		break;
 	case 't':
 		scene->scaleObject(1.3f); // Increase scale by 30%
 		break;
