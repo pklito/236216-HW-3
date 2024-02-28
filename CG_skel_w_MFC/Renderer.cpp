@@ -290,7 +290,8 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		vec2 n2 = vec2(RANGE(normCoor2.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height));
 
 		if (fill) {
-			FillPolygon(p1, p2, p3);
+			vec3 current_color = GetColorToFill();
+			FillPolygon(p1, p2, p3, current_color);
 		}
 
 		DrawLine(p1, p2, edge_color);
@@ -312,7 +313,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 	}
 }
 
-void Renderer::FillPolygon(const vec2& p1, const vec2& p2, const vec2& p3) 
+void Renderer::FillPolygon(const vec2& p1, const vec2& p2, const vec2& p3, const vec3& color) 
 {
 	std::vector<vec2> vertices = { p1, p2, p3 };
 
@@ -352,8 +353,7 @@ void Renderer::FillPolygon(const vec2& p1, const vec2& p2, const vec2& p3)
 
 			for (int x = startX; x <= endX; x++) 
 			{
-				vec3 curr_color = GetColorToFill();
-				DrawPixel(x, y, curr_color);
+				DrawPixel(x, y, color);
 			}
 		}
 	}

@@ -51,7 +51,7 @@ public:
 	void Init();
 	void DrawLine(vec2 vert1, vec2 vert2, vec3 color = vec3(1,1,1));
 	void DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, const vector<vec3>* edge_normals = NULL, bool draw_normals = false, vec3 edge_color = vec3(1,1,1), bool fill = false);
-	void FillPolygon(const vec2& p1, const vec2& p2, const vec2& p3);
+	void FillPolygon(const vec2& p1, const vec2& p2, const vec2& p3, const vec3& color = vec3(0.5,0.5,0.5));
 	void changeColor();
 	vec3 GetColorToFill();
 
