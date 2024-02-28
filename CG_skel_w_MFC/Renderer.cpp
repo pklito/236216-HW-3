@@ -269,6 +269,13 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		normCoor1 = (vert1 + vert2 + vert3) / 3;
 		normCoor2 = normCoor1 - norm_dir;
 
+		//BackFace culling (currently not done in wireframe mode)
+		if(fill){
+			if(norm_dir.z > 0){
+				continue;
+			}
+		}
+
 
 		//sometimes a point will get sent really far (matrix bs)
 		//the DrawLine function wont draw out of bounds, but it will take
