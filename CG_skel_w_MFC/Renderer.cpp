@@ -81,11 +81,12 @@ void Renderer::CreateBuffers(int width, int height)
 	m_height=height;	
 	CreateOpenGLBuffer(); //Do not remove this line.
 	m_outBuffer = new float[3*m_width*m_height];
+	m_zbuffer = new float[3*m_width*m_height];
 }
 
 void Renderer::ReleaseBuffers() {
 	delete[] m_outBuffer;
-	//delete[] m_zbuffer;
+	delete[] m_zbuffer;
 
 	m_outBuffer = nullptr;
 	m_zbuffer = nullptr;
@@ -116,6 +117,7 @@ void Renderer::ResizeBuffers(int new_width, int new_height) {
 }
 
 void Renderer::ClearBuffer(){
+	std::fill(m_zbuffer,m_zbuffer+(m_width*m_height*3),0);
 	std::fill(m_outBuffer,m_outBuffer+(m_width*m_height*3),0);
 }
 
