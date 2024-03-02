@@ -119,7 +119,7 @@ void Renderer::ClearBuffer(){
 	std::fill(m_outBuffer,m_outBuffer+(m_width*m_height*3),0);
 }
 
-void Renderer::FillBuffer(float r, float g, float b)
+void Renderer::FillBuffer(vec3 color)
 {
 
 	// Fill the buffer with the background color
@@ -127,12 +127,12 @@ void Renderer::FillBuffer(float r, float g, float b)
 	{
 		for (int x = 0; x < m_width; x++)
 		{
-			DrawPixel(x,y,r,g,b);
+			DrawPixel(x,y,color);
 		}
 	}
 }
 
-void Renderer::FillEdges(float percent, float r, float g, float b){
+void Renderer::FillEdges(float percent, vec3 color){
 	if(percent <= 0){
 		return;
 	}
@@ -141,14 +141,14 @@ void Renderer::FillEdges(float percent, float r, float g, float b){
 	}
 	for(int i = 0; i <= (int)(m_height*percent); i++){
 		for(int j = 0; j < m_width; j++){
-			DrawPixel(j,i,r,g,b);
-			DrawPixel(j,m_height - i- 1,r,g,b);
+			DrawPixel(j,i,color);
+			DrawPixel(j,m_height - i- 1,color);
 		}
 	}
 	for(int j = 0; j < (int)(m_width*percent); j++){
 		for(int i = (int)(m_height*percent) - 1; i < m_height - (int)(m_height*percent) - 1; i++){
-			DrawPixel(j,i,r,g,b);
-			DrawPixel(m_width - j - 1,i,r,g,b);
+			DrawPixel(j,i,color);
+			DrawPixel(m_width - j - 1,i,color);
 		}
 	}
 }
@@ -159,7 +159,7 @@ void Renderer::FillEdges(float percent, float r, float g, float b){
  vert1 + vert2 = ends of the edge
  normal = direction of normal.
 */
-void Renderer::DrawLine(vec2 vert1, vec2 vert2, float r, float g, float b)
+void Renderer::DrawLine(vec2 vert1, vec2 vert2, vec3 color)
 {
 	//flip the axis so that slope is -1 <= m <= 1
 	bool flipped = false;
@@ -200,24 +200,24 @@ void Renderer::DrawLine(vec2 vert1, vec2 vert2, float r, float g, float b)
 
 		//light the pixel
 		if(flipped){
-			DrawPixelSafe(y,x, r, g, b);
+			DrawPixelSafe(y,x, color);
 		}
 		else{
-			DrawPixelSafe(x,y, r, g, b);
+			DrawPixelSafe(x,y, color);
 		}
 
 	}
 }
 
-void Renderer::DrawPixel(int x, int y, float r, float g, float b){
-	m_outBuffer[INDEX(m_width,x,y,0)]=r;	m_outBuffer[INDEX(m_width,x,y,1)]=g;	m_outBuffer[INDEX(m_width,x,y,2)]=b;
+void Renderer::DrawPixel(int x, int y, vec3 color){
+	m_outBuffer[INDEX(m_width,x,y,0)]=color.x;	m_outBuffer[INDEX(m_width,x,y,1)]=color.y;	m_outBuffer[INDEX(m_width,x,y,2)]=color.z;
 		
 }
 
-void Renderer::DrawPixelSafe(int x, int y, float r, float g, float b){
+void Renderer::DrawPixelSafe(int x, int y, vec3 color){
 	if(x < 0 || x >= m_width || y < 0 || y >= m_height)
 		return;
-	DrawPixel(x,y,r,g,b);
+	DrawPixel(x,y,color);
 }
 
 /**
@@ -231,7 +231,7 @@ void Renderer::DrawPixelSafe(int x, int y, float r, float g, float b){
  * vertices: vector of the camera space vertices
  * normals: directions of the respective world space normals.
  */
-void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, const vector<vec3>* edge_normals, bool draw_normals, float r, float g, float b, bool color)
+void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, const vector<vec3>* edge_normals, bool draw_normals, vec3 edge_color, bool fill)
 {
 	// Clear the buffer before drawing new content
 
@@ -269,6 +269,13 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		normCoor1 = (vert1 + vert2 + vert3) / 3;
 		normCoor2 = normCoor1 - norm_dir;
 
+		//BackFace culling (currently not done in wireframe mode)
+		if(fill){
+			if(norm_dir.z > 0){
+				continue;
+			}
+		}
+
 
 		//sometimes a point will get sent really far (matrix bs)
 		//the DrawLine function wont draw out of bounds, but it will take
@@ -289,30 +296,31 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		vec2 n1 = vec2(RANGE(normCoor1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height));
 		vec2 n2 = vec2(RANGE(normCoor2.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height));
 
-		if (color) {
-			FillPolygon(p1, p2, p3);
+		if (fill) {
+			vec3 current_color = GetColorToFill();
+			FillPolygon(p1, p2, p3, current_color);
 		}
 
-		DrawLine(p1, p2, r, g, b);
-		DrawLine(p2, p3, r, g, b);
-		DrawLine(p3, p1, r, g, b);
+		DrawLine(p1, p2, edge_color);
+		DrawLine(p2, p3, edge_color);
+		DrawLine(p3, p1, edge_color);
 
 		if(edge_normals != NULL){
 			vec2 a1 = vec2(RANGE(vn1.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vn1.y,-1,1,0,m_height));
 			vec2 a2 = vec2(RANGE(vn2.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vn2.y,-1,1,0,m_height));
 			vec2 a3 = vec2(RANGE(vn3.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vn3.y,-1,1,0,m_height));
-			DrawLine(p1, a1, 0, 0, b);
-			DrawLine(p2, a2, 0, 0, b);
-			DrawLine(p3, a3, 0, 0, b);
+			DrawLine(p1, a1, vec3(0,0,edge_color.z));
+			DrawLine(p2, a2, vec3(0,0,edge_color.z));
+			DrawLine(p3, a3, vec3(0,0,edge_color.z));
 		}
 		//Normal:
 		if(draw_normals){
-		  DrawLine(n1, n2, 1, 0, 1);
+		  DrawLine(n1, n2, vec3(1, 0, 1));
     	}
 	}
 }
 
-void Renderer::FillPolygon(const vec2& p1, const vec2& p2, const vec2& p3) 
+void Renderer::FillPolygon(const vec2& p1, const vec2& p2, const vec2& p3, const vec3& color) 
 {
 	std::vector<vec2> vertices = { p1, p2, p3 };
 
@@ -352,8 +360,7 @@ void Renderer::FillPolygon(const vec2& p1, const vec2& p2, const vec2& p3)
 
 			for (int x = startX; x <= endX; x++) 
 			{
-				vec3 curr_color = GetColorToFill();
-				DrawPixel(x, y, curr_color.x, curr_color.y, curr_color.z);
+				DrawPixel(x, y, color);
 			}
 		}
 	}
@@ -407,7 +414,7 @@ void Renderer::DrawNormalsToVertices(const vector<vec3>* vertices, const vector<
 
 		// Normal:
 		if (draw_normals) {
-			DrawLine(first_point, vec2(RANGE(vert1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height)), 0.2,0.5,1);
+			DrawLine(first_point, vec2(RANGE(vert1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height)), vec3(0.2,0.5,1));
 		}
     }
 }
@@ -452,7 +459,7 @@ void Renderer::DrawBoundingBox(const vec3* bounding_box, const mat4& world_trans
 		{
 			continue;
 		}
-		DrawLine(bounding_box_in_vectwo[indices[i][0]], bounding_box_in_vectwo[indices[i][1]], 1, 1, 0);
+		DrawLine(bounding_box_in_vectwo[indices[i][0]], bounding_box_in_vectwo[indices[i][1]], vec3(1, 1, 0));
 	}
 }
 
@@ -489,7 +496,7 @@ void Renderer::DrawSymbol(const vec3& vertex, const mat4& world_transform, SYMBO
 
 	auto a = decided->begin();
 	while(a != decided->end()){
-		DrawLine(scale*(*a) + image_space, scale*(*(a+1)) + image_space, colors.x, colors.y, colors.z);
+		DrawLine(scale*(*a) + image_space, scale*(*(a+1)) + image_space, colors);
 		a+=2;
 	}
 }
