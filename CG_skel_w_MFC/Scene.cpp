@@ -42,6 +42,11 @@ void Scene::addMeshModel(Model* model)
 	models.push_back(model);
 }
 
+void Scene::addLightSource(Light* light)
+{
+	lights.push_back(light);
+}
+
 void Scene::addCamera(Camera* camera){
 	cameras.push_back(camera);
 }
@@ -131,7 +136,7 @@ void Scene::rotateObject(GLfloat theta_angle, int axis)
 
 void Scene::changeCurrsColor()
 {
-	m_renderer->changeColor();
+	models[activeModel]->changeColor();
 }
 
 void Scene::draw()
@@ -214,17 +219,9 @@ Camera* Scene::getActiveCamera()
 }
 
 void Scene::rotateCameraToSelectedObject(){
-<<<<<<< HEAD
-	if (models.size() >= 1) {
-		vec4 model_center = models[activeModel]->getWorldTransformation() * vec4(0, 0, 0, 1);
-		vec4 camera_location = cameras[activeCamera]->getCameraPosition();
-		cameras[activeCamera]->LookAt(camera_location, model_center, vec3(0, 1, 0));
-	}
-=======
-	vec4 model_center = models[activeModel]->getWorldTransformation()*vec4(0,0,0,1);
+	vec4 model_center = models[activeModel]->getWorldTransformation() * vec4(0, 0, 0, 1);
 	vec4 camera_location = cameras[activeCamera]->getCameraPosition();
-	cameras[activeCamera]->LookAt(camera_location,model_center,vec3(0,1,0));
->>>>>>> 4ed9f639f1a7ad0b4645ec3039da541f900af9c1
+	cameras[activeCamera]->LookAt(camera_location, model_center, vec3(0, 1, 0));
 }
 
 //---------------------

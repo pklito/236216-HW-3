@@ -9,9 +9,11 @@ using namespace std;
 class MeshModel : public Model
 {
 protected:
-	MeshModel() : vertex_normals_exist(false), show_vertex_normals(false), show_face_normals(false), fill_obj(false) {}
+	MeshModel() : curr_color(0), color(vec3(1,1,1)), vertex_normals_exist(false), show_vertex_normals(false), show_face_normals(false), fill_obj(false) {}
 	vec3* vertex_positions;
 	vec3* normals_to_vertices;
+	vec3 color;
+	int curr_color;
 
 	bool vertex_normals_exist;
 	int face_count;
@@ -49,6 +51,9 @@ public:
 	void setShowNormalsToVertices(bool change) override;
 	void setShowBox(bool change) override;
 	void setFillObj(bool fill);
+
+	void changeColor();
+	void GetColorToFill();
 
 	void resetToCenter();
 	vec3 calculateBoundingBoxCenter();

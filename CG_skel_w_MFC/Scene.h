@@ -27,11 +27,15 @@ public:
 	virtual void applyModelTransformation(const mat4& transformation) = 0;
 	void setData(int dat) {data = dat;}
 	virtual void resetToCenter() = 0;
+	virtual void changeColor() = 0;
 };
 
 
 class Light {
-
+	vec3 position;
+	vec3 direction;
+	vec3 color;
+	float intensity;
 };
 
 class Camera {
@@ -86,10 +90,11 @@ class Scene {
 
 public:
 	Scene() : world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false) {};
-	Scene(Renderer *renderer) : m_renderer(renderer), world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0) {};
+	Scene(Renderer *renderer) : m_renderer(renderer), world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false) {};
 	void loadOBJModel(string fileName);
 	void addMeshModel(Model* model);
 	void addCamera(Camera* camera);
+	void addLightSource(Light* light);
 	void draw();
 	void drawDemo();
 

@@ -66,6 +66,8 @@ MeshModel::MeshModel(string fileName)
 	show_vertex_normals = false;
 	show_face_normals = false;
 	fill_obj = false;
+	color = vec3(1,1,1);
+	curr_color = 0;
 	loadFile(fileName);
 }
 
@@ -155,14 +157,12 @@ void MeshModel::draw(Renderer* renderer)
 {
 	std::vector<vec3> vec(vertex_positions, vertex_positions + (3 * face_count));
 
-	float color = data == 1 ? 1 : 0.6;
-
 	if(vertex_normals_exist && show_vertex_normals){
 		std::vector<vec3> norm_to_vert(normals_to_vertices, normals_to_vertices + (3 * face_count));
-		renderer->DrawTriangles(&vec, _world_transform, &norm_to_vert, show_face_normals, color, color, color, fill_obj);
+		renderer->DrawTriangles(&vec, _world_transform, &norm_to_vert, show_face_normals, color.x, color.y, color.z, fill_obj);
 	}
 	else{
-		renderer->DrawTriangles(&vec, _world_transform, NULL, show_face_normals,color,color,color, fill_obj);
+		renderer->DrawTriangles(&vec, _world_transform, NULL, show_face_normals,color.x,color.y,color.z, fill_obj);
 	}
 	renderer->DrawBoundingBox(bounding_box, _world_transform, show_box);
 }
@@ -263,6 +263,46 @@ void MeshModel::normalToFace()
 
 	}
 	//draw();
+}
+
+void MeshModel::changeColor()
+{
+	std::cout << "CURR COLORS NUMBER IS: " << curr_color << std::endl;
+	if (curr_color == 6) {
+		curr_color = 0;
+	}
+	else {
+		curr_color = curr_color + 1;
+		GetColorToFill();
+	}
+	std::cout << "CURR COLORS NUMBER AFTER CHANGE IS: " << curr_color << std::endl;
+}
+
+void MeshModel::GetColorToFill() {
+	int num_of_color = curr_color % 7;
+	switch (num_of_color) {
+	case 0:
+		color = vec3(0, 0.6, 0.6);
+		break;
+	case 1:
+		color = vec3(0, 1, 0);
+		break;
+	case 2:
+		color = vec3(1, 0, 1);
+		break;
+	case 3:
+		color = vec3(1, 1, 0);
+		break;
+	case 4:
+		color = vec3(0.4, 0, 0);
+		break;
+	case 5:
+		color = vec3(0, 0.5, 0);
+		break;
+	case 6:
+		color = vec3(0, 0, 0.5);
+		break;
+	}
 }
 
 void MeshModel::calculateBoundingBox()

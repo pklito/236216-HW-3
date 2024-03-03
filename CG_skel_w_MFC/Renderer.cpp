@@ -35,44 +35,7 @@ void BubbleSort(std::vector<int>& intersections) {
 	}
 }
 
-void Renderer::changeColor()
-{
-	std::cout << "CURR COLORS NUMBER IS: " << curr_color << std::endl;
-	if (curr_color == 6) {
-		curr_color = 0;
-	}
-	else {
-		curr_color = curr_color + 1;
-	}
-	std::cout << "CURR COLORS NUMBER AFTER CHANGE IS: " << curr_color << std::endl;
-}
 
-vec3 Renderer::GetColorToFill() {
-	int num_of_color = curr_color % 7;
-	switch (num_of_color) {
-	case 0:
-		return vec3(0, 1, 1);
-		break;
-	case 1:
-		return vec3(0, 1, 0);
-		break;
-	case 2:
-		return vec3(1, 0, 1);
-		break;
-	case 3:
-		return vec3(1, 1, 0);
-		break;
-	case 4:
-		return vec3(0.4, 0, 0);
-		break;
-	case 5:
-		return vec3(0, 0.5, 0);
-		break;
-	case 6:
-		return vec3(0, 0, 0.5);
-		break;
-	}
-}
 
 void Renderer::CreateBuffers(int width, int height)
 {
@@ -81,11 +44,12 @@ void Renderer::CreateBuffers(int width, int height)
 	m_height=height;	
 	CreateOpenGLBuffer(); //Do not remove this line.
 	m_outBuffer = new float[3*m_width*m_height];
+	m_zbuffer = new float[m_width * m_height];
 }
 
 void Renderer::ReleaseBuffers() {
 	delete[] m_outBuffer;
-	//delete[] m_zbuffer;
+	delete[] m_zbuffer;
 
 	m_outBuffer = nullptr;
 	m_zbuffer = nullptr;
@@ -117,6 +81,7 @@ void Renderer::ResizeBuffers(int new_width, int new_height) {
 
 void Renderer::ClearBuffer(){
 	std::fill(m_outBuffer,m_outBuffer+(m_width*m_height*3),0);
+	std::fill(m_zbuffer, m_zbuffer + (m_width * m_height), far_z);
 }
 
 void Renderer::FillBuffer(float r, float g, float b)
@@ -127,7 +92,7 @@ void Renderer::FillBuffer(float r, float g, float b)
 	{
 		for (int x = 0; x < m_width; x++)
 		{
-			DrawPixel(x,y,r,g,b);
+			DrawPixel(x,y,100,r,g,b);
 		}
 	}
 }
@@ -141,14 +106,14 @@ void Renderer::FillEdges(float percent, float r, float g, float b){
 	}
 	for(int i = 0; i <= (int)(m_height*percent); i++){
 		for(int j = 0; j < m_width; j++){
-			DrawPixel(j,i,r,g,b);
-			DrawPixel(j,m_height - i- 1,r,g,b);
+			DrawPixel(j,i,0,r,g,b);
+			DrawPixel(j,m_height - i- 1,0,r,g,b);
 		}
 	}
 	for(int j = 0; j < (int)(m_width*percent); j++){
 		for(int i = (int)(m_height*percent) - 1; i < m_height - (int)(m_height*percent) - 1; i++){
-			DrawPixel(j,i,r,g,b);
-			DrawPixel(m_width - j - 1,i,r,g,b);
+			DrawPixel(j,i,0,r,g,b);
+			DrawPixel(m_width - j - 1,i,0,r,g,b);
 		}
 	}
 }
@@ -159,65 +124,76 @@ void Renderer::FillEdges(float percent, float r, float g, float b){
  vert1 + vert2 = ends of the edge
  normal = direction of normal.
 */
-void Renderer::DrawLine(vec2 vert1, vec2 vert2, float r, float g, float b)
+void Renderer::DrawLine(vec3 vert1, vec3 vert2, float r, float g, float b)
 {
 	//flip the axis so that slope is -1 <= m <= 1
 	bool flipped = false;
 	if (abs(vert1.y - vert2.y) > abs(vert1.x - vert2.x)) {
-		auto temp = vert1.y;
-		vert1.y = vert1.x;
-		vert1.x = temp;
-
-		temp = vert2.y;
-		vert2.y = vert2.x;
-		vert2.x = temp;
+		std::swap(vert1.x, vert1.y);
+		std::swap(vert2.x, vert2.y);
 		flipped = true;
 	}
-	//swap the order so that vert1 is left of vert2
+
+	// Swap the order so that vert1 is left of vert2
 	if (vert1.x > vert2.x) {
-		vec2 temp = vert1;
-		vert1 = vert2;
-		vert2 = temp;
+		std::swap(vert1, vert2);
 	}
 
-	//line drawing:
-	int y = vert1.x <= vert2.x ? vert1.y : vert2.y;
-	int dy = abs(vert2.y - vert1.y);
-	int dx = vert2.x - vert1.x;
-	int d = 2 * dy - dx;
-	//increase or decrease y on move.
-	int slope_direction = vert2.y >= vert1.y ? 1 : -1;
+	// Line drawing
+	int x = vert1.x;
+	int y = vert1.y;
+	float z = vert1.z;
 
-	for (int x = vert1.x; x <= vert2.x; x++)
+	int dx = vert2.x - vert1.x;
+	int dy = abs(vert2.y - vert1.y);
+	float dz = vert2.z - vert1.z;
+
+	int slope_direction = (vert2.y >= vert1.y) ? 1 : -1;
+
+	// Determine whether to increment or decrement y
+	int y_increment = slope_direction;
+
+	// Decision parameter
+	int d = 2 * dy - dx;
+
+	for (int i = 0; i <= dx; i++)
 	{
+		// Light the pixel
+		if (flipped) {
+			DrawPixelSafe(y, x, z, r, g, b);
+		}
+		else {
+			DrawPixelSafe(x, y, z, r, g, b);
+		}
+
+		// Update the position
+		x++;
+
+		// Update the decision parameter
 		if (d < 0) {
 			d += 2 * dy;
 		}
 		else {
-			y += slope_direction;
-			d += 2 * dy - 2 * dx;
+			y += y_increment;
+			d += 2 * (dy - dx);
 		}
 
-		//light the pixel
-		if(flipped){
-			DrawPixelSafe(y,x, r, g, b);
-		}
-		else{
-			DrawPixelSafe(x,y, r, g, b);
-		}
-
+		// Update z using linear interpolation
+		z += dz / dx;
 	}
 }
 
-void Renderer::DrawPixel(int x, int y, float r, float g, float b){
-	m_outBuffer[INDEX(m_width,x,y,0)]=r;	m_outBuffer[INDEX(m_width,x,y,1)]=g;	m_outBuffer[INDEX(m_width,x,y,2)]=b;
-		
+void Renderer::DrawPixel(int x, int y, float z, float r, float g, float b){
+	if (z < m_zbuffer[y * m_width + x]) {
+		m_outBuffer[INDEX(m_width, x, y, 0)] = r;	m_outBuffer[INDEX(m_width, x, y, 1)] = g;	m_outBuffer[INDEX(m_width, x, y, 2)] = b;
+		m_zbuffer[y * m_width + x] = z;
+	}		
 }
 
-void Renderer::DrawPixelSafe(int x, int y, float r, float g, float b){
+void Renderer::DrawPixelSafe(int x, int y, float z, float r, float g, float b){
 	if(x < 0 || x >= m_width || y < 0 || y >= m_height)
 		return;
-	DrawPixel(x,y,r,g,b);
+	DrawPixel(x,y,z,r,g,b);
 }
 
 /**
@@ -281,15 +257,15 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		/*
 		Clipspace coordinates to screenspace coordinates
 		*/
-		vec2 p1 = vec2(RANGE(vert1.x,-1,1,0,m_width), RANGE(vert1.y,-1,1,0,m_height));
-		vec2 p2 = vec2(RANGE(vert2.x,-1,1,0,m_width), RANGE(vert2.y,-1,1,0,m_height));
-		vec2 p3 = vec2(RANGE(vert3.x,-1,1,0,m_width), RANGE(vert3.y,-1,1,0,m_height));
+		vec3 p1 = vec3(RANGE(vert1.x,-1,1,0,m_width), RANGE(vert1.y,-1,1,0,m_height), vert1.z);
+		vec3 p2 = vec3(RANGE(vert2.x,-1,1,0,m_width), RANGE(vert2.y,-1,1,0,m_height), vert2.z);
+		vec3 p3 = vec3(RANGE(vert3.x,-1,1,0,m_width), RANGE(vert3.y,-1,1,0,m_height), vert3.z);
 
-		vec2 n1 = vec2(RANGE(normCoor1.x, -1, 1, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height));
-		vec2 n2 = vec2(RANGE(normCoor2.x, -1, 1, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height));
+		vec3 n1 = vec3(RANGE(normCoor1.x, -1, 1, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height), normCoor1.z);
+		vec3 n2 = vec3(RANGE(normCoor2.x, -1, 1, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height), normCoor2.z);
 
 		if (color) {
-			FillPolygon(p1, p2, p3);
+			FillPolygon(p1, p2, p3, r, g, b);
 		}
 
 		DrawLine(p1, p2, r, g, b);
@@ -297,9 +273,9 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		DrawLine(p3, p1, r, g, b);
 
 		if(edge_normals != NULL){
-			vec2 a1 = vec2(RANGE(vn1.x,-1,1,0,m_width), RANGE(vn1.y,-1,1,0,m_height));
-			vec2 a2 = vec2(RANGE(vn2.x,-1,1,0,m_width), RANGE(vn2.y,-1,1,0,m_height));
-			vec2 a3 = vec2(RANGE(vn3.x,-1,1,0,m_width), RANGE(vn3.y,-1,1,0,m_height));
+			vec3 a1 = vec3(RANGE(vn1.x,-1,1,0,m_width), RANGE(vn1.y,-1,1,0,m_height), vn1.z);
+			vec3 a2 = vec3(RANGE(vn2.x,-1,1,0,m_width), RANGE(vn2.y,-1,1,0,m_height), vn2.z);
+			vec3 a3 = vec3(RANGE(vn3.x,-1,1,0,m_width), RANGE(vn3.y,-1,1,0,m_height), vn3.z);
 			DrawLine(p1, a1, 0, 0, b);
 			DrawLine(p2, a2, 0, 0, b);
 			DrawLine(p3, a3, 0, 0, b);
@@ -311,9 +287,9 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 	}
 }
 
-void Renderer::FillPolygon(const vec2& p1, const vec2& p2, const vec2& p3) 
+void Renderer::FillPolygon(const vec3& p1, const vec3& p2, const vec3& p3, float r, float g, float b) 
 {
-	std::vector<vec2> vertices = { p1, p2, p3 };
+	std::vector<vec3> vertices = { p1, p2, p3 };
 
 	// Find the minimum and maximum y-coordinates to determine the scanline range
 	int minY = static_cast<int>(floor(min( p1.y, p2.y)));
@@ -329,8 +305,8 @@ void Renderer::FillPolygon(const vec2& p1, const vec2& p2, const vec2& p3)
 		// Check for intersections with each polygon edge
 		for (int i = 0; i < vertices.size(); i++)
 		{
-			const vec2& p1 = vertices[i];
-			const vec2& p2 = vertices[(i + 1) % vertices.size()];
+			const vec3& p1 = vertices[i];
+			const vec3& p2 = vertices[(i + 1) % vertices.size()];
 
 			if ((p1.y <= y && p2.y > y) || (p2.y <= y && p1.y > y)) 
 			{
@@ -348,11 +324,17 @@ void Renderer::FillPolygon(const vec2& p1, const vec2& p2, const vec2& p3)
 		{
 			int startX = max(0, intersections[i]);
 			int endX = min(m_width, intersections[i + 1]); 
+			
+			// Interpolate Z-values
+			float z1 = p1.z + (static_cast<float>(y - p1.y) / (p3.y - p1.y)) * (p3.z - p1.z);
+			float z2 = p1.z + (static_cast<float>(y - p1.y) / (p2.y - p1.y)) * (p2.z - p1.z);
 
-			for (int x = startX; x <= endX; x++) 
+			for (int x = startX; x <= endX; x++)
 			{
-				vec3 curr_color = GetColorToFill();
-				DrawPixel(x, y, curr_color.x, curr_color.y, curr_color.z);
+				// Interpolate Z-value across the polygon
+				float z = z1 + (static_cast<float>(x - startX) / (endX - startX)) * (z2 - z1);
+
+				DrawPixel(x, y, z, r, g, b);
 			}
 		}
 	}
@@ -401,11 +383,11 @@ void Renderer::DrawNormalsToVertices(const vector<vec3>* vertices, const vector<
 		// Scale down the normalized vector (make the normals smaller)
 
 		// Apply the range to the normalized point
-		vec2 first_point = vec2(RANGE(normCoor.x, -1, 1, 0, m_width), RANGE(normCoor.y, -1, 1, 0, m_height));
+		vec3 first_point = vec3(RANGE(normCoor.x, -1, 1, 0, m_width), RANGE(normCoor.y, -1, 1, 0, m_height), normCoor.z);
 
 		// Normal:
 		if (draw_normals) {
-			DrawLine(first_point, vec2(RANGE(vert1.x, -1, 1, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height)), 0.2,0.5,1);
+			DrawLine(first_point, vec3(RANGE(vert1.x, -1, 1, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height), vert1.z), 0.2,0.5,1);
 		}
     }
 }
@@ -436,57 +418,57 @@ void Renderer::DrawBoundingBox(const vec3* bounding_box, const mat4& world_trans
 	};
 
 	// Draw lines to connect the vertices of the bounding box using the defined indices
+	// Draw lines to connect the vertices of the bounding box using the defined indices
 	for (int i = 0; i < 12; ++i) {
-		if(new_bounding_box[indices[i][0]].z < -1 || new_bounding_box[indices[i][0]].z > 1 || 
-		new_bounding_box[indices[i][1]].z < -1  || new_bounding_box[indices[i][0]].z > 1  ){
+		if (new_bounding_box[indices[i][0]].z < -1 || new_bounding_box[indices[i][0]].z > 1 ||
+			new_bounding_box[indices[i][1]].z < -1 || new_bounding_box[indices[i][0]].z > 1) {
 			continue;
 		}
-		//sometimes a point will get sent really far (matrix bs)
-		//the DrawLine function wont draw out of bounds, but it will take
-		//very long to go over the whole distance (~200,000 iterations).
-		if (length(new_bounding_box[indices[i][0]]) > LINE_TOO_LARGE || length(new_bounding_box[indices[i][0]]) > LINE_TOO_LARGE)
-		{
-			continue;
-		}
-		DrawLine(bounding_box_in_vectwo[indices[i][0]], bounding_box_in_vectwo[indices[i][1]], 1, 1, 0);
+
+		// Interpolate Z-values
+		float z1 = new_bounding_box[indices[i][0]].z;
+		float z2 = new_bounding_box[indices[i][1]].z;
+
+		// Draw line with Z-buffer check
+		DrawLine(vec3(bounding_box_in_vectwo[indices[i][0]], z1), vec3(bounding_box_in_vectwo[indices[i][1]], z2), 1, 1, 0);
 	}
 }
 
 void Renderer::DrawSymbol(const vec3& vertex, const mat4& world_transform, SYMBOL_TYPE symbol, float scale,vec3 colors)
 {
 	scale *= 4;
-	const std::vector<vec2> square_shape = {vec2(-1,-1),vec2(1,-1),	vec2(1,-1),vec2(1,1), vec2(1,1), vec2(-1,1), vec2(-1,1), vec2(-1,-1)};
-	const std::vector<vec2> x_shape = {vec2(-1,-1),vec2(1,1),	vec2(1,-1),vec2(-1,1)};
-	const std::vector<vec2> star_shape = {vec2(0,1),vec2(0,-1),	vec2(1,-1),vec2(-1,1), vec2(1,1), vec2(-1,-1), vec2(-1,0), vec2(1,0)};
-	const std::vector<vec2> plus_shape = {vec2(0,1),vec2(0,-1),	vec2(-1,0),vec2(1,0)};
-	
+	const std::vector<vec2> square_shape = { vec2(-1, -1), vec2(1, -1), vec2(1, -1), vec2(1, 1), vec2(1, 1), vec2(-1, 1), vec2(-1, 1), vec2(-1, -1) };
+	const std::vector<vec2> x_shape = { vec2(-1, -1), vec2(1, 1), vec2(1, -1), vec2(-1, 1) };
+	const std::vector<vec2> star_shape = { vec2(0, 1), vec2(0, -1), vec2(1, -1), vec2(-1, 1), vec2(1, 1), vec2(-1, -1), vec2(-1, 0), vec2(1, 0) };
+	const std::vector<vec2> plus_shape = { vec2(0, 1), vec2(0, -1), vec2(-1, 0), vec2(1, 0) };
+
 	const std::vector<vec2>* decided = &square_shape;
 
-	vec4 screen_space = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vertex));
+	vec4 screen_space = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vec4(vertex, 1.0f)));
 	vec2 image_space = vec2(RANGE(screen_space.x, -1, 1, 0, m_width), RANGE(screen_space.y, -1, 1, 0, m_height));
-	switch(symbol){
-		case SYM_SQUARE:
-			decided = &square_shape;
-			break;
-		case SYM_X:
-			decided = &x_shape;
-			break;
-		case SYM_STAR:
-			decided = &star_shape;
-			break;
-		case SYM_PLUS:
-			decided = &plus_shape;
-			break;
-		default:
-			decided = &x_shape;
+	switch (symbol) {
+	case SYM_SQUARE:
+		decided = &square_shape;
+		break;
+	case SYM_X:
+		decided = &x_shape;
+		break;
+	case SYM_STAR:
+		decided = &star_shape;
+		break;
+	case SYM_PLUS:
+		decided = &plus_shape;
+		break;
+	default:
+		decided = &x_shape;
 		break;
 	}
 
-
 	auto a = decided->begin();
-	while(a != decided->end()){
-		DrawLine(scale*(*a) + image_space, scale*(*(a+1)) + image_space, colors.x, colors.y, colors.z);
-		a+=2;
+	while (a != decided->end()) {
+		// Draw line with Z-buffer check
+		DrawLine(vec3(scale * (*a) + image_space, screen_space.z), vec3(scale * (*(a + 1)) + image_space, screen_space.z), colors.x, colors.y, colors.z);
+		a += 2;
 	}
 }
 
@@ -556,6 +538,7 @@ void Renderer::InitOpenGLRendering()
 	glVertexAttribPointer( vTexCoord, 2, GL_FLOAT, GL_FALSE, 0,
 		(GLvoid *) sizeof(vtc) );
 	glProgramUniform1i( program, glGetUniformLocation(program, "texture"), 0 );
+
 	a = glGetError();
 }
 

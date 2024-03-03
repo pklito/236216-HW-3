@@ -298,7 +298,7 @@ void keyboard( unsigned char key, int x, int y )
 		swapCameras();
 		break;
 	case '1':
-		scene->setFillObj(!scene->getFillObj());
+		scene->setFillObj(!(scene->getFillObj()));
 		break;
 	case '2':
 		scene->changeCurrsColor();
