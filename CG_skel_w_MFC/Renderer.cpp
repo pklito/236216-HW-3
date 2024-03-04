@@ -7,7 +7,9 @@
 #include "MeshModel.h"
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
+#define Z_INDEX(width,x,y) (x+y*width)
 #define LINE_TOO_LARGE 30
+
 Renderer::Renderer() :m_width(512), m_height(512), curr_color(0)
 {
 	InitOpenGLRendering();
@@ -84,7 +86,7 @@ void Renderer::ClearBuffer(){
 	std::fill(m_zbuffer, m_zbuffer + (m_width * m_height), far_z);
 }
 
-void Renderer::FillBuffer(float r, float g, float b)
+void Renderer::FillBuffer(vec3 color)
 {
 
 	// Fill the buffer with the background color
@@ -92,12 +94,23 @@ void Renderer::FillBuffer(float r, float g, float b)
 	{
 		for (int x = 0; x < m_width; x++)
 		{
-			DrawPixel(x,y,100,r,g,b);
+			DrawPixel(x,y,100,color);
 		}
 	}
 }
 
-void Renderer::FillEdges(float percent, float r, float g, float b){
+void Renderer::setCameraPos(vec3 camera_pos)
+{
+	camera_position = camera_pos;
+}
+
+void Renderer::addLight(Light* light)
+{
+	lights.push_back(light);
+	std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\naddedlight\n!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+}
+
+void Renderer::FillEdges(float percent, vec3 color) {
 	if(percent <= 0){
 		return;
 	}
@@ -106,14 +119,14 @@ void Renderer::FillEdges(float percent, float r, float g, float b){
 	}
 	for(int i = 0; i <= (int)(m_height*percent); i++){
 		for(int j = 0; j < m_width; j++){
-			DrawPixel(j,i,0,r,g,b);
-			DrawPixel(j,m_height - i- 1,0,r,g,b);
+			DrawPixel(j,i,0,color);
+			DrawPixel(j,m_height - i- 1,0,color);
 		}
 	}
 	for(int j = 0; j < (int)(m_width*percent); j++){
 		for(int i = (int)(m_height*percent) - 1; i < m_height - (int)(m_height*percent) - 1; i++){
-			DrawPixel(j,i,0,r,g,b);
-			DrawPixel(m_width - j - 1,i,0,r,g,b);
+			DrawPixel(j,i,0,color);
+			DrawPixel(m_width - j - 1,i,0,color);
 		}
 	}
 }
@@ -124,7 +137,7 @@ void Renderer::FillEdges(float percent, float r, float g, float b){
  vert1 + vert2 = ends of the edge
  normal = direction of normal.
 */
-void Renderer::DrawLine(vec3 vert1, vec3 vert2, float r, float g, float b)
+void Renderer::DrawLine(vec3 vert1, vec3 vert2, vec3 color)
 {
 	//flip the axis so that slope is -1 <= m <= 1
 	bool flipped = false;
@@ -160,10 +173,10 @@ void Renderer::DrawLine(vec3 vert1, vec3 vert2, float r, float g, float b)
 	{
 		// Light the pixel
 		if (flipped) {
-			DrawPixelSafe(y, x, z, r, g, b);
+			DrawPixelSafe(y, x, z, color);
 		}
 		else {
-			DrawPixelSafe(x, y, z, r, g, b);
+			DrawPixelSafe(x, y, z, color);
 		}
 
 		// Update the position
@@ -183,17 +196,17 @@ void Renderer::DrawLine(vec3 vert1, vec3 vert2, float r, float g, float b)
 	}
 }
 
-void Renderer::DrawPixel(int x, int y, float z, float r, float g, float b){
-	if (z < m_zbuffer[y * m_width + x]) {
-		m_outBuffer[INDEX(m_width, x, y, 0)] = r;	m_outBuffer[INDEX(m_width, x, y, 1)] = g;	m_outBuffer[INDEX(m_width, x, y, 2)] = b;
-		m_zbuffer[y * m_width + x] = z;
+void Renderer::DrawPixel(int x, int y, float z, vec3 color){
+	if (z < m_zbuffer[Z_INDEX(m_width, x, y)]) {
+		m_outBuffer[INDEX(m_width, x, y, 0)] = color.x;	m_outBuffer[INDEX(m_width, x, y, 1)] = color.y;	m_outBuffer[INDEX(m_width, x, y, 2)] = color.z;
+		m_zbuffer[Z_INDEX(m_width, x, y)] = z;
 	}		
 }
 
-void Renderer::DrawPixelSafe(int x, int y, float z, float r, float g, float b){
+void Renderer::DrawPixelSafe(int x, int y, float z, vec3 color){
 	if(x < 0 || x >= m_width || y < 0 || y >= m_height)
 		return;
-	DrawPixel(x,y,z,r,g,b);
+	DrawPixel(x,y,z,color);
 }
 
 /**
@@ -207,7 +220,7 @@ void Renderer::DrawPixelSafe(int x, int y, float z, float r, float g, float b){
  * vertices: vector of the camera space vertices
  * normals: directions of the respective world space normals.
  */
-void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, const vector<vec3>* edge_normals, bool draw_normals, float r, float g, float b, bool color)
+void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, Material material, const vector<vec3>* edge_normals, bool draw_normals, vec3 edge_color, bool fill, ShadingMethod shadingMethod)
 {
 	// Clear the buffer before drawing new content
 
@@ -264,33 +277,104 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		vec3 n1 = vec3(RANGE(normCoor1.x, -1, 1, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height), normCoor1.z);
 		vec3 n2 = vec3(RANGE(normCoor2.x, -1, 1, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height), normCoor2.z);
 
-		if (color) {
-			FillPolygon(p1, p2, p3, r, g, b);
-		}
+		if (fill) {
+			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), world_transform, edge_color, material, shadingMethod);
+		} else {
+			DrawLine(p1, p2, edge_color);
+			DrawLine(p2, p3, edge_color);
+			DrawLine(p3, p1, edge_color);
 
-		DrawLine(p1, p2, r, g, b);
-		DrawLine(p2, p3, r, g, b);
-		DrawLine(p3, p1, r, g, b);
+			float aspect_ratio = (float)(m_width) / (float)(m_height);
 
-		if(edge_normals != NULL){
-			vec3 a1 = vec3(RANGE(vn1.x,-1,1,0,m_width), RANGE(vn1.y,-1,1,0,m_height), vn1.z);
-			vec3 a2 = vec3(RANGE(vn2.x,-1,1,0,m_width), RANGE(vn2.y,-1,1,0,m_height), vn2.z);
-			vec3 a3 = vec3(RANGE(vn3.x,-1,1,0,m_width), RANGE(vn3.y,-1,1,0,m_height), vn3.z);
-			DrawLine(p1, a1, 0, 0, b);
-			DrawLine(p2, a2, 0, 0, b);
-			DrawLine(p3, a3, 0, 0, b);
+			if(edge_normals != NULL){
+				vec3 a1 = vec3(RANGE(vn1.x,-aspect_ratio, aspect_ratio, 0, m_width), RANGE(vn1.y,-1,1,0,m_height), vn1.z);
+				vec3 a2 = vec3(RANGE(vn2.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vn2.y,-1,1,0,m_height), vn2.z);
+				vec3 a3 = vec3(RANGE(vn3.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vn3.y,-1,1,0,m_height), vn3.z);
+				DrawLine(p1, a1, vec3(0, 0, edge_color.z));
+				DrawLine(p2, a2, vec3(0, 0, edge_color.z));
+				DrawLine(p3, a3, vec3(0, 0, edge_color.z));
+			}
+			//Normal:
+			if(draw_normals){
+			  DrawLine(n1, n2, vec3(1, 0, 1));
+    		}
 		}
-		//Normal:
-		if(draw_normals){
-		  DrawLine(n1, n2, 1, 0, 1);
-    	}
 	}
 }
 
-void Renderer::FillPolygon(const vec3& p1, const vec3& p2, const vec3& p3, float r, float g, float b) 
-{
-	std::vector<vec3> vertices = { p1, p2, p3 };
+/*
+* Lecture 4 slide 26-27.
+* Given a triangle and a point, return 3 floats, representing the point as an average of the 3 points
+* Returns: vec3: wp1 wp2 wp3
+*/
+vec3 Renderer::getBarycentricCoordinates(const vec2& p, const vec2& p1, const vec2& p2, const vec2& p3) {
+	GLfloat A3 = cross(p - p1, p2 - p1);
+	GLfloat A1 = cross(p - p2, p3 - p2);
+	GLfloat A2 = cross(p - p3, p1 - p3);
 
+	GLfloat Asum = A3 + A2 + A1;
+	return vec3(A3 / Asum, A2 / Asum, A1 / Asum);
+}
+
+vec3 Renderer::calculateViewDirection(const vec3& surface_point, const mat4& world_transform) 
+{
+	// Transform surface point to world coordinates using the world transform matrix
+	vec4 world_surface_point = world_transform * vec4(surface_point, 1.0f);
+	vec3 world_surface_point3 = vec3(world_surface_point.x, world_surface_point.y, world_surface_point.z);
+
+	// Calculate the view direction from the surface point to the camera position
+	vec3 view_direction = normalize(camera_position - world_surface_point3);
+
+	return view_direction;
+}
+
+vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_normal, const mat4& world_transform, Material material)
+{
+	vec3 ambient_color(0.0f, 0.0f, 0.0f);
+	vec3 diffuse_color(0.0f, 0.0f, 0.0f);
+	vec3 specular_color(0.0f, 0.0f, 0.0f);
+	vec3 view_direction = calculateViewDirection(surface_point, world_transform);
+
+	for (auto it = lights.begin(); it != lights.end(); it++) 
+	{
+		Light* lightPtr = *it;
+		Light light = *lightPtr;
+		// Ambient component
+		vec3 light_direction = (light.direction != NULL) ? normalize(light.position - surface_point) : normalize(-light.direction);
+		float cos_theta = max(0.0f, dot(surface_normal, light_direction));
+		diffuse_color = diffuse_color + material.k_diffuse * light.color * light.intensity * cos_theta;
+
+
+		// Specular component
+		vec3 reflection_direction = reflect(-light_direction, surface_normal);
+		float cos_alpha = max(0.0f, dot(reflection_direction, view_direction));
+		specular_color = specular_color + material.k_specular * light.color * light.intensity * std::pow(cos_alpha, material.k_shiny);
+	}
+
+	vec3 total_color = ambient_color + diffuse_color + specular_color;
+	return total_color.clamp(0.0f, 1.0f);
+}
+
+void Renderer::changeShadingMethod()
+{
+	if (shading_method == PHONG)
+	{
+		shading_method = BARYCENTRIC;
+	}
+	else 
+	{
+		shading_method = PHONG;
+	}
+}
+
+void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const mat4& world_transform, const vec3& color, Material material, ShadingMethod shadingMethod)
+{
+	float aspect_ratio = (float)(m_width) / (float)(m_height);
+	vec3 p1 = vec3(RANGE(vert1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height), vert1.z);
+	vec3 p2 = vec3(RANGE(vert2.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vert2.y, -1, 1, 0, m_height), vert2.z);
+	vec3 p3 = vec3(RANGE(vert3.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vert3.y, -1, 1, 0, m_height), vert3.z);
+
+	const std::vector<vec3> vertices = { p1, p2, p3 };
 	// Find the minimum and maximum y-coordinates to determine the scanline range
 	int minY = static_cast<int>(floor(min( p1.y, p2.y)));
 	minY = static_cast<int>(floor(min(minY, p3.y)));
@@ -329,12 +413,25 @@ void Renderer::FillPolygon(const vec3& p1, const vec3& p2, const vec3& p3, float
 			float z1 = p1.z + (static_cast<float>(y - p1.y) / (p3.y - p1.y)) * (p3.z - p1.z);
 			float z2 = p1.z + (static_cast<float>(y - p1.y) / (p2.y - p1.y)) * (p2.z - p1.z);
 
-			for (int x = startX; x <= endX; x++)
-			{
-				// Interpolate Z-value across the polygon
-				float z = z1 + (static_cast<float>(x - startX) / (endX - startX)) * (z2 - z1);
+			if (shading_method == BARYCENTRIC) {
+				for (int x = startX; x <= endX; x++) {
+					// Barycentric shading
+					vec3 weights = getBarycentricCoordinates(vec2(x, y), vec2(p1.x, p1.y), vec2(p2.x, p2.y), vec2(p3.x, p3.y));
+					float z = weights.x * z1 + weights.y * z2 + weights.z * p3.z;
 
-				DrawPixel(x, y, z, r, g, b);
+					if (z < m_zbuffer[Z_INDEX(m_width, x, y)]) {
+						DrawPixel(x, y, z, color * (((1 - z) / 2)));
+						m_zbuffer[Z_INDEX(m_width, x, y)] = z;
+					}
+				}
+			}
+			else if (shading_method == PHONG) {
+				// Phong shading
+				vec3 surface_point = vec3((startX + endX) / 2.0f, y, (z1 + z2) / 2.0f);  // Midpoint for Phong shading
+				vec3 surface_normal = calculateNormal(vert1, vert2, vert3);
+				vec3 phong_color = phongIllumination(surface_point, surface_normal, world_transform, material);
+
+				DrawPixel((startX + endX) / 2, y, (z1 + z2) / 2, phong_color);
 			}
 		}
 	}
@@ -387,7 +484,7 @@ void Renderer::DrawNormalsToVertices(const vector<vec3>* vertices, const vector<
 
 		// Normal:
 		if (draw_normals) {
-			DrawLine(first_point, vec3(RANGE(vert1.x, -1, 1, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height), vert1.z), 0.2,0.5,1);
+			DrawLine(first_point, vec3(RANGE(vert1.x, -1, 1, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height), vert1.z), vec3(0.2,0.5,1));
 		}
     }
 }
@@ -430,7 +527,7 @@ void Renderer::DrawBoundingBox(const vec3* bounding_box, const mat4& world_trans
 		float z2 = new_bounding_box[indices[i][1]].z;
 
 		// Draw line with Z-buffer check
-		DrawLine(vec3(bounding_box_in_vectwo[indices[i][0]], z1), vec3(bounding_box_in_vectwo[indices[i][1]], z2), 1, 1, 0);
+		DrawLine(vec3(bounding_box_in_vectwo[indices[i][0]], z1), vec3(bounding_box_in_vectwo[indices[i][1]], z2), vec3(1, 1, 0));
 	}
 }
 
@@ -467,7 +564,7 @@ void Renderer::DrawSymbol(const vec3& vertex, const mat4& world_transform, SYMBO
 	auto a = decided->begin();
 	while (a != decided->end()) {
 		// Draw line with Z-buffer check
-		DrawLine(vec3(scale * (*a) + image_space, screen_space.z), vec3(scale * (*(a + 1)) + image_space, screen_space.z), colors.x, colors.y, colors.z);
+		DrawLine(vec3(scale * (*a) + image_space, screen_space.z), vec3(scale * (*(a + 1)) + image_space, screen_space.z), colors);
 		a += 2;
 	}
 }

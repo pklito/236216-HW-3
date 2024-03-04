@@ -4,6 +4,7 @@
 #include "vec.h"
 #include "mat.h"
 #include "GL/glew.h"
+#include "util.h"
 using namespace std;
 
 typedef enum {
@@ -13,6 +14,13 @@ typedef enum {
 	SYM_PLUS
 } SYMBOL_TYPE;
 
+
+enum ShadingMethod {
+	BARYCENTRIC,
+	PHONG
+};
+
+
 class Renderer
 {
 	float* m_outBuffer; // 3*width*height
@@ -21,6 +29,10 @@ class Renderer
 	float far_z = 100.0f;
 	mat4 mat_transform_inverse;
 	mat4 mat_project;
+	vec3 camera_position;
+	vector<Light*> lights;
+
+	ShadingMethod shading_method;
 
 	int curr_color;
 
@@ -44,19 +56,25 @@ public:
 	~Renderer(void);
 
 	void ClearBuffer();
-	void FillBuffer(float r, float g, float b);
-	void FillEdges(float amount, float r, float g, float b);
+	void FillBuffer(vec3 color);
+	void FillEdges(float percent, vec3 color);
 	void ResizeBuffers(int new_width, int new_height);
 	void Init();
-	void DrawLine(vec3 vert1, vec3 vert2, float r = 1, float g = 1, float b = 1);
-	void DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, const vector<vec3>* edge_normals = NULL, bool draw_normals = false, float r = 1, float g = 1, float b = 1, bool color = false);
-	void FillPolygon(const vec3& p1, const vec3& p2, const vec3& p3, float r, float g, float b);
+	void DrawLine(vec3 vert1, vec3 vert2, vec3 color = vec3(1,1,1));
+	void DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, Material material, const vector<vec3>* edge_normals = NULL, bool draw_normals = false,vec3 edge_color = vec3(1,1,1), bool fill = false, ShadingMethod shadingMethod = BARYCENTRIC);
+	vec3 getBarycentricCoordinates(const vec2& p, const vec2& p1, const vec2& p2, const vec2& p3);
+	vec3 phongIllumination(const vec3& surface_point, const vec3& surface_normal, const mat4& world_transform, Material material);
+	void FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const mat4& world_transform, const vec3& color, Material material, ShadingMethod shadingMethod);
 
+	vec3 calculateViewDirection(const vec3& surface_point, const mat4& world_transform);
 	void DrawNormalsToVertices(const vector<vec3>* vertices, const vector<vec3>* vertex_normals = NULL, bool draw_vertex_normals = false);
+	void setCameraPos(vec3 camera_pos);
+	void addLight(Light* light);
+	void changeShadingMethod();
 
 	void DrawBoundingBox(const vec3* bounding_box, const mat4& world_transform, bool draw_box = false);
-	void DrawPixel(int x, int y, float z, float r, float g, float b);
-	void DrawPixelSafe(int x, int y, float z, float r, float g, float b);
+	void DrawPixel(int x, int y, float z, vec3 color);
+	void DrawPixelSafe(int x, int y, float z, vec3 color);
 	void DrawSymbol(const vec3& vertex ,const mat4& =  mat4(), SYMBOL_TYPE symbol = SYM_STAR, float scale = 1, vec3 colors = vec3(0.6, 0.9, 0.4));
 	void SetCameraTransformInverse(const mat4& cTransform);
 	void SetProjection(const mat4& projection);

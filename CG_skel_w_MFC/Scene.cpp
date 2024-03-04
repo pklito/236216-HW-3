@@ -45,10 +45,21 @@ void Scene::addMeshModel(Model* model)
 void Scene::addLightSource(Light* light)
 {
 	lights.push_back(light);
+	m_renderer->addLight(light);
+}
+
+void Scene::changeShadingMethod()
+{
+	m_renderer->changeShadingMethod();
 }
 
 void Scene::addCamera(Camera* camera){
 	cameras.push_back(camera);
+	if (cameras.size() == 1) {
+		vec3 cameraPosition = camera->getCameraPosition();
+		m_renderer->setCameraPos(cameraPosition);
+	}
+	
 }
 
 void Scene::setWorldControl(bool ctrl){
@@ -175,6 +186,11 @@ void Scene::drawDemo()
 void Scene::cycleSelectedObject()
 {
 	if (models.size() >= 1) {
+		if (activeModel == models.size()) {
+			activeModel = (activeModel + 1) % models.size();
+			models[activeModel]->setData(1);
+			return;
+		}
 		models[activeModel]->setData(0);
 		activeModel = (activeModel + 1) % models.size();
 		models[activeModel]->setData(1);
@@ -184,6 +200,8 @@ void Scene::cycleSelectedObject()
 void Scene::cycleActiveCamera()
 {
 	activeCamera = (activeCamera+1) % cameras.size();
+	vec3 cameraPosition = getActiveCamera()->getCameraPosition();
+	m_renderer->setCameraPos(cameraPosition);
 }
 
 void Scene::setFillObj(bool fill)
@@ -192,6 +210,7 @@ void Scene::setFillObj(bool fill)
 	if (models.size() >= 1) {
 		models[activeModel]->setFillObj(fillCurrObj);
 	}
+	fillCurrObj = !fill;
 }
 
 bool Scene::getFillObj()
@@ -202,6 +221,7 @@ bool Scene::getFillObj()
 void Scene::removeSelectedObject(){
 	if(models.size() < 1)
 		return;
+
 	models.erase(models.begin()+activeModel);
 	cycleSelectedObject();
 }

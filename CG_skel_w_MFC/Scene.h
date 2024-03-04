@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include "Renderer.h"
+#include "util.h"
 using namespace std;
 
 class Model {
@@ -30,13 +31,6 @@ public:
 	virtual void changeColor() = 0;
 };
 
-
-class Light {
-	vec3 position;
-	vec3 direction;
-	vec3 color;
-	float intensity;
-};
 
 class Camera {
 	mat4 cTransform;
@@ -118,6 +112,7 @@ public:
 	void setFillObj(bool fill);
 	bool getFillObj();
 	void changeCurrsColor();
+	void changeShadingMethod();
 
 	int activeModel;
 	int activeLight;

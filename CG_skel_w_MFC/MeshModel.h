@@ -3,6 +3,7 @@
 #include "vec.h"
 #include "mat.h"
 #include <string>
+#include "util.h"
 
 using namespace std;
 
@@ -14,6 +15,7 @@ protected:
 	vec3* normals_to_vertices;
 	vec3 color;
 	int curr_color;
+	Material material;
 
 	bool vertex_normals_exist;
 	int face_count;
