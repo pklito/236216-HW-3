@@ -97,6 +97,9 @@ void Renderer::FillBuffer(vec3 color)
 			DrawPixel(x,y,100,color);
 		}
 	}
+	for (auto it = lights.begin(); it != lights.end(); it++) {
+		DrawSymbol((*it)->getLightPosition(), mat4(), SYM_STAR, 1);
+	}
 }
 
 void Renderer::setCameraPos(vec3 camera_pos)
@@ -107,7 +110,7 @@ void Renderer::setCameraPos(vec3 camera_pos)
 void Renderer::addLight(Light* light)
 {
 	lights.push_back(light);
-	std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\naddedlight\n!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+	DrawSymbol(light->getLightPosition(), mat4(), SYM_STAR, 1);
 }
 
 void Renderer::FillEdges(float percent, vec3 color) {
@@ -328,7 +331,7 @@ vec3 Renderer::calculateViewDirection(const vec3& surface_point, const mat4& wor
 	return view_direction;
 }
 
-vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_normal, const mat4& world_transform, Material material)
+vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_normal, const mat4& world_transform, Material material, const vec3& color)
 {
 	vec3 ambient_color(0.0f, 0.0f, 0.0f);
 	vec3 diffuse_color(0.0f, 0.0f, 0.0f);
@@ -342,18 +345,19 @@ vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_
 		// Ambient component
 		vec3 light_direction = (light.direction != NULL) ? normalize(light.position - surface_point) : normalize(-light.direction);
 		float cos_theta = max(0.0f, dot(surface_normal, light_direction));
-		diffuse_color = diffuse_color + material.k_diffuse * light.color * light.intensity * cos_theta;
+		diffuse_color = diffuse_color + material.k_diffuse * light.color * color * light.intensity * cos_theta;
 
 
 		// Specular component
 		vec3 reflection_direction = reflect(-light_direction, surface_normal);
 		float cos_alpha = max(0.0f, dot(reflection_direction, view_direction));
-		specular_color = specular_color + material.k_specular * light.color * light.intensity * std::pow(cos_alpha, material.k_shiny);
+		specular_color = specular_color + material.k_specular * light.color * color * light.intensity * std::pow(cos_alpha, material.k_shiny);
 	}
 
 	vec3 total_color = ambient_color + diffuse_color + specular_color;
 	return total_color.clamp(0.0f, 1.0f);
 }
+
 
 void Renderer::changeShadingMethod()
 {
@@ -366,6 +370,7 @@ void Renderer::changeShadingMethod()
 		shading_method = PHONG;
 	}
 }
+
 
 void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const mat4& world_transform, const vec3& color, Material material, ShadingMethod shadingMethod)
 {
@@ -402,6 +407,8 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 
 		// Sort the intersection points in ascending order
 		BubbleSort(intersections);
+		
+		vec3 normal = normalize(toVec3(world_transform * vec4(calculateNormal(vert1, vert2, vert3), 0.0)));
 
 		// Fill the pixels between pairs of intersections
 		for (int i = 0; i < intersections.size(); i += 2) 
@@ -413,25 +420,23 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 			float z1 = p1.z + (static_cast<float>(y - p1.y) / (p3.y - p1.y)) * (p3.z - p1.z);
 			float z2 = p1.z + (static_cast<float>(y - p1.y) / (p2.y - p1.y)) * (p2.z - p1.z);
 
-			if (shading_method == BARYCENTRIC) {
-				for (int x = startX; x <= endX; x++) {
-					// Barycentric shading
-					vec3 weights = getBarycentricCoordinates(vec2(x, y), vec2(p1.x, p1.y), vec2(p2.x, p2.y), vec2(p3.x, p3.y));
-					float z = weights.x * z1 + weights.y * z2 + weights.z * p3.z;
+			
+			for (int x = startX; x <= endX; x++) {
+				// phong shading
+				vec3 weights = getBarycentricCoordinates(vec2(x, y), vec2(p1.x, p1.y), vec2(p2.x, p2.y), vec2(p3.x, p3.y));
+				vec3 interpolatedNormal = weights.x * normalize(toVec3(world_transform * vec4(vert1, 0.0))) +
+					weights.y * normalize(toVec3(world_transform * vec4(vert2, 0.0))) +
+					weights.z * normalize(toVec3(world_transform * vec4(vert3, 0.0)));
 
-					if (z < m_zbuffer[Z_INDEX(m_width, x, y)]) {
-						DrawPixel(x, y, z, color * (((1 - z) / 2)));
-						m_zbuffer[Z_INDEX(m_width, x, y)] = z;
-					}
-				}
-			}
-			else if (shading_method == PHONG) {
 				// Phong shading
-				vec3 surface_point = vec3((startX + endX) / 2.0f, y, (z1 + z2) / 2.0f);  // Midpoint for Phong shading
-				vec3 surface_normal = calculateNormal(vert1, vert2, vert3);
-				vec3 phong_color = phongIllumination(surface_point, surface_normal, world_transform, material);
+				float z = weights.x * z1 + weights.y * z2 + weights.z * p3.z;
+				vec3 surface_point = vec3(x, y, z);
+				vec3 phong_color = phongIllumination(surface_point, interpolatedNormal, world_transform, material, color);
 
-				DrawPixel((startX + endX) / 2, y, (z1 + z2) / 2, phong_color);
+				if (z < m_zbuffer[Z_INDEX(m_width, x, y)]) {
+					DrawPixel(x, y, z, phong_color);
+					m_zbuffer[Z_INDEX(m_width, x, y)] = z;
+				}
 			}
 		}
 	}

@@ -63,7 +63,7 @@ public:
 	void DrawLine(vec3 vert1, vec3 vert2, vec3 color = vec3(1,1,1));
 	void DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, Material material, const vector<vec3>* edge_normals = NULL, bool draw_normals = false,vec3 edge_color = vec3(1,1,1), bool fill = false, ShadingMethod shadingMethod = BARYCENTRIC);
 	vec3 getBarycentricCoordinates(const vec2& p, const vec2& p1, const vec2& p2, const vec2& p3);
-	vec3 phongIllumination(const vec3& surface_point, const vec3& surface_normal, const mat4& world_transform, Material material);
+	vec3 phongIllumination(const vec3& surface_point, const vec3& surface_normal, const mat4& world_transform, Material material, const vec3& color);
 	void FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const mat4& world_transform, const vec3& color, Material material, ShadingMethod shadingMethod);
 
 	vec3 calculateViewDirection(const vec3& surface_point, const mat4& world_transform);

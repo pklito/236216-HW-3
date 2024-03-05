@@ -570,10 +570,10 @@ int my_main(int argc, char** argv)
 	std::cout <<"!"<< camera->getProjection();
 	renderer->setCameraMatrixes(scene->getActiveCamera()->getTransformInverse(),scene->getActiveCamera()->getProjection());
 
-	light->setDir(vec3(0, 0, -1));
-	light->setPos(vec3(0, 0, 5));
+	light->setDir(vec3(-1, -1, -1));
+	light->setPos(vec3(500, 1000, 6));
 	light->setColor(vec3(1, 1, 1));
-	light->setIntensity(0.7);
+	light->setIntensity(1);
 	scene->addLightSource(light);
 
 	std::cout << "[ ] Reading mesh files... ";

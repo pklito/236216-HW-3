@@ -157,6 +157,8 @@ void MeshModel::draw(Renderer* renderer)
 {
 	std::vector<vec3> vec(vertex_positions, vertex_positions + (3 * face_count));
 
+	std::cout << "!!!!!!!!!!!!!!!!!\nfill object = " << fill_obj << std::endl;
+
 	if(vertex_normals_exist && show_vertex_normals){
 		std::vector<vec3> norm_to_vert(normals_to_vertices, normals_to_vertices + (3 * face_count));
 		renderer->DrawTriangles(&vec, _world_transform, material, &norm_to_vert, show_face_normals, vec3(color), fill_obj);
@@ -397,7 +399,9 @@ vec3 MeshModel::calculateBoundingBoxCenter()
 
 void MeshModel::setFillObj(bool fill)
 {
+	std::cout << "IN SETFILLOBJ IN MESH, got fill: " << fill << std::endl;
 	fill_obj = fill;
+	std::cout << "IN SETFILLOBJ IN MESH, fill_obj: " << fill_obj << std::endl;
 }
 
 void MeshModel::resetToCenter() {

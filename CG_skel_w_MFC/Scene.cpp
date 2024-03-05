@@ -159,6 +159,7 @@ void Scene::draw()
 		}
 		i++;
 	}
+
 	
 	// 1. Send the renderer the current camera transform and the projection
 	// 2. Tell all models to draw themselves
@@ -210,7 +211,6 @@ void Scene::setFillObj(bool fill)
 	if (models.size() >= 1) {
 		models[activeModel]->setFillObj(fillCurrObj);
 	}
-	fillCurrObj = !fill;
 }
 
 bool Scene::getFillObj()
@@ -243,6 +243,7 @@ void Scene::rotateCameraToSelectedObject(){
 	vec4 camera_location = cameras[activeCamera]->getCameraPosition();
 	cameras[activeCamera]->LookAt(camera_location, model_center, vec3(0, 1, 0));
 }
+
 
 //---------------------
 //   CAMERA

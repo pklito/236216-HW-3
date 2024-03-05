@@ -25,4 +25,6 @@ public:
 	void setPos(vec3 pos) { position = pos; }
 	void setColor(vec3 new_color) { color = new_color; }
 	void setIntensity(float new_intensity) { intensity = new_intensity; }
+
+	vec3 getLightPosition() { return position; }
 };
