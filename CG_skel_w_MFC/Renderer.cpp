@@ -298,7 +298,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		vec3 n2 = vec3(RANGE(normCoor2.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height), normCoor2.z);
 
 		if (fill) {
-			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), toVec3(vn1), toVec3(vn2), toVec3(vn3), world_transform, edge_color, material);
+			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), toVec3(vn1), toVec3(vn2), toVec3(vn3), edge_color, material);
 		} else {
 			DrawLine(p1, p2, edge_color);
 			DrawLine(p2, p3, edge_color);
@@ -347,16 +347,22 @@ vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_
 
 	for (auto& light : lights) 
 	{
+		//This might be wrong, we might wanna do our calculations in world space, not clip space(based on other students)
+		//Would be faster to do this outside of this function
+		vec3 light_position = toEuclidian(mat_project * (mat_transform_inverse * vec4(light->position)));
 		// Ambient component
-		vec3 light_direction = (light->direction != NULL) ? normalize(light->position - surface_point) : normalize(-light->direction);
+		// ...
+
+		// Diffuse component
+		vec3 light_direction = normalize(light_position - surface_point);
 		float cos_theta = max(0.0f, dot(surface_normal, light_direction));
 		diffuse_color += diffuse_color + material.k_diffuse * light->color * color * light->intensity * cos_theta;
 
 
 		// Specular component
 		vec3 reflection_direction = reflect(-light_direction, surface_normal);
-		float cos_alpha = max(0.0f, dot(reflection_direction, view_direction));
-		specular_color += specular_color + material.k_specular * light->color * color * light->intensity * std::pow(cos_alpha, material.k_shiny);
+		float cos_phi = max(0.0f, dot(reflection_direction, view_direction));
+		specular_color += specular_color + material.k_specular * light->color * color * light->intensity * std::pow(cos_phi, material.k_shiny);
 	}
 
 	vec3 total_color = ambient_color + diffuse_color + specular_color;
