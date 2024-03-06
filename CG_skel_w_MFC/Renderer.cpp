@@ -223,7 +223,7 @@ void Renderer::DrawPixelSafe(int x, int y, float z, vec3 color){
  * vertices: vector of the camera space vertices
  * normals: directions of the respective world space normals.
  */
-void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, Material material, const vector<vec3>* edge_normals, bool draw_normals, vec3 edge_color, bool fill, ShadingMethod shadingMethod)
+void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, Material material, const vector<vec3>* edge_normals, bool draw_normals, vec3 edge_color, bool fill)
 
 {
 	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
@@ -298,7 +298,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		vec3 n2 = vec3(RANGE(normCoor2.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height), normCoor2.z);
 
 		if (fill) {
-			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), world_transform, edge_color, material, shadingMethod);
+			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), world_transform, edge_color, material);
 		} else {
 			DrawLine(p1, p2, edge_color);
 			DrawLine(p2, p3, edge_color);
@@ -391,7 +391,7 @@ void Renderer::changeShadingMethod()
 }
 
 
-void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const mat4& world_transform, const vec3& color, Material material, ShadingMethod shadingMethod)
+void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const mat4& world_transform, const vec3& color, Material material)
 {
 	float aspect_ratio = (float)(m_width) / (float)(m_height);
 	vec3 p1 = vec3(RANGE(vert1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height), vert1.z);
