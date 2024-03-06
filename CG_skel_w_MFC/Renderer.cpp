@@ -226,8 +226,6 @@ void Renderer::DrawPixelSafe(int x, int y, float z, vec3 color){
 void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, Material material, const vector<vec3>* edge_normals, bool draw_normals, vec3 edge_color, bool fill, ShadingMethod shadingMethod)
 
 {
-	// Clear the buffer before drawing new content
-
 	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
 	vector<vec3>::const_iterator normal_it = edge_normals != NULL ? edge_normals->begin() : vertices->begin();
 	for(auto it = vertices->begin(); it != vertices->end(); ++it, ++normal_it){
@@ -251,16 +249,26 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		vert2 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vert2));
 		vert3 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vert3));
 
-		vn1 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vn1));
-		vn2 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vn2));
-		vn3 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vn3));
-
 		if(vert1.z < -1 || vert1.z > 1 || vert2.z < -1 || vert2.z > 1 || vert3.z < -1 || vert3.z > 1){
 			continue;
 		}
 		vec3 norm_dir = calculateNormal(toVec3(vert1),toVec3(vert2),toVec3(vert3))/5.f;
 		normCoor1 = (vert1 + vert2 + vert3) / 3;
 		normCoor2 = normCoor1 + norm_dir;
+
+		if(edge_normals != NULL){
+			
+			vn1 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vn1));
+			vn2 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vn2));
+			vn3 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vn3));
+		}
+		else{
+			//Use the face normal if no edge normals exist
+			//(If we want to compute them better, do it in MeshModel.cpp)
+			vn1 = vec4(0.5* norm_dir) + vert1;
+			vn2 = vec4(0.5* norm_dir) + vert2;
+			vn3 = vec4(0.5* norm_dir) + vert3;
+		}
 
 		//BackFace culling (currently not done in wireframe mode)
 		if(fill){
