@@ -290,12 +290,12 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		/*
 		Clipspace coordinates to screenspace coordinates
 		*/
-		vec3 p1 = vec3(RANGE(vert1.x,-1,1,0,m_width), RANGE(vert1.y,-1,1,0,m_height), vert1.z);
-		vec3 p2 = vec3(RANGE(vert2.x,-1,1,0,m_width), RANGE(vert2.y,-1,1,0,m_height), vert2.z);
-		vec3 p3 = vec3(RANGE(vert3.x,-1,1,0,m_width), RANGE(vert3.y,-1,1,0,m_height), vert3.z);
+		vec3 p1 = vec3(RANGE(vert1.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vert1.y,-1,1,0,m_height), vert1.z);
+		vec3 p2 = vec3(RANGE(vert2.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vert2.y,-1,1,0,m_height), vert2.z);
+		vec3 p3 = vec3(RANGE(vert3.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vert3.y,-1,1,0,m_height), vert3.z);
 
-		vec3 n1 = vec3(RANGE(normCoor1.x, -1, 1, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height), normCoor1.z);
-		vec3 n2 = vec3(RANGE(normCoor2.x, -1, 1, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height), normCoor2.z);
+		vec3 n1 = vec3(RANGE(normCoor1.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height), normCoor1.z);
+		vec3 n2 = vec3(RANGE(normCoor2.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height), normCoor2.z);
 
 		if (fill) {
 			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), world_transform, edge_color, material, shadingMethod);
@@ -507,11 +507,11 @@ void Renderer::DrawNormalsToVertices(const vector<vec3>* vertices, const vector<
 		float aspect_ratio = (float)(m_width)/(float)(m_height);
 		// Apply the range to the normalized point
 
-		vec3 first_point = vec3(RANGE(normCoor.x, -1, 1, 0, m_width), RANGE(normCoor.y, -1, 1, 0, m_height), normCoor.z);
+		vec3 first_point = vec3(RANGE(normCoor.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(normCoor.y, -1, 1, 0, m_height), normCoor.z);
 
 		// Normal:
 		if (draw_normals) {
-			DrawLine(first_point, vec3(RANGE(vert1.x, -1, 1, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height), vert1.z), vec3(0.2,0.5,1));
+			DrawLine(first_point, vec3(RANGE(vert1.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height), vert1.z), vec3(0.2,0.5,1));
 
 		}
     }
@@ -573,7 +573,7 @@ void Renderer::DrawSymbol(const vec3& vertex, const mat4& world_transform, SYMBO
 	const std::vector<vec2>* decided = &square_shape;
 
 	vec4 screen_space = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vec4(vertex, 1.0f)));
-	vec2 image_space = vec2(RANGE(screen_space.x, -1, 1, 0, m_width), RANGE(screen_space.y, -1, 1, 0, m_height));
+	vec2 image_space = vec2(RANGE(screen_space.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(screen_space.y, -1, 1, 0, m_height));
 	switch (symbol) {
 	case SYM_SQUARE:
 		decided = &square_shape;
