@@ -338,24 +338,12 @@ vec3 getBarycentricCoordinates(const vec2& p, const vec2& p1, const vec2& p2, co
 	return vec3(l1, l2, l3);
 }
 
-vec3 Renderer::calculateViewDirection(const vec3& surface_point, const mat4& world_transform) 
-{
-	// Transform surface point to world coordinates using the world transform matrix
-	vec4 world_surface_point = world_transform * vec4(surface_point, 1.0f);
-	vec3 world_surface_point3 = vec3(world_surface_point.x, world_surface_point.y, world_surface_point.z);
-
-	// Calculate the view direction from the surface point to the camera position
-	vec3 view_direction = normalize(camera_position - world_surface_point3);
-
-	return view_direction;
-}
-
-vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_normal, const mat4& world_transform, Material material, const vec3& color)
+vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_normal, Material material, const vec3& color)
 {
 	vec3 ambient_color(0.0f, 0.0f, 0.0f);
 	vec3 diffuse_color(0.0f, 0.0f, 0.0f);
 	vec3 specular_color(0.0f, 0.0f, 0.0f);
-	vec3 view_direction = calculateViewDirection(surface_point, world_transform);
+	vec3 view_direction = vec3(0,0,1);
 
 	for (auto& light : lights) 
 	{
@@ -392,7 +380,7 @@ void Renderer::changeShadingMethod()
 }
 
 
-void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const vec3& vn1, const vec3& vn2, const vec3& vn3, const mat4& world_transform, const vec3& color, const Material& material)
+void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const vec3& vn1, const vec3& vn2, const vec3& vn3, const vec3& color, const Material& material)
 {
 	float aspect_ratio = (float)(m_width) / (float)(m_height);
 	vec3 p1 = vec3(RANGE(vert1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height), vert1.z);
@@ -446,7 +434,7 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 				// Calculate the current norm
 				vec3 norm = weights.x * (vn1-vert1) + weights.y * (vn2-vert2) + weights.z * (vn3-vert3);
 
-				vec3 phong_color = phongIllumination(surface_point, norm, world_transform, material, color);
+				vec3 phong_color = phongIllumination(surface_point, norm, material, color);
 
 				DrawPixel(x, y, surface_point.z, phong_color);
       		}
