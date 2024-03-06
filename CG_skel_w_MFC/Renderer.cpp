@@ -260,7 +260,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		}
 		vec3 norm_dir = calculateNormal(toVec3(vert1),toVec3(vert2),toVec3(vert3))/5.f;
 		normCoor1 = (vert1 + vert2 + vert3) / 3;
-		normCoor2 = normCoor1 - norm_dir;
+		normCoor2 = normCoor1 + norm_dir;
 
 		//BackFace culling (currently not done in wireframe mode)
 		if(fill){
