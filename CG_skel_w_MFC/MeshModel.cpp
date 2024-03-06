@@ -159,7 +159,7 @@ void MeshModel::draw(Renderer* renderer)
 
 	std::cout << "!!!!!!!!!!!!!!!!!\nfill object = " << fill_obj << std::endl;
 
-	if(vertex_normals_exist && show_vertex_normals){
+	if(vertex_normals_exist){
 		std::vector<vec3> norm_to_vert(normals_to_vertices, normals_to_vertices + (3 * face_count));
 		renderer->DrawTriangles(&vec, _world_transform, material, &norm_to_vert, show_face_normals, vec3(color), fill_obj);
 	}
