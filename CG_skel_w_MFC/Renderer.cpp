@@ -362,13 +362,13 @@ vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_
 		// Ambient component
 		vec3 light_direction = (light->direction != NULL) ? normalize(light->position - surface_point) : normalize(-light->direction);
 		float cos_theta = max(0.0f, dot(surface_normal, light_direction));
-		diffuse_color = diffuse_color + material.k_diffuse * light->color * color * light->intensity * cos_theta;
+		diffuse_color += diffuse_color + material.k_diffuse * light->color * color * light->intensity * cos_theta;
 
 
 		// Specular component
 		vec3 reflection_direction = reflect(-light_direction, surface_normal);
 		float cos_alpha = max(0.0f, dot(reflection_direction, view_direction));
-		specular_color = specular_color + material.k_specular * light->color * color * light->intensity * std::pow(cos_alpha, material.k_shiny);
+		specular_color += specular_color + material.k_specular * light->color * color * light->intensity * std::pow(cos_alpha, material.k_shiny);
 	}
 
 	vec3 total_color = ambient_color + diffuse_color + specular_color;
@@ -427,8 +427,6 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 
 		// Sort the intersection points in ascending order
 		BubbleSort(intersections);
-		
-		vec3 normal = normalize(toVec3(world_transform * vec4(calculateNormal(vert1, vert2, vert3), 0.0)));
 
 		// Fill the pixels between pairs of intersections
 		for (int i = 0; i < intersections.size(); i += 2) 
