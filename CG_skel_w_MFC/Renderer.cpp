@@ -298,7 +298,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		vec3 n2 = vec3(RANGE(normCoor2.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height), normCoor2.z);
 
 		if (fill) {
-			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), world_transform, edge_color, material);
+			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), toVec3(vn1), toVec3(vn2), toVec3(vn3), world_transform, edge_color, material);
 		} else {
 			DrawLine(p1, p2, edge_color);
 			DrawLine(p2, p3, edge_color);
@@ -394,7 +394,7 @@ void Renderer::changeShadingMethod()
 }
 
 
-void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const mat4& world_transform, const vec3& color, Material material)
+void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const vec3& vn1, const vec3& vn2, const vec3& vn3, const mat4& world_transform, const vec3& color, const Material& material)
 {
 	float aspect_ratio = (float)(m_width) / (float)(m_height);
 	vec3 p1 = vec3(RANGE(vert1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height), vert1.z);

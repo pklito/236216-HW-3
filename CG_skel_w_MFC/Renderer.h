@@ -67,7 +67,7 @@ public:
 	void DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, Material material, const vector<vec3>* edge_normals = NULL, bool draw_normals = false,vec3 edge_color = vec3(1,1,1), bool fill = false);
 	vec3 getBarycentricCoordinates(const vec2& p, const vec2& p1, const vec2& p2, const vec2& p3);
 	vec3 phongIllumination(const vec3& surface_point, const vec3& surface_normal, const mat4& world_transform, Material material, const vec3& color);
-	void FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const mat4& world_transform, const vec3& color, Material material);
+	void FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const vec3& vn1, const vec3& vn2, const vec3& vn3, const mat4& world_transform, const vec3& color, const Material& material);
 
 
 	vec3 calculateViewDirection(const vec3& surface_point, const mat4& world_transform);
