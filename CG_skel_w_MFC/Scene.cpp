@@ -25,12 +25,6 @@ void Camera::Perspective(float fovy, float aspect, float zNear, float zFar) {
 	Frustum(-fovy*aspect*zNear,fovy*aspect*zNear,-fovy*zNear,fovy*zNear,zNear,zFar);
 }
 
-void Camera::UpdateProjectionMatrix(float aspect_ratio)
-{
-	// Assuming you have member variables like fov, near_clip, and far_clip
-	Perspective(radians(FOV), aspect_ratio, NEAR_CLIPPING_PLANE, FAR_CLIPPING_PLANE);
-}
-
 void Scene::loadOBJModel(string fileName)
 {
 	MeshModel *model = new MeshModel(fileName);
@@ -235,6 +229,7 @@ void Scene::removeSelectedCamera(){
 
 Camera* Scene::getActiveCamera()
 {
+	std::cout << " get " << cameras[activeCamera]->getCameraPosition() << std::endl;
 	return cameras[activeCamera];
 }
 
@@ -242,6 +237,7 @@ void Scene::rotateCameraToSelectedObject(){
 	vec4 model_center = models[activeModel]->getWorldTransformation() * vec4(0, 0, 0, 1);
 	vec4 camera_location = cameras[activeCamera]->getCameraPosition();
 	cameras[activeCamera]->LookAt(camera_location, model_center, vec3(0, 1, 0));
+
 }
 
 
@@ -254,29 +250,38 @@ void Camera::draw(Renderer* renderer){
 	renderer->DrawSymbol(getCameraPosition(),mat4(),SYM_SQUARE, 1);
 }
 vec3 Camera::getCameraPosition(){
-	vec4 point = cTransformInverse * vec4(0,0,0,1);
-	return vec3(-point.x, -point.y, -point.z);
+	vec4 base = vec4(1,2,3,1);
+	std::cout << base << ", " << cTransform * base << ", " << cTransformInverse*(cTransform*base) << std::endl;
+	vec4 point = cTransform * vec4(0,0,0,1);
+	return toVec3(point);
 }
 
-void Camera::setInverseTransformation(const mat4& InvTransform){
-	cTransformInverse = InvTransform;
-}
-void Camera::applyWorldInverseTransformation(const mat4& InvMatrix){
+void Camera::_applyWorldTransformInverse(const mat4& InvMatrix){
 	cTransformInverse = cTransformInverse * InvMatrix;
 }
 
-void Camera::applyScreenInverseTransformation(const mat4& InvMatrix){
+void Camera::_applyScreenTransformInverse(const mat4& InvMatrix){
 	cTransformInverse =  InvMatrix * cTransformInverse;
+}
+
+void Camera::_applyWorldTransform(const mat4& matrix){
+	cTransform = matrix * cTransform;
+}
+
+void Camera::_applyScreenTransform(const mat4& matrix){
+	cTransform = cTransform * matrix;
 }
 
 void Camera::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, bool in_world)
 {
 	//Inverse of Translate
 	if(in_world){
-		applyWorldInverseTransformation(Translate(-x_trans,-y_trans,-z_trans));
+		_applyWorldTransformInverse(Translate(-x_trans,-y_trans,-z_trans));
+		_applyWorldTransform(Translate(x_trans,y_trans,z_trans));
 	}
 	else{
-		applyScreenInverseTransformation(Translate(-x_trans,-y_trans,-z_trans));
+		_applyScreenTransformInverse(Translate(-x_trans,-y_trans,-z_trans));
+		_applyScreenTransform(Translate(x_trans,y_trans,z_trans));
 	}
 }
 
@@ -284,10 +289,12 @@ void Camera::rotate(GLfloat theta_angle, int axis, bool in_world)
 {
 	//Inverse of Rotate
 	if(in_world){
-		applyWorldInverseTransformation(RotateAxis(-theta_angle,axis));
+		_applyWorldTransformInverse(RotateAxis(-theta_angle,axis));
+		_applyWorldTransform(RotateAxis(theta_angle,axis));
 	}
 	else{
-		applyScreenInverseTransformation(RotateAxis(-theta_angle,axis));
+		_applyScreenTransformInverse(RotateAxis(-theta_angle,axis));
+		_applyScreenTransform(RotateAxis(theta_angle,axis));
 	}
 
 }
@@ -299,16 +306,15 @@ void Camera::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale, bool in_wo
 
 	//Inverse of Scale
 	if(in_world){
-		applyWorldInverseTransformation(Scale(1/x_scale,1/y_scale,1/z_scale));
+		_applyWorldTransformInverse(Scale(1/x_scale,1/y_scale,1/z_scale));
+		_applyWorldTransform(Scale(x_scale,y_scale,z_scale));
 	}
 	else{
-		applyWorldInverseTransformation(Scale(1/x_scale,1/y_scale,1/z_scale));
+		_applyScreenTransformInverse(Scale(1/x_scale,1/y_scale,1/z_scale));
+		_applyScreenTransform(Scale(x_scale,y_scale,z_scale));
 	}
 }
 
-void Camera::setTransformation(const mat4& transform) {
-	cTransform = transform;
-}
 void Camera::setProjection(const mat4& perspective) {
 	projection = perspective;
 }
@@ -329,10 +335,7 @@ void Camera::LookAt(const vec4& eye, const vec4& at, const vec4& up ){
 	vec4 n = vec4(normalize(toVec3(eye - at)),0);	//I make it Vec3 because normalizing with W would be wrong
 	vec4 u = vec4(cross(up, n),0);
 	vec4 v = vec4(cross(n, u),0);
-	std::cout << "n u v: " << n << u << v << std::endl;
 	mat4 rotate_inv = mat4(u,v,n,vec4(0,0,0,1));
-	std::cout << "Rot Matrix: " << rotate_inv << std::endl;
-	std::cout << "Transform Matrix: " << Translate(-eye) << std::endl;
 	// set the matrixes stored.
 	cTransformInverse = rotate_inv * Translate(-eye);
 	cTransform = Translate(eye) * transpose(rotate_inv);

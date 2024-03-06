@@ -7,6 +7,8 @@
 #include "util.h"
 using namespace std;
 
+class Camera;
+
 typedef enum {
 	SYM_STAR,
 	SYM_SQUARE,
@@ -66,6 +68,7 @@ public:
 	vec3 phongIllumination(const vec3& surface_point, const vec3& surface_normal, const mat4& world_transform, Material material, const vec3& color);
 	void FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const mat4& world_transform, const vec3& color, Material material, ShadingMethod shadingMethod);
 
+
 	vec3 calculateViewDirection(const vec3& surface_point, const mat4& world_transform);
 	void DrawNormalsToVertices(const vector<vec3>* vertices, const vector<vec3>* vertex_normals = NULL, bool draw_vertex_normals = false);
 	void setCameraPos(vec3 camera_pos);
@@ -75,29 +78,18 @@ public:
 	void DrawBoundingBox(const vec3* bounding_box, const mat4& world_transform, bool draw_box = false);
 	void DrawPixel(int x, int y, float z, vec3 color);
 	void DrawPixelSafe(int x, int y, float z, vec3 color);
+
 	void DrawSymbol(const vec3& vertex ,const mat4& =  mat4(), SYMBOL_TYPE symbol = SYM_STAR, float scale = 1, vec3 colors = vec3(0.6, 0.9, 0.4));
 	void SetCameraTransformInverse(const mat4& cTransform);
 	void SetProjection(const mat4& projection);
 	void setCameraMatrixes(const mat4& cTransform, const mat4& Projection);
-	void SetObjectMatrices(const mat4& oTransform, const mat3& nTransform);
+	void setCameraMatrixes(Camera* camera);
 	void SwapBuffers();
-	void ClearColorBuffer();
-	void ClearDepthBuffer();
+	//void ClearColorBuffer();
+	//void ClearDepthBuffer();
 	void SetDemoBuffer();
-
-	void Render();
-	void HandleInput();
 };
 
 #define CLAMP(x,min,max) ((x) > (max) ? (max) : ((x) < (min) ? (min) : (x)))
 
 #define RANGE(x,min,max,new_min,new_max) (((((x)-(min))*((new_max)-(new_min))/((max)-(min))))+(new_min))
-
-/*
-Macro set pixels
-#define SET_CHANNEL(array,x,y,width,channel,value) ((array)[INDEX((width),(x),(y),(channel))]=value)
-#define SET_PIXEL(array,x,y,width,r,g,b)	SET_CHANNEL((array),(x),(y),(width),0,(r)); SET_CHANNEL((array),(x),(y),(width),1,(g)); SET_CHANNEL((array),(x),(y),(width),2,(b))
-
-#define SET_CHANNEL_CLAMPED(array,x,y,width,height,channel,value) SET_CHANNEL(array,CLAMP((x),0,(width)),CLAMP((y),0,(height)),(width),(channel),(value))
-#define SET_PIXEL_CLAMPED(array,x,y,width,height,r,g,b) SET_PIXEL((array),CLAMP((x),0,(width)),CLAMP((y),0,(height)),(width),(r),(g),(b))
-*/

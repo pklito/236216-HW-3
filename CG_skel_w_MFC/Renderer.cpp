@@ -82,6 +82,7 @@ void Renderer::ResizeBuffers(int new_width, int new_height) {
 }
 
 void Renderer::ClearBuffer(){
+	std::fill(m_zbuffer,m_zbuffer+(m_width*m_height*3),0);
 	std::fill(m_outBuffer,m_outBuffer+(m_width*m_height*3),0);
 	std::fill(m_zbuffer, m_zbuffer + (m_width * m_height), far_z);
 }
@@ -224,6 +225,7 @@ void Renderer::DrawPixelSafe(int x, int y, float z, vec3 color){
  * normals: directions of the respective world space normals.
  */
 void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, Material material, const vector<vec3>* edge_normals, bool draw_normals, vec3 edge_color, bool fill, ShadingMethod shadingMethod)
+
 {
 	// Clear the buffer before drawing new content
 
@@ -261,6 +263,13 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		normCoor1 = (vert1 + vert2 + vert3) / 3;
 		normCoor2 = normCoor1 - norm_dir;
 
+		//BackFace culling (currently not done in wireframe mode)
+		if(fill){
+			if(norm_dir.z > 0){
+				continue;
+			}
+		}
+
 
 		//sometimes a point will get sent really far (matrix bs)
 		//the DrawLine function wont draw out of bounds, but it will take
@@ -270,6 +279,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 			continue;
 		}
 
+		float aspect_ratio = (float)(m_width)/(float)(m_height);
 		/*
 		Clipspace coordinates to screenspace coordinates
 		*/
@@ -415,6 +425,7 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 		{
 			int startX = max(0, intersections[i]);
 			int endX = min(m_width, intersections[i + 1]); 
+
 			
 			// Interpolate Z-values
 			float z1 = p1.z + (static_cast<float>(y - p1.y) / (p3.y - p1.y)) * (p3.z - p1.z);
@@ -437,7 +448,7 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 					DrawPixel(x, y, z, phong_color);
 					m_zbuffer[Z_INDEX(m_width, x, y)] = z;
 				}
-			}
+      }
 		}
 	}
 }
@@ -484,12 +495,15 @@ void Renderer::DrawNormalsToVertices(const vector<vec3>* vertices, const vector<
 		
 		// Scale down the normalized vector (make the normals smaller)
 
+		float aspect_ratio = (float)(m_width)/(float)(m_height);
 		// Apply the range to the normalized point
+
 		vec3 first_point = vec3(RANGE(normCoor.x, -1, 1, 0, m_width), RANGE(normCoor.y, -1, 1, 0, m_height), normCoor.z);
 
 		// Normal:
 		if (draw_normals) {
 			DrawLine(first_point, vec3(RANGE(vert1.x, -1, 1, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height), vert1.z), vec3(0.2,0.5,1));
+
 		}
     }
 }
@@ -505,10 +519,12 @@ void Renderer::DrawBoundingBox(const vec3* bounding_box, const mat4& world_trans
 	for (int i = 0; i < 8; i++) {
 		// Convert 3D point to homogeneous coordinates
 		vec4 homogeneous_point = vec4(bounding_box[i], 1.0f);
+		
+		float aspect_ratio = (float)(m_width)/(float)(m_height);
 
 		// Apply transformations
 		new_bounding_box[i] = toEuclidian(mat_project * (mat_transform_inverse * world_transform * homogeneous_point));
-		bounding_box_in_vectwo[i] = vec2(RANGE(new_bounding_box[i].x, -1, 1, 0, m_width), RANGE(new_bounding_box[i].y, -1, 1, 0, m_height));
+		bounding_box_in_vectwo[i] = vec2(RANGE(new_bounding_box[i].x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(new_bounding_box[i].y, -1, 1, 0, m_height));
 		//bounding_box_in_vectwo[i] = vec2(new_bounding_box[i].x, new_bounding_box[i].y);
 
 	}
@@ -533,6 +549,7 @@ void Renderer::DrawBoundingBox(const vec3* bounding_box, const mat4& world_trans
 
 		// Draw line with Z-buffer check
 		DrawLine(vec3(bounding_box_in_vectwo[indices[i][0]], z1), vec3(bounding_box_in_vectwo[indices[i][1]], z2), vec3(1, 1, 0));
+
 	}
 }
 
@@ -571,6 +588,7 @@ void Renderer::DrawSymbol(const vec3& vertex, const mat4& world_transform, SYMBO
 		// Draw line with Z-buffer check
 		DrawLine(vec3(scale * (*a) + image_space, screen_space.z), vec3(scale * (*(a + 1)) + image_space, screen_space.z), colors);
 		a += 2;
+
 	}
 }
 
@@ -585,6 +603,10 @@ void Renderer::SetProjection(const mat4& projection){
 void Renderer::setCameraMatrixes(const mat4& cTransformInverse, const mat4& Projection){
 	SetCameraTransformInverse(cTransformInverse);
 	SetProjection(Projection);
+}
+
+void Renderer::setCameraMatrixes(Camera* camera){
+	setCameraMatrixes(camera->getTransformInverse(), camera->getProjection());
 }
 
 
