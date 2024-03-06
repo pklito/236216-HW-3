@@ -319,13 +319,15 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 * Given a triangle and a point, return 3 floats, representing the point as an average of the 3 points
 * Returns: vec3: wp1 wp2 wp3
 */
-vec3 Renderer::getBarycentricCoordinates(const vec2& p, const vec2& p1, const vec2& p2, const vec2& p3) {
-	GLfloat A3 = cross(p - p1, p2 - p1);
-	GLfloat A1 = cross(p - p2, p3 - p2);
-	GLfloat A2 = cross(p - p3, p1 - p3);
+vec3 getBarycentricCoordinates(const vec2& p, const vec2& p1, const vec2& p2, const vec2& p3){
+	//More optimized implementation taken from : https://gamedev.stackexchange.com/a/116304
+	float invDET = 1./((p2.y-p3.y) * (p1.x-p3.x) + 
+                   (p3.x-p2.x) * (p1.y-p3.y));
 
-	GLfloat Asum = A3 + A2 + A1;
-	return vec3(A3 / Asum, A2 / Asum, A1 / Asum);
+	float l1 = ((p2.y-p3.y) * (p.x-p3.x) + (p3.x-p2.x) * (p.y-p3.y)) * invDET; 
+	float l2 = ((p3.y-p1.y) * (p.x-p3.x) + (p1.x-p3.x) * (p.y-p3.y)) * invDET; 
+	float l3 = 1. - l1 - l2;
+	return vec3(l1, l2, l3);
 }
 
 vec3 Renderer::calculateViewDirection(const vec3& surface_point, const mat4& world_transform) 
