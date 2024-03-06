@@ -18,7 +18,8 @@ typedef enum {
 
 
 enum ShadingMethod {
-	BARYCENTRIC,
+	FLAT,
+	GOURAUD,
 	PHONG
 };
 

@@ -380,13 +380,16 @@ vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_
 
 void Renderer::changeShadingMethod()
 {
-	if (shading_method == PHONG)
-	{
-		shading_method = BARYCENTRIC;
-	}
-	else 
-	{
-		shading_method = PHONG;
+	switch(shading_method){
+		case FLAT:
+			shading_method = GOURAUD;
+			break;
+		case GOURAUD:
+			shading_method = PHONG;
+			break;
+		case PHONG:
+			shading_method = FLAT;
+			break;
 	}
 }
 
