@@ -439,24 +439,20 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 			int endX = min(m_width, intersections[i + 1]); 
 
 			
-			// Interpolate Z-values
-			float z1 = p1.z + (static_cast<float>(y - p1.y) / (p3.y - p1.y)) * (p3.z - p1.z);
-			float z2 = p1.z + (static_cast<float>(y - p1.y) / (p2.y - p1.y)) * (p2.z - p1.z);
-
-			
 			for (int x = startX; x <= endX; x++) {
-				// phong shading
+				// Get the weights of the three edges of the tri
 				vec3 weights = getBarycentricCoordinates(vec2(x, y), vec2(p1.x, p1.y), vec2(p2.x, p2.y), vec2(p3.x, p3.y));
-				vec3 interpolatedNormal = weights.x * normalize(toVec3(world_transform * vec4(vert1, 0.0))) +
-					weights.y * normalize(toVec3(world_transform * vec4(vert2, 0.0))) +
-					weights.z * normalize(toVec3(world_transform * vec4(vert3, 0.0)));
+				
+				// Calculate the current Z
+				vec3 surface_point = weights.x * vert1 + weights.y * vert2 + weights.z * vert3;	//Not efficient but easy to work with
+				//GLfloat z = weights.x * vert1.z + weights.y * vert2.z + weights.z * vert3.z;
+				
+				// Calculate the current norm
+				vec3 norm = weights.x * (vn1-vert1) + weights.y * (vn2-vert2) + weights.z * (vn3-vert3);
 
-				// Phong shading
-				float z = weights.x * z1 + weights.y * z2 + weights.z * p3.z;
-				vec3 surface_point = vec3(x, y, z);
-				vec3 phong_color = phongIllumination(surface_point, interpolatedNormal, world_transform, material, color);
+				vec3 phong_color = phongIllumination(surface_point, norm, world_transform, material, color);
 
-				DrawPixel(x, y, z, phong_color);
+				DrawPixel(x, y, surface_point.z, phong_color);
       		}
 		}
 	}
