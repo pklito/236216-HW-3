@@ -456,11 +456,8 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 				vec3 surface_point = vec3(x, y, z);
 				vec3 phong_color = phongIllumination(surface_point, interpolatedNormal, world_transform, material, color);
 
-				if (z < m_zbuffer[Z_INDEX(m_width, x, y)]) {
-					DrawPixel(x, y, z, phong_color);
-					m_zbuffer[Z_INDEX(m_width, x, y)] = z;
-				}
-      }
+				DrawPixel(x, y, z, phong_color);
+      		}
 		}
 	}
 }
