@@ -439,7 +439,7 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 				
 				// Calculate the current norm
 				vec3 norm = weights.x * (vn1-vert1) + weights.y * (vn2-vert2) + weights.z * (vn3-vert3);
-
+				norm = normalize(norm);
 				vec3 phong_color = phongIllumination(surface_point, norm, material, color);
 
 				DrawPixel(x, y, surface_point.z, phong_color);
