@@ -10,12 +10,12 @@
 #define Z_INDEX(width,x,y) (x+y*width)
 #define LINE_TOO_LARGE 30
 
-Renderer::Renderer() :m_width(512), m_height(512), curr_color(0)
+Renderer::Renderer() :m_width(512), m_height(512), curr_color(0), shading_method(FLAT)
 {
 	InitOpenGLRendering();
 	CreateBuffers(512,512);
 }
-Renderer::Renderer(int width, int height) :m_width(width), m_height(height), curr_color(0)
+Renderer::Renderer(int width, int height) :m_width(width), m_height(height), curr_color(0), shading_method(FLAT)
 {
 	InitOpenGLRendering();
 	CreateBuffers(width,height);
@@ -372,6 +372,7 @@ vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_
 
 void Renderer::changeShadingMethod()
 {
+	std::cout << shading_method << std::endl;
 	switch(shading_method){
 		case FLAT:
 			shading_method = GOURAUD;
@@ -379,7 +380,7 @@ void Renderer::changeShadingMethod()
 		case GOURAUD:
 			shading_method = PHONG;
 			break;
-		case PHONG:
+		default:
 			shading_method = FLAT;
 			break;
 	}
@@ -400,6 +401,18 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 	int maxY = static_cast<int>(ceil(max( p1.y, p2.y)));
 	maxY = static_cast<int>(ceil(max( maxY, p3.y )));
 
+	//Calculate colors once per polygon for FLAT and GOURAUD
+	vec3 color1 = vec3(0,0,0);
+	vec3 color2 = vec3(0,0,0);
+	vec3 color3 = vec3(0,0,0);
+	if(shading_method == FLAT){
+		color1 = phongIllumination(0.33*vert1 + 0.33*vert2 +0.33*vert3, calculateNormal(vert1,vert2,vert3),material,color);
+	}
+	if(shading_method == GOURAUD){
+		color1 = phongIllumination(vert1, vn1, material,color);
+		color2 = phongIllumination(vert2, vn2, material,color);
+		color3 = phongIllumination(vert3, vn3, material,color);
+	}
 	// Iterate through each scanline
 	for (int y = max(0, minY); y <= min(m_height - 1, maxY); y++)
 	{
@@ -435,14 +448,31 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 				
 				// Calculate the current Z
 				vec3 surface_point = weights.x * vert1 + weights.y * vert2 + weights.z * vert3;	//Not efficient but easy to work with
-				//GLfloat z = weights.x * vert1.z + weights.y * vert2.z + weights.z * vert3.z;
-				
+
+				//dont do color calculations for covered pixels!!!
+				if(surface_point.z >= m_zbuffer[Z_INDEX(m_width, x, y)]) {
+					continue;
+				}
+
 				// Calculate the current norm
 				vec3 norm = weights.x * (vn1-vert1) + weights.y * (vn2-vert2) + weights.z * (vn3-vert3);
 				norm = normalize(norm);
-				vec3 phong_color = phongIllumination(surface_point, norm, material, color);
 
-				DrawPixel(x, y, surface_point.z, phong_color);
+				// Calculate the pixel based on shading method
+				vec3 pixel_color = vec3(0,0,0);
+				switch(shading_method){
+					case FLAT:
+						pixel_color = color1;
+						break;
+					case GOURAUD:
+						pixel_color = weights.x * color1 + weights.y * color2 + weights.z * color3;
+						break;
+					case PHONG:
+						pixel_color = phongIllumination(surface_point, norm, material, color);
+						break;
+				}
+
+				DrawPixel(x, y, surface_point.z, pixel_color);
       		}
 		}
 	}
