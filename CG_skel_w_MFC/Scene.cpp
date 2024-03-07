@@ -153,6 +153,14 @@ void Scene::draw()
 		i++;
 	}
 
+	for(auto& light : lights){
+		PointLight* plight = dynamic_cast<PointLight*>(light);
+		if(plight){
+			//should be a draw() function at PointLight but theres include errors so i cba
+			m_renderer->DrawSymbol(plight->getPosition(),mat4(),SYM_STAR, 1);
+		}
+	}
+
 	
 	// 1. Send the renderer the current camera transform and the projection
 	// 2. Tell all models to draw themselves
