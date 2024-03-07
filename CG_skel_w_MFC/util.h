@@ -15,16 +15,43 @@ public:
 };
 
 class Light {
-public:
-	vec3 position;
-	vec3 direction;
+protected:
 	vec3 color;
 	float intensity;
+public:
+	Light(float intensity, const vec3& color): color(color), intensity(intensity){}
+	Light() : color(vec3(1,1,1)), intensity(1){}
+	void setColor(const vec3& color) {this->color = color;}
+	vec3 getColor() {return color;}
+	void setIntensity(float intensity) {this->intensity = intensity;}
+	float getIntensity() {return intensity;}
 
-	void setDir(vec3 dir) { direction = dir; }
-	void setPos(vec3 pos) { position = pos; }
-	void setColor(vec3 new_color) { color = new_color; }
-	void setIntensity(float new_intensity) { intensity = new_intensity; }
 
-	vec3 getLightPosition() { return position; }
 };
+
+class PointLight : public Light {
+protected:
+	vec3 position;
+
+public:
+	PointLight(float intensity, const vec3& color,vec3 position) : Light(intensity, color), position(position) {}
+
+	void setPosition(const vec3& postion) {this->position = position;}
+	vec3 getPosition() {return position;}
+};
+
+class DirectionalLight : public Light {
+protected:
+	vec3 direction;
+
+public:
+	DirectionalLight(float intensity, const vec3& color,vec3 direction) : Light(intensity, color), direction(direction) {}
+
+	void setDirection(const vec3& postion) {this->direction = direction;}
+	vec3 getDirection() {return direction;}
+};
+
+class AmbientLight : public Light {
+public:
+	AmbientLight(float intensity, const vec3& color) : Light(intensity, color) {}
+}

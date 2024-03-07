@@ -110,7 +110,6 @@ void Renderer::setCameraPos(vec3 camera_pos)
 void Renderer::addLight(Light* light)
 {
 	lights.push_back(light);
-	DrawSymbol(light->getLightPosition(), mat4(), SYM_STAR, 1);
 }
 
 void Renderer::FillEdges(float percent, vec3 color) {

@@ -561,7 +561,7 @@ int my_main(int argc, char** argv)
 	renderer = new Renderer(1024, 1024);
 	scene = new Scene(renderer);
 	Camera* camera = new Camera();
-	Light* light = new Light();
+	Light* light = new DirectionalLight(1, vec3(1,1,1),vec3(-1,0,0));
 
 	std::cout << "[ ] Camera transform: " << std::endl;
 	camera->LookAt(vec3(0,0,1),vec3(0,0,-1),vec3(0,1,0));
@@ -570,10 +570,6 @@ int my_main(int argc, char** argv)
 	std::cout <<"!"<< camera->getProjection();
 	renderer->setCameraMatrixes(scene->getActiveCamera());
 
-	light->setDir(vec3(-1, -1, -1));
-	light->setPos(vec3(10, 2, 1));
-	light->setColor(vec3(1, 1, 1));
-	light->setIntensity(1);
 	scene->addLightSource(light);
 
 	std::cout << "[ ] Reading mesh files... ";
