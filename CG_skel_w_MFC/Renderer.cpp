@@ -413,9 +413,9 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 		color1 = phongIllumination(0.33*vert1 + 0.33*vert2 +0.33*vert3, calculateNormal(vert1,vert2,vert3),material,color);
 	}
 	if(shading_method == GOURAUD){
-		color1 = phongIllumination(vert1, vn1, material,color);
-		color2 = phongIllumination(vert2, vn2, material,color);
-		color3 = phongIllumination(vert3, vn3, material,color);
+		color1 = phongIllumination(vert1, normalize(vn1-vert1), material,color);
+		color2 = phongIllumination(vert2, normalize(vn2-vert2), material,color);
+		color3 = phongIllumination(vert3, normalize(vn3-vert3), material,color);
 	}
 	// Iterate through each scanline
 	for (int y = max(0, minY); y <= min(m_height - 1, maxY); y++)
