@@ -345,7 +345,7 @@ vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_
 	{
 		// Ambient component
 		if(dynamic_cast<AmbientLight*>(light)){
-			ambient_color += light->getColor() * light->getIntensity();
+			ambient_color += light->getColor() * material.k_ambient * light->getIntensity();
 			continue;
 		}
 		vec3 light_direction;
