@@ -228,7 +228,6 @@ void Scene::removeSelectedCamera(){
 
 Camera* Scene::getActiveCamera()
 {
-	std::cout << " get " << cameras[activeCamera]->getCameraPosition() << std::endl;
 	return cameras[activeCamera];
 }
 
@@ -250,7 +249,6 @@ void Camera::draw(Renderer* renderer){
 }
 vec3 Camera::getCameraPosition(){
 	vec4 base = vec4(1,2,3,1);
-	std::cout << base << ", " << cTransform * base << ", " << cTransformInverse*(cTransform*base) << std::endl;
 	vec4 point = cTransform * vec4(0,0,0,1);
 	return toVec3(point);
 }

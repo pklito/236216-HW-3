@@ -157,8 +157,6 @@ void MeshModel::draw(Renderer* renderer)
 {
 	std::vector<vec3> vec(vertex_positions, vertex_positions + (3 * face_count));
 
-	std::cout << "!!!!!!!!!!!!!!!!!\nfill object = " << fill_obj << std::endl;
-
 	if(vertex_normals_exist){
 		std::vector<vec3> norm_to_vert(normals_to_vertices, normals_to_vertices + (3 * face_count));
 		renderer->DrawTriangles(&vec, _world_transform, material, &norm_to_vert, show_face_normals, vec3(color), fill_obj);
@@ -225,7 +223,7 @@ void MeshModel::rotate(GLfloat theta, int mode)
 		rotation_matrix = RotateZ(theta);
 	}
 	else {
-		std::cout << "something is wrong" << std::endl;
+		std::cout << "ERROR - ILLEGAL ROTATION PARAMETER:" << mode << std::endl;
 		return;
 	}
 	while (i < 3*face_count) {
@@ -269,7 +267,6 @@ void MeshModel::normalToFace()
 
 void MeshModel::changeColor()
 {
-	std::cout << "CURR COLORS NUMBER IS: " << curr_color << std::endl;
 	if (curr_color == 6) {
 		curr_color = 0;
 	}
@@ -277,7 +274,6 @@ void MeshModel::changeColor()
 		curr_color = curr_color + 1;
 		GetColorToFill();
 	}
-	std::cout << "CURR COLORS NUMBER AFTER CHANGE IS: " << curr_color << std::endl;
 }
 
 void MeshModel::GetColorToFill() {
@@ -399,9 +395,7 @@ vec3 MeshModel::calculateBoundingBoxCenter()
 
 void MeshModel::setFillObj(bool fill)
 {
-	std::cout << "IN SETFILLOBJ IN MESH, got fill: " << fill << std::endl;
 	fill_obj = fill;
-	std::cout << "IN SETFILLOBJ IN MESH, fill_obj: " << fill_obj << std::endl;
 }
 
 void MeshModel::resetToCenter() {

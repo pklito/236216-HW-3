@@ -70,7 +70,7 @@ public:
 
 	void DrawNormalsToVertices(const std::vector<vec3>* vertices, const std::vector<vec3>* vertex_normals = NULL, bool draw_vertex_normals = false);
 	void setCameraPos(vec3 camera_pos);
-	void setLights(std::vector<Light*>* lights) {std::cout << "INITIALIZED" << lights << std::endl; this->lights = lights;};
+	void setLights(std::vector<Light*>* lights) {this->lights = lights;};
 	void changeShadingMethod();
 
 	void DrawBoundingBox(const vec3* bounding_box, const mat4& world_transform, bool draw_box = false);

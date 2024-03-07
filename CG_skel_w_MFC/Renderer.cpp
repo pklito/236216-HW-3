@@ -375,7 +375,6 @@ vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_
 
 void Renderer::changeShadingMethod()
 {
-	std::cout << shading_method << std::endl;
 	switch(shading_method){
 		case FLAT:
 			shading_method = GOURAUD;
