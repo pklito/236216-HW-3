@@ -571,7 +571,7 @@ int my_main(int argc, char** argv)
 	renderer->setCameraMatrixes(scene->getActiveCamera());
 
 	light->setDir(vec3(-1, -1, -1));
-	light->setPos(vec3(500, 1000, 6));
+	light->setPos(vec3(10, 2, 1));
 	light->setColor(vec3(1, 1, 1));
 	light->setIntensity(1);
 	scene->addLightSource(light);
