@@ -353,8 +353,10 @@ vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_
 			light_direction = normalize(light_position - surface_point);
 		}
 		DirectionalLight* dlight = dynamic_cast<DirectionalLight*>(light);
-		if(dlight){
-			light_direction = dlight->getDirection();
+		if(dlight){	
+			//THIS MIGHT BE WRONG
+			vec3 dir_point  = toEuclidian(mat_project * (mat_transform_inverse * vec4(dlight->getDirection())));
+			light_direction = normalize(dir_point);
 		}
 
 
