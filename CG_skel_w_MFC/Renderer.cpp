@@ -104,11 +104,6 @@ void Renderer::setCameraPos(vec3 camera_pos)
 	camera_position = camera_pos;
 }
 
-void Renderer::addLight(Light* light)
-{
-	lights.push_back(light);
-}
-
 void Renderer::FillEdges(float percent, vec3 color) {
 	if(percent <= 0){
 		return;
@@ -340,8 +335,9 @@ vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_
 	vec3 diffuse_color(0.0f, 0.0f, 0.0f);
 	vec3 specular_color(0.0f, 0.0f, 0.0f);
 	vec3 view_direction = vec3(0,0,-1);
-
-	for (auto& light : lights) 
+	//use a reference to the vector rather than a pointer
+	std::vector<Light*>& lights_ref = *lights;
+	for (auto& light : lights_ref) 
 	{
 		// Ambient component
 		if(dynamic_cast<AmbientLight*>(light)){

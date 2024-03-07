@@ -39,7 +39,6 @@ void Scene::addMeshModel(Model* model)
 void Scene::addLightSource(Light* light)
 {
 	lights.push_back(light);
-	m_renderer->addLight(light);
 }
 
 void Scene::changeShadingMethod()

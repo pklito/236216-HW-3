@@ -79,8 +79,8 @@ class Scene {
 	bool fillCurrObj;
 
 public:
-	Scene() : world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false) {};
-	Scene(Renderer *renderer) : m_renderer(renderer), world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false) {};
+	//Scene() : world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false), {std::cout << "NO RENDERER PROVIDED!" << std::endl;};
+	Scene(Renderer *renderer) : m_renderer(renderer), world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false),lights() {m_renderer->setLights(&lights);};
 	void loadOBJModel(string fileName);
 	void addMeshModel(Model* model);
 	void addCamera(Camera* camera);
