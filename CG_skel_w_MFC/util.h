@@ -1,5 +1,4 @@
 #pragma once
-
 class Material {
 public:
 	const float k_ambient;
@@ -24,7 +23,7 @@ public:
 	void setColor(const vec3& color) {this->color = color;}
 	vec3 getColor() {return color;}
 	void setIntensity(float intensity) {this->intensity = intensity;}
-	float getIntensity() {return intensity;}
+	virtual float getIntensity() {return intensity;}
 
 
 };
@@ -47,11 +46,11 @@ protected:
 public:
 	DirectionalLight(float intensity, const vec3& color,vec3 direction) : Light(intensity, color), direction(direction) {}
 
-	void setDirection(const vec3& postion) {this->direction = direction;}
+	void setDirection(const vec3& direction) {this->direction = direction;}
 	vec3 getDirection() {return direction;}
 };
 
 class AmbientLight : public Light {
 public:
 	AmbientLight(float intensity, const vec3& color) : Light(intensity, color) {}
-}
+};

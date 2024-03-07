@@ -97,9 +97,6 @@ void Renderer::FillBuffer(vec3 color)
 			DrawPixel(x,y,100,color);
 		}
 	}
-	for (auto it = lights.begin(); it != lights.end(); it++) {
-		DrawSymbol((*it)->getLightPosition(), mat4(), SYM_STAR, 1);
-	}
 }
 
 void Renderer::setCameraPos(vec3 camera_pos)
@@ -346,23 +343,34 @@ vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_
 
 	for (auto& light : lights) 
 	{
+		// Ambient component
+		if(dynamic_cast<AmbientLight*>(light)){
+			ambient_color += light->getColor() * light->getIntensity();
+			continue;
+		}
+		vec3 light_direction;
+		PointLight* plight = dynamic_cast<PointLight*>(light);
+		if(plight){
 		//This might be wrong, we might wanna do our calculations in world space, not clip space(based on other students)
 		//Would be faster to do this outside of this function
-		vec3 light_position = toEuclidian(mat_project * (mat_transform_inverse * vec4(light->position)));
-		// Ambient component
-		// ...
+			vec3 light_position = toEuclidian(mat_project * (mat_transform_inverse * vec4(plight->getPosition())));
+			light_direction = normalize(light_position - surface_point);
+		}
+		DirectionalLight* dlight = dynamic_cast<DirectionalLight*>(light);
+		if(dlight){
+			light_direction = dlight->getDirection();
+		}
+
 
 		// Diffuse component
-		vec3 light_direction = normalize(light_position - surface_point);
 		float cos_theta = max(0.0f, dot(surface_normal, light_direction));
-		diffuse_color = diffuse_color + material.k_diffuse * light->color * color * light->intensity * cos_theta;
-
+		diffuse_color = diffuse_color + material.k_diffuse * light->getColor() * color * light->getIntensity() * cos_theta;
 
 		// Specular component
 		vec3 reflection_direction = reflect(-light_direction, surface_normal);
 		float cos_phi = max(0.0f, dot(reflection_direction, view_direction));
-		specular_color = specular_color + material.k_specular * light->color * color * light->intensity * std::pow(cos_phi, material.k_shiny);
-	}
+		specular_color = specular_color + material.k_specular * light->getColor() * color * light->getIntensity() * std::pow(cos_phi, material.k_shiny);
+		}
 
 	vec3 total_color = ambient_color + diffuse_color + specular_color;
 	return total_color.clamp(0.0f, 1.0f);

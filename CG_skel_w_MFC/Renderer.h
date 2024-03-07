@@ -3,9 +3,8 @@
 #include "CG_skel_w_MFC.h"
 #include "vec.h"
 #include "mat.h"
-#include "GL/glew.h"
 #include "util.h"
-using namespace std;
+#include "GL/glew.h"
 
 class Camera;
 
@@ -33,7 +32,7 @@ class Renderer
 	mat4 mat_transform_inverse;
 	mat4 mat_project;
 	vec3 camera_position;
-	vector<Light*> lights;
+	std::vector<Light*> lights;
 
 	ShadingMethod shading_method;
 
@@ -64,12 +63,12 @@ public:
 	void ResizeBuffers(int new_width, int new_height);
 	void Init();
 	void DrawLine(vec3 vert1, vec3 vert2, vec3 color = vec3(1,1,1));
-	void DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, Material material, const vector<vec3>* edge_normals = NULL, bool draw_normals = false,vec3 edge_color = vec3(1,1,1), bool fill = false);
+	void DrawTriangles(const std::vector<vec3>* vertices, const mat4& world_transform, Material material, const std::vector<vec3>* edge_normals = NULL, bool draw_normals = false,vec3 edge_color = vec3(1,1,1), bool fill = false);
 	vec3 phongIllumination(const vec3& surface_point, const vec3& surface_normal, Material material, const vec3& color);
 	void FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const vec3& vn1, const vec3& vn2, const vec3& vn3, const vec3& color, const Material& material);
 
 
-	void DrawNormalsToVertices(const vector<vec3>* vertices, const vector<vec3>* vertex_normals = NULL, bool draw_vertex_normals = false);
+	void DrawNormalsToVertices(const std::vector<vec3>* vertices, const std::vector<vec3>* vertex_normals = NULL, bool draw_vertex_normals = false);
 	void setCameraPos(vec3 camera_pos);
 	void addLight(Light* light);
 	void changeShadingMethod();
