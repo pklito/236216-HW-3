@@ -5,7 +5,7 @@ public:
 	vec3 color_diffuse;
 	vec3 color_specular;
 	int k_shiny;
-	Material() : color_ambient(vec3(0.2)), color_diffuse(vec3(0.8)), color_specular(vec3(0.5)), k_shiny(1) {};
+	Material() : color_ambient(vec3(0.2)), color_diffuse(vec3(0.8)), color_specular(vec3(0.5)), k_shiny(5) {};
 	Material(const vec3& ambient, const vec3& diffuse, const vec3& specular, int shiny) : color_ambient(ambient), color_diffuse(diffuse), color_specular(specular), k_shiny(shiny) {};
 
 	Material(const Material& mat)  : color_ambient(mat.color_ambient), color_diffuse(mat.color_diffuse), color_specular(mat.color_specular), k_shiny(mat.k_shiny) {};
