@@ -218,27 +218,26 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 
 {
 	//incase none were passed
-	Material defmat = Material();
-	vector<Material> matlist(1,defmat);
+	vector<Material> matlist(1,Material());
 	if(!material_list){
 		material_list = &matlist;
 	}
 	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
 	vector<Material>::const_iterator mat_it = material_list->begin();
 	vector<vec3>::const_iterator normal_it = edge_normals != NULL ? edge_normals->begin() : vertices->begin();
-	for(auto it = vertices->begin(); it != vertices->end(); ++it, ++normal_it){
+	for(auto it = vertices->begin(); it != vertices->end();){
 		//get the next face
 		vec4 vert1 = vec4(*it);
 		vec4 vert2 = vec4(*(it+1));
 		vec4 vert3 = vec4(*(it+2));
-		it = it + 2;
+		it = it + 3;
 
 		vec4 normCoor1, normCoor2;
 
 		vec4 vn1 = vec4(*normal_it);
 		vec4 vn2 = vec4(*(normal_it+1));
 		vec4 vn3 = vec4(*(normal_it+2));
-		normal_it += 2;
+		normal_it += 3;
 
 		Material mat1 = *mat_it;
 		Material mat2 = *(mat_it+(material_list->size() == vertices->size()));
