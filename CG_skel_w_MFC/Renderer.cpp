@@ -485,7 +485,8 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 						pixel_color = weights.x * color1 + weights.y * color2 + weights.z * color3;
 						break;
 					case PHONG:
-						Material mat = Material::weightedAverage(mat1,mat2,mat3,weights.x,weights.y,weights.z);
+						//Material mat = Material::weightedAverage(mat1,mat2,mat3,weights.x,weights.y,weights.z);
+						Material mat = mat1;
 						pixel_color = phongIllumination(surface_point, norm, mat);
 						break;
 				}
