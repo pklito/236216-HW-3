@@ -1,16 +1,15 @@
 #pragma once
 class Material {
 public:
-	const float k_ambient;
-	const float k_diffuse;
-	const float k_specular;
-	const int k_shiny;
-	Material() : k_ambient(0.2), k_diffuse(0.8), k_specular(0.5), k_shiny(1) {};
-	Material(float ambient, float diffuse, float specular, int shiny) : k_ambient(ambient), k_diffuse(diffuse), k_specular(specular), k_shiny(shiny) {};
-	void changeAmbient(float new_ambient);
-	void changeDiffuse(float diffuse);
-	void changeSpecular(float new_specular);
-	void changeShinyness(int new_shiny);
+	vec3 color_ambient;
+	vec3 color_diffuse;
+	vec3 color_specular;
+	int k_shiny;
+	Material() : color_ambient(vec3(0.2)), color_diffuse(vec3(0.8)), color_specular(vec3(0.5)), k_shiny(1) {};
+	Material(const vec3& ambient, const vec3& diffuse, const vec3& specular, int shiny) : color_ambient(ambient), color_diffuse(diffuse), color_specular(specular), k_shiny(shiny) {};
+
+	Material(const Material& mat)  : color_ambient(mat.color_ambient), color_diffuse(mat.color_diffuse), color_specular(mat.color_specular), k_shiny(mat.k_shiny) {};
+	void operator=(const Material& mat) {color_ambient = mat.color_ambient; color_diffuse = mat.color_diffuse; color_specular = mat.color_specular; k_shiny = mat.k_shiny;};
 };
 
 class Light {

@@ -289,7 +289,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		vec3 n2 = vec3(RANGE(normCoor2.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height), normCoor2.z);
 
 		if (fill) {
-			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), toVec3(vn1), toVec3(vn2), toVec3(vn3), edge_color, material);
+			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), toVec3(vn1), toVec3(vn2), toVec3(vn3), material);
 		} else {
 			DrawLine(p1, p2, edge_color);
 			DrawLine(p2, p3, edge_color);
@@ -329,7 +329,7 @@ vec3 getBarycentricCoordinates(const vec2& p, const vec2& p1, const vec2& p2, co
 	return vec3(l1, l2, l3);
 }
 
-vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_normal, Material material, const vec3& color)
+vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_normal, Material material)
 {
 	vec3 ambient_color(0.0f, 0.0f, 0.0f);
 	vec3 diffuse_color(0.0f, 0.0f, 0.0f);
@@ -341,7 +341,7 @@ vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_
 	{
 		// Ambient component
 		if(dynamic_cast<AmbientLight*>(light)){
-			ambient_color += light->getColor() * material.k_ambient * light->getIntensity();
+			ambient_color += light->getColor() * material.color_ambient * light->getIntensity();
 			continue;
 		}
 		vec3 light_direction;
@@ -363,15 +363,15 @@ vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_
 
 		// Diffuse component
 		float cos_theta = max(0.0f, dot(surface_normal, light_direction));
-		diffuse_color = diffuse_color + material.k_diffuse * light->getColor() * light->getIntensity() * cos_theta;
+		diffuse_color = diffuse_color + material.color_diffuse * light->getColor() * light->getIntensity() * cos_theta;
 
 		// Specular component
 		vec3 reflection_direction = reflect(-light_direction, surface_normal);
 		float cos_phi = max(0.0f, dot(reflection_direction, view_direction));
-		specular_color = specular_color + material.k_specular * light->getColor() * light->getIntensity() * std::pow(cos_phi, material.k_shiny);
+		specular_color = specular_color + material.color_specular * light->getColor() * light->getIntensity() * std::pow(cos_phi, material.k_shiny);
 		}
 
-	vec3 total_color = color*(ambient_color + diffuse_color + specular_color);
+	vec3 total_color = (ambient_color + diffuse_color + specular_color);
 	return total_color.clamp(0.0f, 1.0f);
 }
 
@@ -392,7 +392,7 @@ void Renderer::changeShadingMethod()
 }
 
 
-void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const vec3& vn1, const vec3& vn2, const vec3& vn3, const vec3& color, const Material& material)
+void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const vec3& vn1, const vec3& vn2, const vec3& vn3, const Material& material)
 {
 	float aspect_ratio = (float)(m_width) / (float)(m_height);
 	vec3 p1 = vec3(RANGE(vert1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height), vert1.z);
@@ -411,12 +411,12 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 	vec3 color2 = vec3(0,0,0);
 	vec3 color3 = vec3(0,0,0);
 	if(shading_method == FLAT){
-		color1 = phongIllumination(0.33*vert1 + 0.33*vert2 +0.33*vert3, calculateNormal(vert1,vert2,vert3),material,color);
+		color1 = phongIllumination(0.33*vert1 + 0.33*vert2 +0.33*vert3, calculateNormal(vert1,vert2,vert3),material);
 	}
 	if(shading_method == GOURAUD){
-		color1 = phongIllumination(vert1, normalize(vn1-vert1), material,color);
-		color2 = phongIllumination(vert2, normalize(vn2-vert2), material,color);
-		color3 = phongIllumination(vert3, normalize(vn3-vert3), material,color);
+		color1 = phongIllumination(vert1, normalize(vn1-vert1), material);
+		color2 = phongIllumination(vert2, normalize(vn2-vert2), material);
+		color3 = phongIllumination(vert3, normalize(vn3-vert3), material);
 	}
 	// Iterate through each scanline
 	for (int y = max(0, minY); y <= min(m_height - 1, maxY); y++)
@@ -473,7 +473,7 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 						pixel_color = weights.x * color1 + weights.y * color2 + weights.z * color3;
 						break;
 					case PHONG:
-						pixel_color = phongIllumination(surface_point, norm, material, color);
+						pixel_color = phongIllumination(surface_point, norm, material);
 						break;
 				}
 

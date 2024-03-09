@@ -66,8 +66,6 @@ MeshModel::MeshModel(string fileName)
 	show_vertex_normals = false;
 	show_face_normals = false;
 	fill_obj = false;
-	color = vec3(1,1,1);
-	curr_color = 0;
 	loadFile(fileName);
 }
 
@@ -159,10 +157,10 @@ void MeshModel::draw(Renderer* renderer)
 
 	if(vertex_normals_exist){
 		std::vector<vec3> norm_to_vert(normals_to_vertices, normals_to_vertices + (3 * face_count));
-		renderer->DrawTriangles(&vec, _world_transform, material, &norm_to_vert, show_face_normals, vec3(color), fill_obj);
+		renderer->DrawTriangles(&vec, _world_transform, material, &norm_to_vert, show_face_normals, vec3(1,1,1), fill_obj);
 	}
 	else{
-		renderer->DrawTriangles(&vec, _world_transform, material, NULL, show_face_normals, vec3(color), fill_obj);
+		renderer->DrawTriangles(&vec, _world_transform, material, NULL, show_face_normals, vec3(1,1,1),fill_obj);
 	}
 	renderer->DrawBoundingBox(bounding_box, _world_transform, show_box);
 }
@@ -267,38 +265,33 @@ void MeshModel::normalToFace()
 
 void MeshModel::changeColor()
 {
-	if (curr_color == 6) {
-		curr_color = 0;
-	}
-	else {
-		curr_color = curr_color + 1;
-		GetColorToFill();
-	}
+	curr_color = (curr_color + 1) % 7;
+	updateMaterial();
 }
 
-void MeshModel::GetColorToFill() {
+void MeshModel::updateMaterial() {
 	int num_of_color = curr_color % 7;
 	switch (num_of_color) {
 	case 0:
-		color = vec3(0, 0.6, 0.6);
+		material.color_diffuse = vec3(0, 0.6, 0.6);
 		break;
 	case 1:
-		color = vec3(0, 1, 0);
+		material.color_diffuse = vec3(0, 1, 0);
 		break;
 	case 2:
-		color = vec3(1, 0, 1);
+		material.color_diffuse = vec3(1, 0, 1);
 		break;
 	case 3:
-		color = vec3(1, 1, 0);
+		material.color_diffuse =  vec3(1, 1, 0);
 		break;
 	case 4:
-		color = vec3(0.4, 0, 0);
+		material.color_diffuse = vec3(0.4, 0, 0);
 		break;
 	case 5:
-		color = vec3(0, 0.5, 0);
+		material.color_diffuse = vec3(0, 0.5, 0);
 		break;
 	case 6:
-		color = vec3(0, 0, 0.5);
+		material.color_diffuse = vec3(0, 0, 0.5);
 		break;
 	}
 }
