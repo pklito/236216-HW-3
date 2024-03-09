@@ -22,6 +22,7 @@
 #include "Renderer.h"
 #include "MeshModel.h"
 #include <string>
+#include "CPopup.h"
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
@@ -223,6 +224,13 @@ void keyboard_special( int key, int x, int y ){
 	glutPostRedisplay();
 }
 
+void testing(){
+	
+		CPopup c;
+		c.DoModal();
+		std::cout << c.m_msg1 << std::endl;
+		AfxMessageBox(_T(""));
+}
 void keyboard( unsigned char key, int x, int y )
 {
 	switch ( key ) {
@@ -305,6 +313,9 @@ void keyboard( unsigned char key, int x, int y )
 		break;
 	case '3':
 		scene->changeShadingMethod();
+		break;
+	case '4':
+		testing();
 		break;
 	default:
 		return;
