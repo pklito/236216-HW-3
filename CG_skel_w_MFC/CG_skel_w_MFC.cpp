@@ -74,7 +74,7 @@ void swapCameras(){
 #define TRY_FLOAT(var, text) try { var = std::stof(text); } catch (const std::invalid_argument& e) {std::cout<<"BAD_INPUT"<<std::endl;return;} catch (const std::out_of_range& e) {return;}
 
 void changeIncrement(){
-	renderer->FillEdges(0.1,vec3(0.9,0.1,0.1));
+	renderer->FillEdges(0.1, vec3(0.9, 0.1, 0.1));
 	display();
 	std::string userInput;
 	
@@ -96,7 +96,7 @@ void addProjCamera(){
 	float zFar = 5;
 	if(result == IDYES){
 
-		renderer->FillEdges(0.1,vec3(0.9,0.1,0.1));
+		renderer->FillEdges(0.1, vec3(0.9, 0.1, 0.1));
 		display();
 		std::string userInput;
 		
@@ -132,7 +132,7 @@ void addOrthoCamera(){
 	float zNear = 0.5;
 	float zFar = 5;
 	if(result == IDYES){
-		renderer->FillEdges(0.1,vec3(0.9,0.1,0.1));
+		renderer->FillEdges(0.1, vec3(0.9, 0.1, 0.1));
 		display();
 		std::string userInput;
 		
@@ -177,7 +177,7 @@ void readFromFile(){
 
 void display( void ){
 	if(scene->getWorldControl()){
-		renderer->FillEdges(0.02,vec3(0.1,0.1,0.5));
+		renderer->FillEdges(0.02, vec3(0.1, 0.1, 0.5));
 	}
 	scene->draw();
 	renderer->SwapBuffers();
@@ -298,10 +298,13 @@ void keyboard( unsigned char key, int x, int y )
 		swapCameras();
 		break;
 	case '1':
-		scene->setFillObj(!scene->getFillObj());
+		scene->setFillObj(!(scene->getFillObj()));
 		break;
 	case '2':
 		scene->changeCurrsColor();
+		break;
+	case '3':
+		scene->changeShadingMethod();
 		break;
 	default:
 		return;
@@ -558,6 +561,8 @@ int my_main(int argc, char** argv)
 	renderer = new Renderer(1024, 1024);
 	scene = new Scene(renderer);
 	Camera* camera = new Camera();
+	Light* light = new DirectionalLight(1, vec3(1,1,1),vec3(-1,0,0));
+	Light* light2 = new AmbientLight(0.5,vec3(0,0,1));
 
 	std::cout << "[ ] Camera transform: " << std::endl;
 	camera->LookAt(vec3(0,0,1),vec3(0,0,-1),vec3(0,1,0));
@@ -565,6 +570,9 @@ int my_main(int argc, char** argv)
 	scene->addCamera(camera);
 	std::cout <<"!"<< camera->getProjection();
 	renderer->setCameraMatrixes(scene->getActiveCamera());
+
+	scene->addLightSource(light);
+	scene->addLightSource(light2);
 
 	std::cout << "[ ] Reading mesh files... ";
 	MeshModel* demo_object = new MeshModel("meshes/bunny.obj");

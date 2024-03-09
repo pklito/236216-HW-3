@@ -7,13 +7,15 @@
 #include "MeshModel.h"
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
+#define Z_INDEX(width,x,y) (x+y*width)
 #define LINE_TOO_LARGE 30
-Renderer::Renderer() :m_width(512), m_height(512), curr_color(0)
+
+Renderer::Renderer() :m_width(512), m_height(512), curr_color(0), shading_method(FLAT)
 {
 	InitOpenGLRendering();
 	CreateBuffers(512,512);
 }
-Renderer::Renderer(int width, int height) :m_width(width), m_height(height), curr_color(0)
+Renderer::Renderer(int width, int height) :m_width(width), m_height(height), curr_color(0), shading_method(FLAT)
 {
 	InitOpenGLRendering();
 	CreateBuffers(width,height);
@@ -35,44 +37,7 @@ void BubbleSort(std::vector<int>& intersections) {
 	}
 }
 
-void Renderer::changeColor()
-{
-	std::cout << "CURR COLORS NUMBER IS: " << curr_color << std::endl;
-	if (curr_color == 6) {
-		curr_color = 0;
-	}
-	else {
-		curr_color = curr_color + 1;
-	}
-	std::cout << "CURR COLORS NUMBER AFTER CHANGE IS: " << curr_color << std::endl;
-}
 
-vec3 Renderer::GetColorToFill() {
-	int num_of_color = curr_color % 7;
-	switch (num_of_color) {
-	case 0:
-		return vec3(0, 1, 1);
-		break;
-	case 1:
-		return vec3(0, 1, 0);
-		break;
-	case 2:
-		return vec3(1, 0, 1);
-		break;
-	case 3:
-		return vec3(1, 1, 0);
-		break;
-	case 4:
-		return vec3(0.4, 0, 0);
-		break;
-	case 5:
-		return vec3(0, 0.5, 0);
-		break;
-	case 6:
-		return vec3(0, 0, 0.5);
-		break;
-	}
-}
 
 void Renderer::CreateBuffers(int width, int height)
 {
@@ -81,7 +46,7 @@ void Renderer::CreateBuffers(int width, int height)
 	m_height=height;	
 	CreateOpenGLBuffer(); //Do not remove this line.
 	m_outBuffer = new float[3*m_width*m_height];
-	m_zbuffer = new float[3*m_width*m_height];
+	m_zbuffer = new float[m_width * m_height];
 }
 
 void Renderer::ReleaseBuffers() {
@@ -117,8 +82,8 @@ void Renderer::ResizeBuffers(int new_width, int new_height) {
 }
 
 void Renderer::ClearBuffer(){
-	std::fill(m_zbuffer,m_zbuffer+(m_width*m_height*3),0);
 	std::fill(m_outBuffer,m_outBuffer+(m_width*m_height*3),0);
+	std::fill(m_zbuffer, m_zbuffer + (m_width * m_height), far_z);
 }
 
 void Renderer::FillBuffer(vec3 color)
@@ -129,12 +94,17 @@ void Renderer::FillBuffer(vec3 color)
 	{
 		for (int x = 0; x < m_width; x++)
 		{
-			DrawPixel(x,y,color);
+			DrawPixel(x,y,100,color);
 		}
 	}
 }
 
-void Renderer::FillEdges(float percent, vec3 color){
+void Renderer::setCameraPos(vec3 camera_pos)
+{
+	camera_position = camera_pos;
+}
+
+void Renderer::FillEdges(float percent, vec3 color) {
 	if(percent <= 0){
 		return;
 	}
@@ -143,14 +113,14 @@ void Renderer::FillEdges(float percent, vec3 color){
 	}
 	for(int i = 0; i <= (int)(m_height*percent); i++){
 		for(int j = 0; j < m_width; j++){
-			DrawPixel(j,i,color);
-			DrawPixel(j,m_height - i- 1,color);
+			DrawPixel(j,i,0,color);
+			DrawPixel(j,m_height - i- 1,0,color);
 		}
 	}
 	for(int j = 0; j < (int)(m_width*percent); j++){
 		for(int i = (int)(m_height*percent) - 1; i < m_height - (int)(m_height*percent) - 1; i++){
-			DrawPixel(j,i,color);
-			DrawPixel(m_width - j - 1,i,color);
+			DrawPixel(j,i,0,color);
+			DrawPixel(m_width - j - 1,i,0,color);
 		}
 	}
 }
@@ -161,65 +131,76 @@ void Renderer::FillEdges(float percent, vec3 color){
  vert1 + vert2 = ends of the edge
  normal = direction of normal.
 */
-void Renderer::DrawLine(vec2 vert1, vec2 vert2, vec3 color)
+void Renderer::DrawLine(vec3 vert1, vec3 vert2, vec3 color)
 {
 	//flip the axis so that slope is -1 <= m <= 1
 	bool flipped = false;
 	if (abs(vert1.y - vert2.y) > abs(vert1.x - vert2.x)) {
-		auto temp = vert1.y;
-		vert1.y = vert1.x;
-		vert1.x = temp;
-
-		temp = vert2.y;
-		vert2.y = vert2.x;
-		vert2.x = temp;
+		std::swap(vert1.x, vert1.y);
+		std::swap(vert2.x, vert2.y);
 		flipped = true;
 	}
-	//swap the order so that vert1 is left of vert2
+
+	// Swap the order so that vert1 is left of vert2
 	if (vert1.x > vert2.x) {
-		vec2 temp = vert1;
-		vert1 = vert2;
-		vert2 = temp;
+		std::swap(vert1, vert2);
 	}
 
-	//line drawing:
-	int y = vert1.x <= vert2.x ? vert1.y : vert2.y;
-	int dy = abs(vert2.y - vert1.y);
-	int dx = vert2.x - vert1.x;
-	int d = 2 * dy - dx;
-	//increase or decrease y on move.
-	int slope_direction = vert2.y >= vert1.y ? 1 : -1;
+	// Line drawing
+	int x = vert1.x;
+	int y = vert1.y;
+	float z = vert1.z;
 
-	for (int x = vert1.x; x <= vert2.x; x++)
+	int dx = vert2.x - vert1.x;
+	int dy = abs(vert2.y - vert1.y);
+	float dz = vert2.z - vert1.z;
+
+	int slope_direction = (vert2.y >= vert1.y) ? 1 : -1;
+
+	// Determine whether to increment or decrement y
+	int y_increment = slope_direction;
+
+	// Decision parameter
+	int d = 2 * dy - dx;
+
+	for (int i = 0; i <= dx; i++)
 	{
+		// Light the pixel
+		if (flipped) {
+			DrawPixelSafe(y, x, z, color);
+		}
+		else {
+			DrawPixelSafe(x, y, z, color);
+		}
+
+		// Update the position
+		x++;
+
+		// Update the decision parameter
 		if (d < 0) {
 			d += 2 * dy;
 		}
 		else {
-			y += slope_direction;
-			d += 2 * dy - 2 * dx;
+			y += y_increment;
+			d += 2 * (dy - dx);
 		}
 
-		//light the pixel
-		if(flipped){
-			DrawPixelSafe(y,x, color);
-		}
-		else{
-			DrawPixelSafe(x,y, color);
-		}
-
+		// Update z using linear interpolation
+		z += dz / dx;
 	}
 }
 
-void Renderer::DrawPixel(int x, int y, vec3 color){
-	m_outBuffer[INDEX(m_width,x,y,0)]=color.x;	m_outBuffer[INDEX(m_width,x,y,1)]=color.y;	m_outBuffer[INDEX(m_width,x,y,2)]=color.z;
-		
+void Renderer::DrawPixel(int x, int y, float z, vec3 color){
+	if (z < m_zbuffer[Z_INDEX(m_width, x, y)]) {
+		m_outBuffer[INDEX(m_width, x, y, 0)] = color.x;	m_outBuffer[INDEX(m_width, x, y, 1)] = color.y;	m_outBuffer[INDEX(m_width, x, y, 2)] = color.z;
+		m_zbuffer[Z_INDEX(m_width, x, y)] = z;
+	}		
 }
 
-void Renderer::DrawPixelSafe(int x, int y, vec3 color){
+void Renderer::DrawPixelSafe(int x, int y, float z, vec3 color){
 	if(x < 0 || x >= m_width || y < 0 || y >= m_height)
 		return;
-	DrawPixel(x,y,color);
+	DrawPixel(x,y,z,color);
 }
 
 /**
@@ -233,10 +214,9 @@ void Renderer::DrawPixelSafe(int x, int y, vec3 color){
  * vertices: vector of the camera space vertices
  * normals: directions of the respective world space normals.
  */
-void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, const vector<vec3>* edge_normals, bool draw_normals, vec3 edge_color, bool fill)
-{
-	// Clear the buffer before drawing new content
+void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, Material material, const vector<vec3>* edge_normals, bool draw_normals, vec3 edge_color, bool fill)
 
+{
 	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
 	vector<vec3>::const_iterator normal_it = edge_normals != NULL ? edge_normals->begin() : vertices->begin();
 	for(auto it = vertices->begin(); it != vertices->end(); ++it, ++normal_it){
@@ -260,16 +240,26 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		vert2 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vert2));
 		vert3 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vert3));
 
-		vn1 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vn1));
-		vn2 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vn2));
-		vn3 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vn3));
-
 		if(vert1.z < -1 || vert1.z > 1 || vert2.z < -1 || vert2.z > 1 || vert3.z < -1 || vert3.z > 1){
 			continue;
 		}
 		vec3 norm_dir = calculateNormal(toVec3(vert1),toVec3(vert2),toVec3(vert3))/5.f;
 		normCoor1 = (vert1 + vert2 + vert3) / 3;
-		normCoor2 = normCoor1 - norm_dir;
+		normCoor2 = normCoor1 + norm_dir;
+
+		if(edge_normals != NULL){
+			
+			vn1 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vn1));
+			vn2 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vn2));
+			vn3 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vn3));
+		}
+		else{
+			//Use the face normal if no edge normals exist
+			//(If we want to compute them better, do it in MeshModel.cpp)
+			vn1 = vec4(0.5* norm_dir) + vert1;
+			vn2 = vec4(0.5* norm_dir) + vert2;
+			vn3 = vec4(0.5* norm_dir) + vert3;
+		}
 
 		//BackFace culling (currently not done in wireframe mode)
 		if(fill){
@@ -291,47 +281,143 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		/*
 		Clipspace coordinates to screenspace coordinates
 		*/
-		vec2 p1 = vec2(RANGE(vert1.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vert1.y,-1,1,0,m_height));
-		vec2 p2 = vec2(RANGE(vert2.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vert2.y,-1,1,0,m_height));
-		vec2 p3 = vec2(RANGE(vert3.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vert3.y,-1,1,0,m_height));
+		vec3 p1 = vec3(RANGE(vert1.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vert1.y,-1,1,0,m_height), vert1.z);
+		vec3 p2 = vec3(RANGE(vert2.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vert2.y,-1,1,0,m_height), vert2.z);
+		vec3 p3 = vec3(RANGE(vert3.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vert3.y,-1,1,0,m_height), vert3.z);
 
-		vec2 n1 = vec2(RANGE(normCoor1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height));
-		vec2 n2 = vec2(RANGE(normCoor2.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height));
+		vec3 n1 = vec3(RANGE(normCoor1.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height), normCoor1.z);
+		vec3 n2 = vec3(RANGE(normCoor2.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height), normCoor2.z);
 
 		if (fill) {
-			vec3 current_color = GetColorToFill();
-			FillPolygon(p1, p2, p3, current_color);
-		}
+			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), toVec3(vn1), toVec3(vn2), toVec3(vn3), edge_color, material);
+		} else {
+			DrawLine(p1, p2, edge_color);
+			DrawLine(p2, p3, edge_color);
+			DrawLine(p3, p1, edge_color);
 
-		DrawLine(p1, p2, edge_color);
-		DrawLine(p2, p3, edge_color);
-		DrawLine(p3, p1, edge_color);
+			float aspect_ratio = (float)(m_width) / (float)(m_height);
 
-		if(edge_normals != NULL){
-			vec2 a1 = vec2(RANGE(vn1.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vn1.y,-1,1,0,m_height));
-			vec2 a2 = vec2(RANGE(vn2.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vn2.y,-1,1,0,m_height));
-			vec2 a3 = vec2(RANGE(vn3.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vn3.y,-1,1,0,m_height));
-			DrawLine(p1, a1, vec3(0,0,edge_color.z));
-			DrawLine(p2, a2, vec3(0,0,edge_color.z));
-			DrawLine(p3, a3, vec3(0,0,edge_color.z));
+			if(edge_normals != NULL){
+				vec3 a1 = vec3(RANGE(vn1.x,-aspect_ratio, aspect_ratio, 0, m_width), RANGE(vn1.y,-1,1,0,m_height), vn1.z);
+				vec3 a2 = vec3(RANGE(vn2.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vn2.y,-1,1,0,m_height), vn2.z);
+				vec3 a3 = vec3(RANGE(vn3.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vn3.y,-1,1,0,m_height), vn3.z);
+				DrawLine(p1, a1, vec3(0, 0, edge_color.z));
+				DrawLine(p2, a2, vec3(0, 0, edge_color.z));
+				DrawLine(p3, a3, vec3(0, 0, edge_color.z));
+			}
+			//Normal:
+			if(draw_normals){
+			  DrawLine(n1, n2, vec3(1, 0, 1));
+    		}
 		}
-		//Normal:
-		if(draw_normals){
-		  DrawLine(n1, n2, vec3(1, 0, 1));
-    	}
 	}
 }
 
-void Renderer::FillPolygon(const vec2& p1, const vec2& p2, const vec2& p3, const vec3& color) 
-{
-	std::vector<vec2> vertices = { p1, p2, p3 };
+/*
+* Lecture 4 slide 26-27.
+* Given a triangle and a point, return 3 floats, representing the point as an average of the 3 points
+* Returns: vec3: wp1 wp2 wp3
+*/
+vec3 getBarycentricCoordinates(const vec2& p, const vec2& p1, const vec2& p2, const vec2& p3){
+	//More optimized implementation taken from : https://gamedev.stackexchange.com/a/116304
+	float invDET = 1./((p2.y-p3.y) * (p1.x-p3.x) + 
+                   (p3.x-p2.x) * (p1.y-p3.y));
 
+	float l1 = ((p2.y-p3.y) * (p.x-p3.x) + (p3.x-p2.x) * (p.y-p3.y)) * invDET; 
+	float l2 = ((p3.y-p1.y) * (p.x-p3.x) + (p1.x-p3.x) * (p.y-p3.y)) * invDET; 
+	float l3 = 1. - l1 - l2;
+	return vec3(l1, l2, l3);
+}
+
+vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_normal, Material material, const vec3& color)
+{
+	vec3 ambient_color(0.0f, 0.0f, 0.0f);
+	vec3 diffuse_color(0.0f, 0.0f, 0.0f);
+	vec3 specular_color(0.0f, 0.0f, 0.0f);
+	vec3 view_direction = vec3(0,0,-1);
+	//use a reference to the vector rather than a pointer
+	std::vector<Light*>& lights_ref = *lights;
+	for (auto& light : lights_ref) 
+	{
+		// Ambient component
+		if(dynamic_cast<AmbientLight*>(light)){
+			ambient_color += light->getColor() * material.k_ambient * light->getIntensity();
+			continue;
+		}
+		vec3 light_direction;
+		PointLight* plight = dynamic_cast<PointLight*>(light);
+		if(plight){
+		//This might be wrong, we might wanna do our calculations in world space, not clip space(based on other students)
+		//Would be faster to do this outside of this function
+			vec3 light_position = toEuclidian(mat_project * (mat_transform_inverse * vec4(plight->getPosition())));
+			light_direction = normalize(light_position - surface_point);
+		}
+		DirectionalLight* dlight = dynamic_cast<DirectionalLight*>(light);
+		if(dlight){	
+			//THIS MIGHT BE WRONG
+			vec3 dir_point  = toEuclidian(mat_project * (mat_transform_inverse * vec4(surface_point+dlight->getDirection())));
+			vec3 origin_point = toEuclidian(mat_project * (mat_transform_inverse * vec4(surface_point)));
+			light_direction = normalize(dir_point - origin_point);
+		}
+
+
+		// Diffuse component
+		float cos_theta = max(0.0f, dot(surface_normal, light_direction));
+		diffuse_color = diffuse_color + material.k_diffuse * light->getColor() * light->getIntensity() * cos_theta;
+
+		// Specular component
+		vec3 reflection_direction = reflect(-light_direction, surface_normal);
+		float cos_phi = max(0.0f, dot(reflection_direction, view_direction));
+		specular_color = specular_color + material.k_specular * light->getColor() * light->getIntensity() * std::pow(cos_phi, material.k_shiny);
+		}
+
+	vec3 total_color = color*(ambient_color + diffuse_color + specular_color);
+	return total_color.clamp(0.0f, 1.0f);
+}
+
+
+void Renderer::changeShadingMethod()
+{
+	switch(shading_method){
+		case FLAT:
+			shading_method = GOURAUD;
+			break;
+		case GOURAUD:
+			shading_method = PHONG;
+			break;
+		default:
+			shading_method = FLAT;
+			break;
+	}
+}
+
+
+void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const vec3& vn1, const vec3& vn2, const vec3& vn3, const vec3& color, const Material& material)
+{
+	float aspect_ratio = (float)(m_width) / (float)(m_height);
+	vec3 p1 = vec3(RANGE(vert1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height), vert1.z);
+	vec3 p2 = vec3(RANGE(vert2.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vert2.y, -1, 1, 0, m_height), vert2.z);
+	vec3 p3 = vec3(RANGE(vert3.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vert3.y, -1, 1, 0, m_height), vert3.z);
+
+	const std::vector<vec3> vertices = { p1, p2, p3 };
 	// Find the minimum and maximum y-coordinates to determine the scanline range
 	int minY = static_cast<int>(floor(min( p1.y, p2.y)));
 	minY = static_cast<int>(floor(min(minY, p3.y)));
 	int maxY = static_cast<int>(ceil(max( p1.y, p2.y)));
 	maxY = static_cast<int>(ceil(max( maxY, p3.y )));
 
+	//Calculate colors once per polygon for FLAT and GOURAUD
+	vec3 color1 = vec3(0,0,0);
+	vec3 color2 = vec3(0,0,0);
+	vec3 color3 = vec3(0,0,0);
+	if(shading_method == FLAT){
+		color1 = phongIllumination(0.33*vert1 + 0.33*vert2 +0.33*vert3, calculateNormal(vert1,vert2,vert3),material,color);
+	}
+	if(shading_method == GOURAUD){
+		color1 = phongIllumination(vert1, normalize(vn1-vert1), material,color);
+		color2 = phongIllumination(vert2, normalize(vn2-vert2), material,color);
+		color3 = phongIllumination(vert3, normalize(vn3-vert3), material,color);
+	}
 	// Iterate through each scanline
 	for (int y = max(0, minY); y <= min(m_height - 1, maxY); y++)
 	{
@@ -340,8 +426,8 @@ void Renderer::FillPolygon(const vec2& p1, const vec2& p2, const vec2& p3, const
 		// Check for intersections with each polygon edge
 		for (int i = 0; i < vertices.size(); i++)
 		{
-			const vec2& p1 = vertices[i];
-			const vec2& p2 = vertices[(i + 1) % vertices.size()];
+			const vec3& p1 = vertices[i];
+			const vec3& p2 = vertices[(i + 1) % vertices.size()];
 
 			if ((p1.y <= y && p2.y > y) || (p2.y <= y && p1.y > y)) 
 			{
@@ -360,10 +446,39 @@ void Renderer::FillPolygon(const vec2& p1, const vec2& p2, const vec2& p3, const
 			int startX = max(0, intersections[i]);
 			int endX = min(m_width, intersections[i + 1]); 
 
-			for (int x = startX; x <= endX; x++) 
-			{
-				DrawPixel(x, y, color);
-			}
+			
+			for (int x = startX; x <= endX; x++) {
+				// Get the weights of the three edges of the tri
+				vec3 weights = getBarycentricCoordinates(vec2(x, y), vec2(p1.x, p1.y), vec2(p2.x, p2.y), vec2(p3.x, p3.y));
+				
+				// Calculate the current Z
+				vec3 surface_point = weights.x * vert1 + weights.y * vert2 + weights.z * vert3;	//Not efficient but easy to work with
+
+				//dont do color calculations for covered pixels!!!
+				if(surface_point.z >= m_zbuffer[Z_INDEX(m_width, x, y)]) {
+					continue;
+				}
+
+				// Calculate the current norm
+				vec3 norm = weights.x * (vn1-vert1) + weights.y * (vn2-vert2) + weights.z * (vn3-vert3);
+				norm = normalize(norm);
+
+				// Calculate the pixel based on shading method
+				vec3 pixel_color = vec3(0,0,0);
+				switch(shading_method){
+					case FLAT:
+						pixel_color = color1;
+						break;
+					case GOURAUD:
+						pixel_color = weights.x * color1 + weights.y * color2 + weights.z * color3;
+						break;
+					case PHONG:
+						pixel_color = phongIllumination(surface_point, norm, material, color);
+						break;
+				}
+
+				DrawPixel(x, y, surface_point.z, pixel_color);
+      		}
 		}
 	}
 }
@@ -412,11 +527,13 @@ void Renderer::DrawNormalsToVertices(const vector<vec3>* vertices, const vector<
 
 		float aspect_ratio = (float)(m_width)/(float)(m_height);
 		// Apply the range to the normalized point
-		vec2 first_point = vec2(RANGE(normCoor.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(normCoor.y, -1, 1, 0, m_height));
+
+		vec3 first_point = vec3(RANGE(normCoor.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(normCoor.y, -1, 1, 0, m_height), normCoor.z);
 
 		// Normal:
 		if (draw_normals) {
-			DrawLine(first_point, vec2(RANGE(vert1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height)), vec3(0.2,0.5,1));
+			DrawLine(first_point, vec3(RANGE(vert1.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height), vert1.z), vec3(0.2,0.5,1));
+
 		}
     }
 }
@@ -449,57 +566,59 @@ void Renderer::DrawBoundingBox(const vec3* bounding_box, const mat4& world_trans
 	};
 
 	// Draw lines to connect the vertices of the bounding box using the defined indices
+	// Draw lines to connect the vertices of the bounding box using the defined indices
 	for (int i = 0; i < 12; ++i) {
-		if(new_bounding_box[indices[i][0]].z < -1 || new_bounding_box[indices[i][0]].z > 1 || 
-		new_bounding_box[indices[i][1]].z < -1  || new_bounding_box[indices[i][0]].z > 1  ){
+		if (new_bounding_box[indices[i][0]].z < -1 || new_bounding_box[indices[i][0]].z > 1 ||
+			new_bounding_box[indices[i][1]].z < -1 || new_bounding_box[indices[i][0]].z > 1) {
 			continue;
 		}
-		//sometimes a point will get sent really far (matrix bs)
-		//the DrawLine function wont draw out of bounds, but it will take
-		//very long to go over the whole distance (~200,000 iterations).
-		if (length(new_bounding_box[indices[i][0]]) > LINE_TOO_LARGE || length(new_bounding_box[indices[i][0]]) > LINE_TOO_LARGE)
-		{
-			continue;
-		}
-		DrawLine(bounding_box_in_vectwo[indices[i][0]], bounding_box_in_vectwo[indices[i][1]], vec3(1, 1, 0));
+
+		// Interpolate Z-values
+		float z1 = new_bounding_box[indices[i][0]].z;
+		float z2 = new_bounding_box[indices[i][1]].z;
+
+		// Draw line with Z-buffer check
+		DrawLine(vec3(bounding_box_in_vectwo[indices[i][0]], z1), vec3(bounding_box_in_vectwo[indices[i][1]], z2), vec3(1, 1, 0));
+
 	}
 }
 
 void Renderer::DrawSymbol(const vec3& vertex, const mat4& world_transform, SYMBOL_TYPE symbol, float scale,vec3 colors)
 {
 	scale *= 4;
-	const std::vector<vec2> square_shape = {vec2(-1,-1),vec2(1,-1),	vec2(1,-1),vec2(1,1), vec2(1,1), vec2(-1,1), vec2(-1,1), vec2(-1,-1)};
-	const std::vector<vec2> x_shape = {vec2(-1,-1),vec2(1,1),	vec2(1,-1),vec2(-1,1)};
-	const std::vector<vec2> star_shape = {vec2(0,1),vec2(0,-1),	vec2(1,-1),vec2(-1,1), vec2(1,1), vec2(-1,-1), vec2(-1,0), vec2(1,0)};
-	const std::vector<vec2> plus_shape = {vec2(0,1),vec2(0,-1),	vec2(-1,0),vec2(1,0)};
-	
-	const std::vector<vec2>* decided = &square_shape;
+	const std::vector<vec2> square_shape = { vec2(-1, -1), vec2(1, -1), vec2(1, -1), vec2(1, 1), vec2(1, 1), vec2(-1, 1), vec2(-1, 1), vec2(-1, -1) };
+	const std::vector<vec2> x_shape = { vec2(-1, -1), vec2(1, 1), vec2(1, -1), vec2(-1, 1) };
+	const std::vector<vec2> star_shape = { vec2(0, 1), vec2(0, -1), vec2(1, -1), vec2(-1, 1), vec2(1, 1), vec2(-1, -1), vec2(-1, 0), vec2(1, 0) };
+	const std::vector<vec2> plus_shape = { vec2(0, 1), vec2(0, -1), vec2(-1, 0), vec2(1, 0) };
 
-	vec4 screen_space = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vertex));
-	vec2 image_space = vec2(RANGE(screen_space.x, -1, 1, 0, m_width), RANGE(screen_space.y, -1, 1, 0, m_height));
-	switch(symbol){
-		case SYM_SQUARE:
-			decided = &square_shape;
-			break;
-		case SYM_X:
-			decided = &x_shape;
-			break;
-		case SYM_STAR:
-			decided = &star_shape;
-			break;
-		case SYM_PLUS:
-			decided = &plus_shape;
-			break;
-		default:
-			decided = &x_shape;
+	const std::vector<vec2>* decided = &square_shape;
+	float aspect_ratio = (float)(m_width)/(float)(m_height);
+	vec4 screen_space = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vec4(vertex, 1.0f)));
+	vec2 image_space = vec2(RANGE(screen_space.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(screen_space.y, -1, 1, 0, m_height));
+	switch (symbol) {
+	case SYM_SQUARE:
+		decided = &square_shape;
+		break;
+	case SYM_X:
+		decided = &x_shape;
+		break;
+	case SYM_STAR:
+		decided = &star_shape;
+		break;
+	case SYM_PLUS:
+		decided = &plus_shape;
+		break;
+	default:
+		decided = &x_shape;
 		break;
 	}
 
-
 	auto a = decided->begin();
-	while(a != decided->end()){
-		DrawLine(scale*(*a) + image_space, scale*(*(a+1)) + image_space, colors);
-		a+=2;
+	while (a != decided->end()) {
+		// Draw line with Z-buffer check
+		DrawLine(vec3(scale * (*a) + image_space, screen_space.z), vec3(scale * (*(a + 1)) + image_space, screen_space.z), colors);
+		a += 2;
+
 	}
 }
 
@@ -573,6 +692,7 @@ void Renderer::InitOpenGLRendering()
 	glVertexAttribPointer( vTexCoord, 2, GL_FLOAT, GL_FALSE, 0,
 		(GLvoid *) sizeof(vtc) );
 	glProgramUniform1i( program, glGetUniformLocation(program, "texture"), 0 );
+
 	a = glGetError();
 }
 

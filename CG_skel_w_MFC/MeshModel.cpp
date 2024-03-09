@@ -66,6 +66,8 @@ MeshModel::MeshModel(string fileName)
 	show_vertex_normals = false;
 	show_face_normals = false;
 	fill_obj = false;
+	color = vec3(1,1,1);
+	curr_color = 0;
 	loadFile(fileName);
 }
 
@@ -155,14 +157,12 @@ void MeshModel::draw(Renderer* renderer)
 {
 	std::vector<vec3> vec(vertex_positions, vertex_positions + (3 * face_count));
 
-	float color = data == 1 ? 1 : 0.6;
-
-	if(vertex_normals_exist && show_vertex_normals){
+	if(vertex_normals_exist){
 		std::vector<vec3> norm_to_vert(normals_to_vertices, normals_to_vertices + (3 * face_count));
-		renderer->DrawTriangles(&vec, _world_transform, &norm_to_vert, show_face_normals, vec3(color), fill_obj);
+		renderer->DrawTriangles(&vec, _world_transform, material, &norm_to_vert, show_face_normals, vec3(color), fill_obj);
 	}
 	else{
-		renderer->DrawTriangles(&vec, _world_transform, NULL, show_face_normals,vec3(color), fill_obj);
+		renderer->DrawTriangles(&vec, _world_transform, material, NULL, show_face_normals, vec3(color), fill_obj);
 	}
 	renderer->DrawBoundingBox(bounding_box, _world_transform, show_box);
 }
@@ -223,7 +223,7 @@ void MeshModel::rotate(GLfloat theta, int mode)
 		rotation_matrix = RotateZ(theta);
 	}
 	else {
-		std::cout << "something is wrong" << std::endl;
+		std::cout << "ERROR - ILLEGAL ROTATION PARAMETER:" << mode << std::endl;
 		return;
 	}
 	while (i < 3*face_count) {
@@ -247,7 +247,7 @@ vec3 calculateNormal(vec3 first_point, vec3 second_point, vec3 third_point)
 	vec3 a = third_point - first_point;
 	vec3 b = second_point - first_point;
 
-	vec3 c = cross(b, a);
+	vec3 c = cross(a, b);
 
 	return normalize(c);
 }
@@ -263,6 +263,44 @@ void MeshModel::normalToFace()
 
 	}
 	//draw();
+}
+
+void MeshModel::changeColor()
+{
+	if (curr_color == 6) {
+		curr_color = 0;
+	}
+	else {
+		curr_color = curr_color + 1;
+		GetColorToFill();
+	}
+}
+
+void MeshModel::GetColorToFill() {
+	int num_of_color = curr_color % 7;
+	switch (num_of_color) {
+	case 0:
+		color = vec3(0, 0.6, 0.6);
+		break;
+	case 1:
+		color = vec3(0, 1, 0);
+		break;
+	case 2:
+		color = vec3(1, 0, 1);
+		break;
+	case 3:
+		color = vec3(1, 1, 0);
+		break;
+	case 4:
+		color = vec3(0.4, 0, 0);
+		break;
+	case 5:
+		color = vec3(0, 0.5, 0);
+		break;
+	case 6:
+		color = vec3(0, 0, 0.5);
+		break;
+	}
 }
 
 void MeshModel::calculateBoundingBox()

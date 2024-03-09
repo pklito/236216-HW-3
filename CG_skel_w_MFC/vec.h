@@ -173,6 +173,10 @@ vec2 normalize(const vec2& v) {
     }
 }
 
+inline GLfloat cross(const vec2& u, const vec2& v) {
+    return u.x * v.y - u.y * v.x;
+}
+
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -249,6 +253,13 @@ struct vec3 {
         return *this * r;
     }
 
+    vec3 clamp(float min_val, float max_val)
+    {
+        return vec3(max(min_val, min(x, max_val)),
+            max(min_val, min(y, max_val)),
+            max(min_val, min(z, max_val)));
+    }
+
     //
     //  --- (modifying) Arithematic Operators ---
     //
@@ -281,6 +292,12 @@ struct vec3 {
 
         return *this;
     }
+
+    inline 
+    vec3 toVec3(const vec2& v) {
+        return vec3(v.x, v.y, 0);
+    }
+
 
     //
     //  --- Insertion and Extraction Operators ---
@@ -533,12 +550,18 @@ vec3 cross(const vec4& a, const vec4& b)
         a.x * b.y - a.y * b.x);
 }
 
-inline vec3 toVec3(const vec4& v) {
+inline 
+vec3 toVec3(const vec4& v) {
     return vec3(v.x, v.y, v.z);
 }
 
-inline vec3 toEuclidian(const vec4& v) {
+inline 
+vec3 toEuclidian(const vec4& v) {
     return vec3(v.x / v.w, v.y / v.w, v.z / v.w);
 }
 
+inline
+vec3 reflect(const vec3& vector, const vec3& normal) {
+    return vector - normal * 2 * dot(vector, normal);
+}
 //----------------------------------------------------------------------------

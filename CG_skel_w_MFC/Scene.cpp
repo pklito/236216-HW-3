@@ -36,8 +36,23 @@ void Scene::addMeshModel(Model* model)
 	models.push_back(model);
 }
 
+void Scene::addLightSource(Light* light)
+{
+	lights.push_back(light);
+}
+
+void Scene::changeShadingMethod()
+{
+	m_renderer->changeShadingMethod();
+}
+
 void Scene::addCamera(Camera* camera){
 	cameras.push_back(camera);
+	if (cameras.size() == 1) {
+		vec3 cameraPosition = camera->getCameraPosition();
+		m_renderer->setCameraPos(cameraPosition);
+	}
+	
 }
 
 void Scene::setWorldControl(bool ctrl){
@@ -125,7 +140,7 @@ void Scene::rotateObject(GLfloat theta_angle, int axis)
 
 void Scene::changeCurrsColor()
 {
-	m_renderer->changeColor();
+	models[activeModel]->changeColor();
 }
 
 void Scene::draw()
@@ -137,6 +152,15 @@ void Scene::draw()
 		}
 		i++;
 	}
+
+	for(auto& light : lights){
+		PointLight* plight = dynamic_cast<PointLight*>(light);
+		if(plight){
+			//should be a draw() function at PointLight but theres include errors so i cba
+			m_renderer->DrawSymbol(plight->getPosition(),mat4(),SYM_STAR, 1);
+		}
+	}
+
 	
 	// 1. Send the renderer the current camera transform and the projection
 	// 2. Tell all models to draw themselves
@@ -164,6 +188,11 @@ void Scene::drawDemo()
 void Scene::cycleSelectedObject()
 {
 	if (models.size() >= 1) {
+		if (activeModel == models.size()) {
+			activeModel = (activeModel + 1) % models.size();
+			models[activeModel]->setData(1);
+			return;
+		}
 		models[activeModel]->setData(0);
 		activeModel = (activeModel + 1) % models.size();
 		models[activeModel]->setData(1);
@@ -173,6 +202,8 @@ void Scene::cycleSelectedObject()
 void Scene::cycleActiveCamera()
 {
 	activeCamera = (activeCamera+1) % cameras.size();
+	vec3 cameraPosition = getActiveCamera()->getCameraPosition();
+	m_renderer->setCameraPos(cameraPosition);
 }
 
 void Scene::setFillObj(bool fill)
@@ -191,6 +222,7 @@ bool Scene::getFillObj()
 void Scene::removeSelectedObject(){
 	if(models.size() < 1)
 		return;
+
 	models.erase(models.begin()+activeModel);
 	cycleSelectedObject();
 }
@@ -204,17 +236,16 @@ void Scene::removeSelectedCamera(){
 
 Camera* Scene::getActiveCamera()
 {
-	std::cout << " get " << cameras[activeCamera]->getCameraPosition() << std::endl;
 	return cameras[activeCamera];
 }
 
 void Scene::rotateCameraToSelectedObject(){
-	if (models.size() >= 1) {
-		vec4 model_center = models[activeModel]->getWorldTransformation() * vec4(0, 0, 0, 1);
-		vec4 camera_location = cameras[activeCamera]->getCameraPosition();
-		cameras[activeCamera]->LookAt(camera_location, model_center, vec3(0, 1, 0));
-	}
+	vec4 model_center = models[activeModel]->getWorldTransformation() * vec4(0, 0, 0, 1);
+	vec4 camera_location = cameras[activeCamera]->getCameraPosition();
+	cameras[activeCamera]->LookAt(camera_location, model_center, vec3(0, 1, 0));
+
 }
+
 
 //---------------------
 //   CAMERA
@@ -226,7 +257,6 @@ void Camera::draw(Renderer* renderer){
 }
 vec3 Camera::getCameraPosition(){
 	vec4 base = vec4(1,2,3,1);
-	std::cout << base << ", " << cTransform * base << ", " << cTransformInverse*(cTransform*base) << std::endl;
 	vec4 point = cTransform * vec4(0,0,0,1);
 	return toVec3(point);
 }
