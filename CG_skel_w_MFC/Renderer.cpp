@@ -289,7 +289,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		vec3 n2 = vec3(RANGE(normCoor2.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height), normCoor2.z);
 
 		if (fill) {
-			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), toVec3(vn1), toVec3(vn2), toVec3(vn3), material);
+			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), toVec3(vn1), toVec3(vn2), toVec3(vn3), material,material,material);
 		} else {
 			DrawLine(p1, p2, edge_color);
 			DrawLine(p2, p3, edge_color);
@@ -392,7 +392,7 @@ void Renderer::changeShadingMethod()
 }
 
 
-void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const vec3& vn1, const vec3& vn2, const vec3& vn3, const Material& material)
+void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const vec3& vn1, const vec3& vn2, const vec3& vn3, const Material& mat1, const Material& mat2, const Material& mat3)
 {
 	float aspect_ratio = (float)(m_width) / (float)(m_height);
 	vec3 p1 = vec3(RANGE(vert1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height), vert1.z);
@@ -411,12 +411,12 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 	vec3 color2 = vec3(0,0,0);
 	vec3 color3 = vec3(0,0,0);
 	if(shading_method == FLAT){
-		color1 = phongIllumination(0.33*vert1 + 0.33*vert2 +0.33*vert3, calculateNormal(vert1,vert2,vert3),material);
+		color1 = phongIllumination(0.33*vert1 + 0.33*vert2 +0.33*vert3, calculateNormal(vert1,vert2,vert3), mat1);	//mat1 should be mat1,mat2,mat3,0.33,0.33,0.34
 	}
 	if(shading_method == GOURAUD){
-		color1 = phongIllumination(vert1, normalize(vn1-vert1), material);
-		color2 = phongIllumination(vert2, normalize(vn2-vert2), material);
-		color3 = phongIllumination(vert3, normalize(vn3-vert3), material);
+		color1 = phongIllumination(vert1, normalize(vn1-vert1), mat1);
+		color2 = phongIllumination(vert2, normalize(vn2-vert2), mat2);
+		color3 = phongIllumination(vert3, normalize(vn3-vert3), mat3);
 	}
 	// Iterate through each scanline
 	for (int y = max(0, minY); y <= min(m_height - 1, maxY); y++)
@@ -453,7 +453,6 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 				
 				// Calculate the current Z
 				vec3 surface_point = weights.x * vert1 + weights.y * vert2 + weights.z * vert3;	//Not efficient but easy to work with
-
 				//dont do color calculations for covered pixels!!!
 				if(surface_point.z >= m_zbuffer[Z_INDEX(m_width, x, y)]) {
 					continue;
@@ -473,7 +472,8 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 						pixel_color = weights.x * color1 + weights.y * color2 + weights.z * color3;
 						break;
 					case PHONG:
-						pixel_color = phongIllumination(surface_point, norm, material);
+						Material mat = Material::weightedAverage(mat1,mat2,mat3,weights.x,weights.y,weights.z);
+						pixel_color = phongIllumination(surface_point, norm, mat);
 						break;
 				}
 

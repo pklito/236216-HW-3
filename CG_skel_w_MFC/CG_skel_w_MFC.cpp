@@ -561,7 +561,7 @@ int my_main(int argc, char** argv)
 	renderer = new Renderer(1024, 1024);
 	scene = new Scene(renderer);
 	Camera* camera = new Camera();
-	Light* light = new DirectionalLight(1, vec3(1,1,1),vec3(-1,0,0));
+	Light* light = new DirectionalLight(4, vec3(1,1,1),vec3(-1,0,0));
 	Light* light2 = new AmbientLight(0.5,vec3(0,0,1));
 
 	std::cout << "[ ] Camera transform: " << std::endl;
@@ -572,7 +572,7 @@ int my_main(int argc, char** argv)
 	renderer->setCameraMatrixes(scene->getActiveCamera());
 
 	scene->addLightSource(light);
-	scene->addLightSource(light2);
+	//scene->addLightSource(light2);
 
 	std::cout << "[ ] Reading mesh files... ";
 	MeshModel* demo_object = new MeshModel("meshes/bunny.obj");

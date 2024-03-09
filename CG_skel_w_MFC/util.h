@@ -10,6 +10,14 @@ public:
 
 	Material(const Material& mat)  : color_ambient(mat.color_ambient), color_diffuse(mat.color_diffuse), color_specular(mat.color_specular), k_shiny(mat.k_shiny) {};
 	void operator=(const Material& mat) {color_ambient = mat.color_ambient; color_diffuse = mat.color_diffuse; color_specular = mat.color_specular; k_shiny = mat.k_shiny;};
+
+	//Called with Material::weightedAverage(m1,m2,m3,w1,w2,w3);
+	static Material weightedAverage(const Material& mat1, const Material& mat2, const Material& mat3, float w1, float w2, float w3){
+	return Material(w1*mat1.color_ambient + w2*mat2.color_ambient + w3*mat3.color_ambient, 
+					w1*mat1.color_diffuse + w2*mat2.color_diffuse + w3*mat3.color_diffuse,
+					w1*mat1.color_specular + w2*mat2.color_specular + w3*mat3.color_specular,
+					int(w1*mat1.k_shiny + w2*mat2.k_shiny + w3*mat3.k_shiny) );
+	}
 };
 
 class Light {
@@ -52,4 +60,30 @@ public:
 class AmbientLight : public Light {
 public:
 	AmbientLight(float intensity, const vec3& color) : Light(intensity, color) {}
+};
+
+////////////// TRIPLE
+
+template<typename TYPE>
+class Triple {
+public:
+    // Constructors
+    Triple() : first(), second(), third() {}
+    Triple(const TYPE& f, const TYPE& s, const TYPE& t) : first(f), second(s), third(t) {}
+
+	/**
+    // Accessors
+    const TYPE& First() const { return first; }
+    TYPE& First() { return first; }
+    const TYPE& Second() const { return second; }
+    TYPE& Second() { return second; }
+    const T1& Third() const { return third; }
+    TYPE& Third() { return third; }
+
+	void setFirst()
+	*/
+public:
+    TYPE first;
+    TYPE second;
+	TYPE third;
 };
