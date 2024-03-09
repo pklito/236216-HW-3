@@ -214,10 +214,17 @@ void Renderer::DrawPixelSafe(int x, int y, float z, vec3 color){
  * vertices: vector of the camera space vertices
  * normals: directions of the respective world space normals.
  */
-void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, Material material, const vector<vec3>* edge_normals, bool draw_normals, vec3 edge_color, bool fill)
+void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, const vector<Material>* material_list, const vector<vec3>* edge_normals, bool draw_normals, vec3 edge_color, bool fill)
 
 {
+	//incase none were passed
+	Material defmat = Material();
+	vector<Material> matlist(1,defmat);
+	if(!material_list){
+		material_list = &matlist;
+	}
 	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
+	vector<Material>::const_iterator mat_it = material_list->begin();
 	vector<vec3>::const_iterator normal_it = edge_normals != NULL ? edge_normals->begin() : vertices->begin();
 	for(auto it = vertices->begin(); it != vertices->end(); ++it, ++normal_it){
 		//get the next face
@@ -233,6 +240,12 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		vec4 vn3 = vec4(*(normal_it+2));
 		normal_it += 2;
 
+		Material mat1 = *mat_it;
+		Material mat2 = *(mat_it+(material_list->size() == vertices->size()));
+		Material mat3 = *(mat_it+2*(material_list->size() == vertices->size()));
+		if(material_list->size() == vertices->size()){
+			mat_it += 3;
+		}
 		/*
 		TRANSFORMATIONS + PROJECTION ( P * Tc-1 * v)
 		*/
@@ -289,7 +302,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		vec3 n2 = vec3(RANGE(normCoor2.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height), normCoor2.z);
 
 		if (fill) {
-			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), toVec3(vn1), toVec3(vn2), toVec3(vn3), material,material,material);
+			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), toVec3(vn1), toVec3(vn2), toVec3(vn3), mat1,mat2,mat3);
 		} else {
 			DrawLine(p1, p2, edge_color);
 			DrawLine(p2, p3, edge_color);

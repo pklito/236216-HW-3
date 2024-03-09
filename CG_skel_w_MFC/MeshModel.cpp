@@ -157,10 +157,13 @@ void MeshModel::draw(Renderer* renderer)
 
 	if(vertex_normals_exist){
 		std::vector<vec3> norm_to_vert(normals_to_vertices, normals_to_vertices + (3 * face_count));
-		renderer->DrawTriangles(&vec, _world_transform, material, &norm_to_vert, show_face_normals, vec3(1,1,1), fill_obj);
+		//material 
+		vector<Material> matlist(1,material);	//one element
+		renderer->DrawTriangles(&vec, _world_transform, &matlist, &norm_to_vert, show_face_normals, vec3(1,1,1), fill_obj);
 	}
 	else{
-		renderer->DrawTriangles(&vec, _world_transform, material, NULL, show_face_normals, vec3(1,1,1),fill_obj);
+		vector<Material> matlist(1,material);
+		renderer->DrawTriangles(&vec, _world_transform, &matlist, NULL, show_face_normals, vec3(1,1,1),fill_obj);
 	}
 	renderer->DrawBoundingBox(bounding_box, _world_transform, show_box);
 }
