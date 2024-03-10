@@ -246,13 +246,16 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 			mat_it += 3;
 		}
 		/*
-		TRANSFORMATIONS + PROJECTION ( P * Tc-1 * v)
+		TRANSFORMATIONS + PROJECTION ( Tc-1 * v)
 		*/
-		vert1 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vert1));
-		vert2 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vert2));
-		vert3 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vert3));
-
-		if(vert1.z < -1 || vert1.z > 1 || vert2.z < -1 || vert2.z > 1 || vert3.z < -1 || vert3.z > 1){
+		vert1 = (mat_transform_inverse * world_transform * vert1);
+		vert2 = (mat_transform_inverse * world_transform * vert2);
+		vert3 = (mat_transform_inverse * world_transform * vert3);
+		
+		vec3 screenvert1 = toEuclidian(mat_project * vert1);
+		vec3 screenvert2 = toEuclidian(mat_project * vert2);
+		vec3 screenvert3 = toEuclidian(mat_project * vert3);
+		if(screenvert1.z < -1 || screenvert1.z > 1 || screenvert2.z < -1 || screenvert2.z > 1 || screenvert3.z < -1 || screenvert3.z > 1){
 			continue;
 		}
 		vec3 norm_dir = calculateNormal(toVec3(vert1),toVec3(vert2),toVec3(vert3))/5.f;
@@ -261,9 +264,9 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 
 		if(edge_normals != NULL){
 			
-			vn1 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vn1));
-			vn2 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vn2));
-			vn3 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vn3));
+			vn1 = mat_transform_inverse * world_transform * vn1;
+			vn2 = mat_transform_inverse * world_transform * vn2;
+			vn3 = mat_transform_inverse * world_transform * vn3;
 		}
 		else{
 			//Use the face normal if no edge normals exist
@@ -289,27 +292,32 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 			continue;
 		}
 
-		float aspect_ratio = (float)(m_width)/(float)(m_height);
-		/*
-		Clipspace coordinates to screenspace coordinates
-		*/
-		vec3 p1 = vec3(RANGE(vert1.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vert1.y,-1,1,0,m_height), vert1.z);
-		vec3 p2 = vec3(RANGE(vert2.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vert2.y,-1,1,0,m_height), vert2.z);
-		vec3 p3 = vec3(RANGE(vert3.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vert3.y,-1,1,0,m_height), vert3.z);
-
-		vec3 n1 = vec3(RANGE(normCoor1.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height), normCoor1.z);
-		vec3 n2 = vec3(RANGE(normCoor2.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height), normCoor2.z);
-
 		if (fill) {
 			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), toVec3(vn1), toVec3(vn2), toVec3(vn3), mat1,mat2,mat3);
 		} else {
+			float aspect_ratio = (float)(m_width)/(float)(m_height);
+			/*
+			Cameraspace coordinates to clipslace coordinates
+			*/
+			vert1 = toEuclidian(mat_project * vert1);
+			vert2 = toEuclidian(mat_project * vert2);
+			vert3 = toEuclidian(mat_project * vert3);
+
+			/*
+			Clipspace coordinates to screenspace coordinates
+			*/
+			vec3 p1 = vec3(RANGE(screenvert1.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(screenvert1.y,-1,1,0,m_height), screenvert1.z);
+			vec3 p2 = vec3(RANGE(screenvert2.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(screenvert2.y,-1,1,0,m_height), screenvert2.z);
+			vec3 p3 = vec3(RANGE(screenvert3.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(screenvert3.y,-1,1,0,m_height), screenvert3.z);
+
 			DrawLine(p1, p2, edge_color);
 			DrawLine(p2, p3, edge_color);
 			DrawLine(p3, p1, edge_color);
 
-			float aspect_ratio = (float)(m_width) / (float)(m_height);
-
 			if(edge_normals != NULL){
+				vn1 = toEuclidian(mat_project * vn1);
+				vn2 = toEuclidian(mat_project * vn2);
+				vn3 = toEuclidian(mat_project * vn3);
 				vec3 a1 = vec3(RANGE(vn1.x,-aspect_ratio, aspect_ratio, 0, m_width), RANGE(vn1.y,-1,1,0,m_height), vn1.z);
 				vec3 a2 = vec3(RANGE(vn2.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vn2.y,-1,1,0,m_height), vn2.z);
 				vec3 a3 = vec3(RANGE(vn3.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vn3.y,-1,1,0,m_height), vn3.z);
@@ -319,7 +327,14 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 			}
 			//Normal:
 			if(draw_normals){
-			  DrawLine(n1, n2, vec3(1, 0, 1));
+				
+				normCoor1 = toEuclidian(mat_project * normCoor1);
+				normCoor2 = toEuclidian(mat_project * normCoor2);
+
+				vec3 n1 = vec3(RANGE(normCoor1.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height), normCoor1.z);
+				vec3 n2 = vec3(RANGE(normCoor2.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height), normCoor2.z);
+
+			  	DrawLine(n1, n2, vec3(1, 0, 1));
     		}
 		}
 	}
@@ -361,14 +376,14 @@ vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_
 		if(plight){
 		//This might be wrong, we might wanna do our calculations in world space, not clip space(based on other students)
 		//Would be faster to do this outside of this function
-			vec3 light_position = toEuclidian(mat_project * (mat_transform_inverse * vec4(plight->getPosition())));
+			vec3 light_position = toVec3(mat_transform_inverse * vec4(plight->getPosition()));
 			light_direction = normalize(light_position - surface_point);
 		}
 		DirectionalLight* dlight = dynamic_cast<DirectionalLight*>(light);
 		if(dlight){	
 			//THIS MIGHT BE WRONG
-			vec3 dir_point  = toEuclidian(mat_project * (mat_transform_inverse * vec4(surface_point+dlight->getDirection())));
-			vec3 origin_point = toEuclidian(mat_project * (mat_transform_inverse * vec4(surface_point)));
+			vec3 dir_point  = toVec3(mat_transform_inverse * vec4(surface_point+dlight->getDirection()));
+			vec3 origin_point = toVec3(mat_transform_inverse * vec4(surface_point));
 			light_direction = normalize(dir_point - origin_point);
 		}
 
@@ -406,10 +421,21 @@ void Renderer::changeShadingMethod()
 
 void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const vec3& vn1, const vec3& vn2, const vec3& vn3, const Material& mat1, const Material& mat2, const Material& mat3)
 {
+	/*
+	Cameraspace coordinates to clipslace coordinates
+	*/
+	vec3 screenvert1 = toEuclidian(mat_project * vert1);
+	vec3 screenvert2 = toEuclidian(mat_project * vert2);
+	vec3 screenvert3 = toEuclidian(mat_project * vert3);
+
+	vec3 screenvn1 = toEuclidian(mat_project * vn1);
+	vec3 screenvn2 = toEuclidian(mat_project * vn2);
+	vec3 screenvn3 = toEuclidian(mat_project * vn3);
+
 	float aspect_ratio = (float)(m_width) / (float)(m_height);
-	vec3 p1 = vec3(RANGE(vert1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height), vert1.z);
-	vec3 p2 = vec3(RANGE(vert2.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vert2.y, -1, 1, 0, m_height), vert2.z);
-	vec3 p3 = vec3(RANGE(vert3.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vert3.y, -1, 1, 0, m_height), vert3.z);
+	vec3 p1 = vec3(RANGE(screenvert1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(screenvert1.y, -1, 1, 0, m_height), screenvert1.z);
+	vec3 p2 = vec3(RANGE(screenvert2.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(screenvert2.y, -1, 1, 0, m_height), screenvert2.z);
+	vec3 p3 = vec3(RANGE(screenvert3.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(screenvert3.y, -1, 1, 0, m_height), screenvert3.z);
 
 	const std::vector<vec3> vertices = { p1, p2, p3 };
 	// Find the minimum and maximum y-coordinates to determine the scanline range
