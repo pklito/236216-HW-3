@@ -382,7 +382,10 @@ vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_
 		}
 		DirectionalLight* dlight = dynamic_cast<DirectionalLight*>(light);
 		if(dlight){	
-			light_direction = toVec3(mat_transform_inverse * vec4(dlight->getDirection()));
+			//THIS MIGHT BE WRONG
+			vec3 dir_point  = toVec3(mat_transform_inverse * vec4(surface_point+dlight->getDirection()));
+			vec3 origin_point = toVec3(mat_transform_inverse * vec4(surface_point));
+			light_direction = normalize(dir_point - origin_point);
 		}
 
 		// Diffuse component
@@ -446,7 +449,7 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 	vec3 color2 = vec3(0,0,0);
 	vec3 color3 = vec3(0,0,0);
 	if(shading_method == FLAT){
-		color1 = phongIllumination(0.33*vert1 + 0.33*vert2 +0.33*vert3, calculateNormal(vert1,vert2,vert3), mat1);	//mat1 should be mat1,mat2,mat3,0.33,0.33,0.34
+		color1 = phongIllumination(0.33*vert1 + 0.33*vert2 +0.33*vert3, -calculateNormal(vert1,vert2,vert3), mat1);	//mat1 should be mat1,mat2,mat3,0.33,0.33,0.34
 	}
 	if(shading_method == GOURAUD){
 		color1 = phongIllumination(vert1, normalize(vn1-vert1), mat1);
