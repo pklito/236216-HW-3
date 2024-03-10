@@ -26,4 +26,7 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()
+public:
+	int m_sliderval;
+	afx_msg void OnBnClickedIgnore();
 };

@@ -97,11 +97,9 @@ void addProjCamera(){
 	float aspect_ratio = 1;
 	float zNear = 0.5;
 	float zFar = 5;
-	std::cout << result << " ";
-	std::cout << c.m_slider.GetPos() << std::endl;
 	if(result == IDYES){
+		fov_degrees = c.m_sliderval;
 		try{
-			fov_degrees = c.m_slider.GetPos();
 			aspect_ratio = _ttof(c.m_msg1);
 			zNear = _ttof(c.m_msg2);
 			zFar = _ttof(c.m_msg3);
