@@ -222,6 +222,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 	if(!material_list){
 		material_list = &matlist;
 	}
+	far_z = 100;
 	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
 	vector<Material>::const_iterator mat_it = material_list->begin();
 	vector<vec3>::const_iterator normal_it = edge_normals != NULL ? edge_normals->begin() : vertices->begin();
@@ -491,8 +492,9 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 				
 				// Calculate the current Z
 				vec3 surface_point = weights.x * vert1 + weights.y * vert2 + weights.z * vert3;	//Not efficient but easy to work with
+				float screen_z = weights.x * screenvert1.z + weights.y * screenvert2.z + weights.z * screenvert3.z;
 				//dont do color calculations for covered pixels!!!
-				if(surface_point.z >= m_zbuffer[Z_INDEX(m_width, x, y)]) {
+				if(screen_z >= m_zbuffer[Z_INDEX(m_width, x, y)]) {
 					continue;
 				}
 
@@ -515,8 +517,7 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 						pixel_color = phongIllumination(surface_point, norm, mat);
 						break;
 				}
-
-				DrawPixel(x, y, surface_point.z, pixel_color);
+				DrawPixel(x, y, screen_z, pixel_color);
       		}
 		}
 	}
