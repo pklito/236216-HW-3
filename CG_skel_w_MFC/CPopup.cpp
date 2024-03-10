@@ -61,3 +61,47 @@ void CPopup::OnNMCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 	//m_sliderval = m_slider.GetPos();
 	//*pResult = m_slider.GetPos();
 }
+
+
+/////////////////////////////////////////////////////
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
+
+// CPopupOrtho dialog
+
+IMPLEMENT_DYNAMIC(CPopupOrtho, CDialogEx)
+
+CPopupOrtho::CPopupOrtho(CWnd* pParent /*=nullptr*/)
+	: CDialogEx(IDD_DIALOG2, pParent)
+{
+
+}
+
+CPopupOrtho::~CPopupOrtho()
+{
+}
+
+void CPopupOrtho::DoDataExchange(CDataExchange* pDX)
+{
+	CDialogEx::DoDataExchange(pDX);
+	DDX_Text(pDX, IDC_EDIT1, m_msg1); // Map the member variable to the edit control
+	DDX_Text(pDX, IDC_EDIT2, m_msg2);
+	DDX_Text(pDX, IDC_EDIT3, m_msg3);
+	DDX_Text(pDX, IDC_EDIT4, m_msg4);
+}
+
+BOOL CPopupOrtho::OnInitDialog(){
+	CDialogEx::OnInitDialog();
+	GetDlgItem(IDC_EDIT1)->SetWindowText(_T("2")); // Replace "Default Text" with your desired default text
+	GetDlgItem(IDC_EDIT2)->SetWindowText(_T("2")); // Replace "Default Text" with your desired default text
+	GetDlgItem(IDC_EDIT3)->SetWindowText(_T("0.5")); // Replace "Default Text" with your desired default text
+	GetDlgItem(IDC_EDIT4)->SetWindowText(_T("5")); // Replace "Default Text" with your desired default text
+
+
+	return TRUE;
+}
+BEGIN_MESSAGE_MAP(CPopupOrtho, CDialogEx)
+END_MESSAGE_MAP()
+
+
+// CPopupOrtho message handlers
