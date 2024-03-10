@@ -77,6 +77,7 @@ public:
 	bool getFogFlag();
 	void setFog(std::vector<Fog*>* fogs) { this->fogs = fogs; };
 	void ApplyFog(const Fog& fog);
+	vec3 blendWithFogs(const vec3& surface_point, const vec3& pixel_color);
 
 	void DrawNormalsToVertices(const std::vector<vec3>* vertices, const std::vector<vec3>* vertex_normals = NULL, bool draw_vertex_normals = false);
 	void setCameraPos(vec3 camera_pos);

@@ -340,14 +340,6 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
     		}
 		}
 	}
-
-	
-	if (draw_fog) {
-		std::vector<Fog*>& fogs_ref = *fogs;
-		for (auto& fog : fogs_ref) {
-			ApplyFog(*dynamic_cast<Fog*>(fog));
-		}
-	}
 	
 }
 
@@ -427,7 +419,6 @@ void Renderer::changeShadingMethod()
 			break;
 	}
 }
-
 
 void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const vec3& vn1, const vec3& vn2, const vec3& vn3, const Material& mat1, const Material& mat2, const Material& mat3)
 {
@@ -525,6 +516,11 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 						Material mat = mat1;
 						pixel_color = phongIllumination(surface_point, norm, mat);
 						break;
+				}
+				//Blend the color with fog
+				draw_fog = true;
+				if(draw_fog){
+					pixel_color = blendWithFogs(surface_point, pixel_color);
 				}
 				DrawPixel(x, y, screen_z, pixel_color);
       		}
@@ -763,6 +759,17 @@ void Renderer::ApplyFog(const Fog& fog)
 	}
 }
 
+
+vec3 Renderer::blendWithFogs(const vec3& surface_point, const vec3& pixel_color){
+	//This isn't correct for multiple fogs
+	std::vector<Fog*>& fogs_ref = *fogs;
+	vec3 fogged_color;
+	for (auto& fog : fogs_ref) {
+		float fog_amount = fog->ComputeFog(-surface_point.z);
+		fogged_color = mix(pixel_color,toVec3(fog->getFogColor()),1-fog_amount);
+	}
+	return fogged_color;
+}
 
 void Renderer::SetCameraTransformInverse(const mat4& cTransform){
 	mat_transform_inverse = cTransform;
