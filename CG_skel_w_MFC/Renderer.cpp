@@ -224,7 +224,6 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 	if(!material_list){
 		material_list = &matlist;
 	}
-	far_z = 100;
 	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
 	vector<Material>::const_iterator mat_it = material_list->begin();
 	vector<vec3>::const_iterator normal_it = edge_normals != NULL ? edge_normals->begin() : vertices->begin();
