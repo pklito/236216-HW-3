@@ -362,7 +362,7 @@ vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_
 	vec3 ambient_color(0.0f, 0.0f, 0.0f);
 	vec3 diffuse_color(0.0f, 0.0f, 0.0f);
 	vec3 specular_color(0.0f, 0.0f, 0.0f);
-	vec3 view_direction = vec3(0,0,-1);
+	vec3 view_direction = -surface_point;
 	//use a reference to the vector rather than a pointer
 	std::vector<Light*>& lights_ref = *lights;
 	for (auto& light : lights_ref) 
@@ -393,8 +393,8 @@ vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_
 		diffuse_color = diffuse_color + material.color_diffuse * light->getColor() * light->getIntensity() * cos_theta;
 
 		// Specular component
-		vec3 reflection_direction = reflect(light_direction, surface_normal);
-		float cos_phi = max(0.0f, dot(reflection_direction, view_direction));
+		vec3 reflection_direction = reflect(-light_direction, surface_normal);
+		float cos_phi = max(0.0f, dot(normalize(reflection_direction), normalize(view_direction)));
 		specular_color = specular_color + material.color_specular * light->getColor() * light->getIntensity() * std::pow(cos_phi, material.k_shiny);
 		}
 
