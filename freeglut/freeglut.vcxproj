@@ -109,10 +109,14 @@
   <ItemGroup>
     <ClInclude Include="include\GL\freeglut.h" />
     <ClInclude Include="include\GL\freeglut_ext.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="src\freeglut_internal.h" />
     <ClInclude Include="include\GL\freeglut_std.h" />
     <ClInclude Include="src\freeglut_teapot_data.h" />
     <ClInclude Include="include\GL\glut.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="freeglut.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
