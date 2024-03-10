@@ -11,7 +11,10 @@ class CPopup : public CDialogEx
 public:
 	CPopup(CWnd* pParent = nullptr);   // standard constructor
 	virtual ~CPopup();
+	CSliderCtrl m_slider;
 	CString m_msg1;
+	CString m_msg2;
+	CString m_msg3;
 
 // Dialog Data
 #ifdef AFX_DESIGN_TIME
@@ -19,6 +22,7 @@ public:
 #endif
 
 protected:
+	BOOL OnInitDialog() override;
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()

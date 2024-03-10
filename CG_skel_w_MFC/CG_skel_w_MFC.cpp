@@ -85,7 +85,11 @@ void changeIncrement(){
 }
 
 void addProjCamera(){
-	int result = AfxMessageBox(_T("Enter a Projection camera?\n - Press YES to input settings\n - Press NO to use a default\n - Press CANCEL if you do not wish to continue."), MB_ICONINFORMATION | MB_YESNOCANCEL);
+	
+	CPopup c;
+	int result = c.DoModal();
+	std::cout << result << std::endl;
+	return;
 	if(result == IDCANCEL){
 		return;
 	}
@@ -229,7 +233,6 @@ void testing(){
 		CPopup c;
 		c.DoModal();
 		std::cout << c.m_msg1 << std::endl;
-		AfxMessageBox(_T(""));
 }
 void keyboard( unsigned char key, int x, int y )
 {
