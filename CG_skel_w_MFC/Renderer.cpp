@@ -260,6 +260,11 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		if(screenvert1.z < -1 || screenvert1.z > 1 || screenvert2.z < -1 || screenvert2.z > 1 || screenvert3.z < -1 || screenvert3.z > 1){
 			continue;
 		}
+		if(fill && calculateNormal(toVec3(screenvert1),toVec3(screenvert2),toVec3(screenvert3)).z > 0){
+			continue;
+		}
+		
+		//BackFace culling (currently not done in wireframe mode)
 		vec3 norm_dir = calculateNormal(toVec3(vert1),toVec3(vert2),toVec3(vert3))/5.f;
 		normCoor1 = (vert1 + vert2 + vert3) / 3;
 		normCoor2 = normCoor1 + norm_dir;
@@ -277,14 +282,6 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 			vn2 = vec4(0.5* norm_dir) + vert2;
 			vn3 = vec4(0.5* norm_dir) + vert3;
 		}
-
-		//BackFace culling (currently not done in wireframe mode)
-		if(fill){
-			if(norm_dir.z > 0){
-				continue;
-			}
-		}
-
 
 		//sometimes a point will get sent really far (matrix bs)
 		//the DrawLine function wont draw out of bounds, but it will take
@@ -518,7 +515,6 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 						break;
 				}
 				//Blend the color with fog
-				draw_fog = true;
 				if(draw_fog){
 					pixel_color = blendWithFogs(surface_point, pixel_color);
 				}

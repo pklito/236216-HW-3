@@ -236,7 +236,7 @@ void Scene::removeSelectedCamera(){
 	if(cameras.size() <= 1)
 		return;
 	cameras.erase(cameras.begin()+activeCamera);
-	cycleSelectedObject();
+	cycleActiveCamera();
 }
 
 Camera* Scene::getActiveCamera()

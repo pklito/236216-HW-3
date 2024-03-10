@@ -22,6 +22,7 @@
 #include "Renderer.h"
 #include "MeshModel.h"
 #include <string>
+#include "CPopup.h"
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
@@ -84,7 +85,9 @@ void changeIncrement(){
 }
 
 void addProjCamera(){
-	int result = AfxMessageBox(_T("Enter a Projection camera?\n - Press YES to input settings\n - Press NO to use a default\n - Press CANCEL if you do not wish to continue."), MB_ICONINFORMATION | MB_YESNOCANCEL);
+	
+	CPopup c;
+	int result = c.DoModal();
 	if(result == IDCANCEL){
 		return;
 	}
@@ -94,25 +97,20 @@ void addProjCamera(){
 	float aspect_ratio = 1;
 	float zNear = 0.5;
 	float zFar = 5;
-	if(result == IDYES){
-
-		renderer->FillEdges(0.1, vec3(0.9, 0.1, 0.1));
-		display();
-		std::string userInput;
-		
-		std::cout << "enter field of view (degrees, width axis): ";
-		std::cin >> userInput;
-		TRY_FLOAT(fov_degrees, userInput);
-		std::cout << "enter aspect ratio: ";
-		std::cin >> userInput;
-		TRY_FLOAT(aspect_ratio, userInput);
-		std::cout << "enter zNear: ";
-		std::cin >> userInput;
-		TRY_FLOAT(zNear, userInput);
-		std::cout << "enter zFar: ";
-		std::cin >> userInput;
-		TRY_FLOAT(zFar, userInput);
+	if(result == IDOK){
+		fov_degrees = c.m_sliderval;
+		try{
+			aspect_ratio = _ttof(c.m_msg1);
+			zNear = _ttof(c.m_msg2);
+			zFar = _ttof(c.m_msg3);
+		}
+		catch(exception e){
+			aspect_ratio = 1;
+			zNear = 0.5;
+			zFar = 5;
+		}
 	}
+	
 	fov_degrees = Radians(fov_degrees);
 	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
 	//TEMP ORTHOGRAPHIC
@@ -122,8 +120,8 @@ void addProjCamera(){
 }
 
 void addOrthoCamera(){
-
-	int result = AfxMessageBox(_T("Enter a Orthographic camera?\n - Press YES to input settings\n - Press NO to use a default\n - Press CANCEL if you do not wish to continue."), MB_ICONEXCLAMATION | MB_YESNOCANCEL);
+	CPopupOrtho c;
+	int result = c.DoModal();
 	if(result == IDCANCEL){
 		return;
 	}
@@ -131,32 +129,20 @@ void addOrthoCamera(){
 	float height = 2;
 	float zNear = 0.5;
 	float zFar = 5;
-	if(result == IDYES){
-		renderer->FillEdges(0.1, vec3(0.9, 0.1, 0.1));
-		display();
-		std::string userInput;
-		
-		std::cout << "width: (right-left) ";
-		std::cin >> userInput;
-		TRY_FLOAT(width, userInput);
-		std::cout << "height (top - bottom): ";
-		std::cin >> userInput;
-		TRY_FLOAT(height, userInput);
-		std::cout << "enter zNear: ";
-		std::cin >> userInput;
-		TRY_FLOAT(zNear, userInput);
-		std::cout << "enter zFar: ";
-		std::cin >> userInput;
-		TRY_FLOAT(zFar, userInput);
+	if(result == IDOK){
+		try{
+			width = _ttof(c.m_msg1);
+			height = _ttof(c.m_msg2);
+			zNear = _ttof(c.m_msg3);
+			zFar = _ttof(c.m_msg4);
+		}
+		catch(exception e){
+
+		}
 	}
 	Camera* camera = new Camera();
 
-
-	//std::cout << "enter z-min: ";
-	//std::string userInput2;
-	//std::cin >> userInput2;
-	
-	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
+	camera->LookAt(vec3(1,0,1),vec3(-1,0,0),vec3(0,1,0));
 	camera->Ortho(-width/2,width/2,-height/2,height/2,zNear,zFar);
 	scene->addCamera(camera);
 	glutPostRedisplay();
@@ -308,6 +294,7 @@ void keyboard( unsigned char key, int x, int y )
 		break;
 	case '4':
 		renderer->setFogFlag(!(renderer->getFogFlag()));
+		break;
 	default:
 		return;
 	}
