@@ -10,13 +10,13 @@
 #define Z_INDEX(width,x,y) (x+y*width)
 #define LINE_TOO_LARGE 30
 
-Renderer::Renderer() :m_width(512), m_height(512), curr_color(0), shading_method(FLAT)
+Renderer::Renderer() :m_width(512), m_height(512), curr_color(0), shading_method(FLAT), ambient_light(AmbientLight(0,vec3(0,0,0)))
 {
 	InitOpenGLRendering();
 	draw_fog = false;
 	CreateBuffers(512,512);
 }
-Renderer::Renderer(int width, int height) :m_width(width), m_height(height), curr_color(0), shading_method(FLAT)
+Renderer::Renderer(int width, int height) :m_width(width), m_height(height), curr_color(0), shading_method(FLAT), ambient_light(AmbientLight(0,vec3(0,0,0)))
 {
 	InitOpenGLRendering();
 	draw_fog = false;
@@ -364,6 +364,9 @@ vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_
 	vec3 view_direction = -surface_point;
 	//use a reference to the vector rather than a pointer
 	std::vector<Light*>& lights_ref = *lights;
+	
+	//renderer stores a constant ambient light
+	ambient_color += ambient_light.getColor() * material.color_ambient * ambient_light.getIntensity();
 	for (auto& light : lights_ref) 
 	{
 		// Ambient component
