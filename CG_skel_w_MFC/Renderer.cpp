@@ -518,7 +518,6 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 						break;
 				}
 				//Blend the color with fog
-				draw_fog = true;
 				if(draw_fog){
 					pixel_color = blendWithFogs(surface_point, pixel_color);
 				}
