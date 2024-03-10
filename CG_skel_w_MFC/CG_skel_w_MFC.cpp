@@ -88,8 +88,6 @@ void addProjCamera(){
 	
 	CPopup c;
 	int result = c.DoModal();
-	std::cout << result << std::endl;
-	return;
 	if(result == IDCANCEL){
 		return;
 	}
@@ -99,24 +97,20 @@ void addProjCamera(){
 	float aspect_ratio = 1;
 	float zNear = 0.5;
 	float zFar = 5;
+	std::cout << result << " ";
+	std::cout << c.m_slider.GetPos() << std::endl;
 	if(result == IDYES){
-
-		renderer->FillEdges(0.1, vec3(0.9, 0.1, 0.1));
-		display();
-		std::string userInput;
-		
-		std::cout << "enter field of view (degrees, width axis): ";
-		std::cin >> userInput;
-		TRY_FLOAT(fov_degrees, userInput);
-		std::cout << "enter aspect ratio: ";
-		std::cin >> userInput;
-		TRY_FLOAT(aspect_ratio, userInput);
-		std::cout << "enter zNear: ";
-		std::cin >> userInput;
-		TRY_FLOAT(zNear, userInput);
-		std::cout << "enter zFar: ";
-		std::cin >> userInput;
-		TRY_FLOAT(zFar, userInput);
+		try{
+			fov_degrees = c.m_slider.GetPos();
+			aspect_ratio = _ttof(c.m_msg1);
+			zNear = _ttof(c.m_msg2);
+			zFar = _ttof(c.m_msg3);
+		}
+		catch(exception e){
+			aspect_ratio = 1;
+			zNear = 0.5;
+			zFar = 5;
+		}
 	}
 	fov_degrees = Radians(fov_degrees);
 	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
