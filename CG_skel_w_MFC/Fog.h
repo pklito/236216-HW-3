@@ -14,9 +14,9 @@ class Fog
 private:
 	vec4 color = vec4(0.3, 0.3, 0.3, 1);
 	float m_start = 0;
-	float m_end = 20;
+	float m_end = 5;
 public:
-	Fog() : color(vec4(0.3, 0.3, 0.3, 1)), m_start(0), m_end(20) {}
+	Fog() : color(vec4(0.3, 0.3, 0.3, 1)), m_start(0), m_end(5) {}
 	Fog(vec4 color, float start, float end) : color(color), m_start(start), m_end(end) {}
 
 	void setColor(const vec4& new_color) { color = new_color; }
