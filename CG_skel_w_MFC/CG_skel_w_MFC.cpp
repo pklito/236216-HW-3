@@ -157,6 +157,18 @@ void readFromFile(){
 		glutPostRedisplay();
 	}
 }
+
+void changeAmbientLight(){
+	CColorDialog c;
+	if(c.DoModal() != IDOK){
+		return;
+	}
+	COLORREF color = c.GetColor();
+	vec3 colorvec = vec3((float)GetRValue(color)/255.f,
+    (float)GetGValue(color)/255.f,
+    (float)GetBValue(color)/255.f);
+	renderer->setAmbientLight(AmbientLight(1,colorvec));
+}
 //----------------------------------------------------------------------------
 // Callbacks
 //----------------------------------------------------------------------------
@@ -295,6 +307,8 @@ void keyboard( unsigned char key, int x, int y )
 	case '4':
 		renderer->setFogFlag(!(renderer->getFogFlag()));
 		break;
+	case '5':
+		changeAmbientLight();
 	default:
 		return;
 	}
