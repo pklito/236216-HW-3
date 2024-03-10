@@ -581,7 +581,7 @@ int my_main(int argc, char** argv)
 	scene->addFog(fog);
 
 	std::cout << "[ ] Reading mesh files... ";
-	MeshModel* demo_object = new MeshModel("meshes/sphere.obj");
+	MeshModel* demo_object = new MeshModel("meshes/bunny.obj");
 	scene->addMeshModel(demo_object);
 	std::cout << " Done!" << std::endl;
 	//----------------------------------------------------------------------------
