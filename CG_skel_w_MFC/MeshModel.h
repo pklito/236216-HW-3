@@ -10,10 +10,9 @@ using namespace std;
 class MeshModel : public Model
 {
 protected:
-	MeshModel() : curr_color(0), color(vec3(1,1,1)), vertex_normals_exist(false), show_vertex_normals(false), show_face_normals(false), fill_obj(false) {}
+	MeshModel() : vertex_normals_exist(false), show_vertex_normals(false), show_face_normals(false), fill_obj(false) {}
 	vec3* vertex_positions;
 	vec3* normals_to_vertices;
-	vec3 color;
 	int curr_color;
 	Material material;
 
@@ -30,6 +29,8 @@ protected:
 	//add more attributes
 	mat4 _world_transform;
 	mat3 _normal_transform;
+
+	void updateMaterial();
 
 public:
 
@@ -55,7 +56,9 @@ public:
 	void setFillObj(bool fill);
 
 	void changeColor();
-	void GetColorToFill();
+
+	void setMaterial(const Material& new_mat){material = new_mat;}
+	Material getMaterial(){return material;}
 
 	void resetToCenter();
 	vec3 calculateBoundingBoxCenter();

@@ -216,33 +216,49 @@ void Renderer::DrawPixelSafe(int x, int y, float z, vec3 color){
  * vertices: vector of the camera space vertices
  * normals: directions of the respective world space normals.
  */
-void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, Material material, const vector<vec3>* edge_normals, bool draw_normals, vec3 edge_color, bool fill)
+void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_transform, const vector<Material>* material_list, const vector<vec3>* edge_normals, bool draw_normals, vec3 edge_color, bool fill)
 
 {
+	//incase none were passed
+	vector<Material> matlist(1,Material());
+	if(!material_list){
+		material_list = &matlist;
+	}
+	far_z = 100;
 	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
+	vector<Material>::const_iterator mat_it = material_list->begin();
 	vector<vec3>::const_iterator normal_it = edge_normals != NULL ? edge_normals->begin() : vertices->begin();
-	for(auto it = vertices->begin(); it != vertices->end(); ++it, ++normal_it){
+	for(auto it = vertices->begin(); it != vertices->end();){
 		//get the next face
 		vec4 vert1 = vec4(*it);
 		vec4 vert2 = vec4(*(it+1));
 		vec4 vert3 = vec4(*(it+2));
-		it = it + 2;
+		it = it + 3;
 
 		vec4 normCoor1, normCoor2;
 
 		vec4 vn1 = vec4(*normal_it);
 		vec4 vn2 = vec4(*(normal_it+1));
 		vec4 vn3 = vec4(*(normal_it+2));
-		normal_it += 2;
+		normal_it += 3;
 
+		Material mat1 = *mat_it;
+		Material mat2 = *(mat_it+(material_list->size() == vertices->size()));
+		Material mat3 = *(mat_it+2*(material_list->size() == vertices->size()));
+		if(material_list->size() == vertices->size()){
+			mat_it += 3;
+		}
 		/*
-		TRANSFORMATIONS + PROJECTION ( P * Tc-1 * v)
+		TRANSFORMATIONS + PROJECTION ( Tc-1 * v)
 		*/
-		vert1 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vert1));
-		vert2 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vert2));
-		vert3 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vert3));
-
-		if(vert1.z < -1 || vert1.z > 1 || vert2.z < -1 || vert2.z > 1 || vert3.z < -1 || vert3.z > 1){
+		vert1 = (mat_transform_inverse * world_transform * vert1);
+		vert2 = (mat_transform_inverse * world_transform * vert2);
+		vert3 = (mat_transform_inverse * world_transform * vert3);
+		
+		vec3 screenvert1 = toEuclidian(mat_project * vert1);
+		vec3 screenvert2 = toEuclidian(mat_project * vert2);
+		vec3 screenvert3 = toEuclidian(mat_project * vert3);
+		if(screenvert1.z < -1 || screenvert1.z > 1 || screenvert2.z < -1 || screenvert2.z > 1 || screenvert3.z < -1 || screenvert3.z > 1){
 			continue;
 		}
 		vec3 norm_dir = calculateNormal(toVec3(vert1),toVec3(vert2),toVec3(vert3))/5.f;
@@ -251,9 +267,9 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 
 		if(edge_normals != NULL){
 			
-			vn1 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vn1));
-			vn2 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vn2));
-			vn3 = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vn3));
+			vn1 = mat_transform_inverse * world_transform * vn1;
+			vn2 = mat_transform_inverse * world_transform * vn2;
+			vn3 = mat_transform_inverse * world_transform * vn3;
 		}
 		else{
 			//Use the face normal if no edge normals exist
@@ -279,27 +295,32 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 			continue;
 		}
 
-		float aspect_ratio = (float)(m_width)/(float)(m_height);
-		/*
-		Clipspace coordinates to screenspace coordinates
-		*/
-		vec3 p1 = vec3(RANGE(vert1.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vert1.y,-1,1,0,m_height), vert1.z);
-		vec3 p2 = vec3(RANGE(vert2.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vert2.y,-1,1,0,m_height), vert2.z);
-		vec3 p3 = vec3(RANGE(vert3.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(vert3.y,-1,1,0,m_height), vert3.z);
-
-		vec3 n1 = vec3(RANGE(normCoor1.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height), normCoor1.z);
-		vec3 n2 = vec3(RANGE(normCoor2.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height), normCoor2.z);
-
 		if (fill) {
-			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), toVec3(vn1), toVec3(vn2), toVec3(vn3), edge_color, material);
+			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), toVec3(vn1), toVec3(vn2), toVec3(vn3), mat1,mat2,mat3);
 		} else {
+			float aspect_ratio = (float)(m_width)/(float)(m_height);
+			/*
+			Cameraspace coordinates to clipslace coordinates
+			*/
+			vert1 = toEuclidian(mat_project * vert1);
+			vert2 = toEuclidian(mat_project * vert2);
+			vert3 = toEuclidian(mat_project * vert3);
+
+			/*
+			Clipspace coordinates to screenspace coordinates
+			*/
+			vec3 p1 = vec3(RANGE(screenvert1.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(screenvert1.y,-1,1,0,m_height), screenvert1.z);
+			vec3 p2 = vec3(RANGE(screenvert2.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(screenvert2.y,-1,1,0,m_height), screenvert2.z);
+			vec3 p3 = vec3(RANGE(screenvert3.x,-aspect_ratio,aspect_ratio,0,m_width), RANGE(screenvert3.y,-1,1,0,m_height), screenvert3.z);
+
 			DrawLine(p1, p2, edge_color);
 			DrawLine(p2, p3, edge_color);
 			DrawLine(p3, p1, edge_color);
 
-			float aspect_ratio = (float)(m_width) / (float)(m_height);
-
 			if(edge_normals != NULL){
+				vn1 = toEuclidian(mat_project * vn1);
+				vn2 = toEuclidian(mat_project * vn2);
+				vn3 = toEuclidian(mat_project * vn3);
 				vec3 a1 = vec3(RANGE(vn1.x,-aspect_ratio, aspect_ratio, 0, m_width), RANGE(vn1.y,-1,1,0,m_height), vn1.z);
 				vec3 a2 = vec3(RANGE(vn2.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vn2.y,-1,1,0,m_height), vn2.z);
 				vec3 a3 = vec3(RANGE(vn3.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vn3.y,-1,1,0,m_height), vn3.z);
@@ -309,7 +330,14 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 			}
 			//Normal:
 			if(draw_normals){
-			  DrawLine(n1, n2, vec3(1, 0, 1));
+				
+				normCoor1 = toEuclidian(mat_project * normCoor1);
+				normCoor2 = toEuclidian(mat_project * normCoor2);
+
+				vec3 n1 = vec3(RANGE(normCoor1.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(normCoor1.y, -1, 1, 0, m_height), normCoor1.z);
+				vec3 n2 = vec3(RANGE(normCoor2.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(normCoor2.y, -1, 1, 0, m_height), normCoor2.z);
+
+			  	DrawLine(n1, n2, vec3(1, 0, 1));
     		}
 		}
 	}
@@ -340,19 +368,19 @@ vec3 getBarycentricCoordinates(const vec2& p, const vec2& p1, const vec2& p2, co
 	return vec3(l1, l2, l3);
 }
 
-vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_normal, Material material, const vec3& color)
+vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_normal, Material material)
 {
 	vec3 ambient_color(0.0f, 0.0f, 0.0f);
 	vec3 diffuse_color(0.0f, 0.0f, 0.0f);
 	vec3 specular_color(0.0f, 0.0f, 0.0f);
-	vec3 view_direction = vec3(0,0,-1);
+	vec3 view_direction = -surface_point;
 	//use a reference to the vector rather than a pointer
 	std::vector<Light*>& lights_ref = *lights;
 	for (auto& light : lights_ref) 
 	{
 		// Ambient component
 		if(dynamic_cast<AmbientLight*>(light)){
-			ambient_color += light->getColor() * material.k_ambient * light->getIntensity();
+			ambient_color += light->getColor() * material.color_ambient * light->getIntensity();
 			continue;
 		}
 		vec3 light_direction;
@@ -360,29 +388,28 @@ vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_
 		if(plight){
 		//This might be wrong, we might wanna do our calculations in world space, not clip space(based on other students)
 		//Would be faster to do this outside of this function
-			vec3 light_position = toEuclidian(mat_project * (mat_transform_inverse * vec4(plight->getPosition())));
+			vec3 light_position = toVec3(mat_transform_inverse * vec4(plight->getPosition()));
 			light_direction = normalize(light_position - surface_point);
 		}
 		DirectionalLight* dlight = dynamic_cast<DirectionalLight*>(light);
 		if(dlight){	
 			//THIS MIGHT BE WRONG
-			vec3 dir_point  = toEuclidian(mat_project * (mat_transform_inverse * vec4(surface_point+dlight->getDirection())));
-			vec3 origin_point = toEuclidian(mat_project * (mat_transform_inverse * vec4(surface_point)));
+			vec3 dir_point  = toVec3(mat_transform_inverse * vec4(surface_point+dlight->getDirection()));
+			vec3 origin_point = toVec3(mat_transform_inverse * vec4(surface_point));
 			light_direction = normalize(dir_point - origin_point);
 		}
 
-
 		// Diffuse component
 		float cos_theta = max(0.0f, dot(surface_normal, light_direction));
-		diffuse_color = diffuse_color + material.k_diffuse * light->getColor() * light->getIntensity() * cos_theta;
+		diffuse_color = diffuse_color + material.color_diffuse * light->getColor() * light->getIntensity() * cos_theta;
 
 		// Specular component
 		vec3 reflection_direction = reflect(-light_direction, surface_normal);
-		float cos_phi = max(0.0f, dot(reflection_direction, view_direction));
-		specular_color = specular_color + material.k_specular * light->getColor() * light->getIntensity() * std::pow(cos_phi, material.k_shiny);
+		float cos_phi = max(0.0f, dot(normalize(reflection_direction), normalize(view_direction)));
+		specular_color = specular_color + material.color_specular * light->getColor() * light->getIntensity() * std::pow(cos_phi, material.k_shiny);
 		}
 
-	vec3 total_color = color*(ambient_color + diffuse_color + specular_color);
+	vec3 total_color = (ambient_color + diffuse_color + specular_color);
 	return total_color.clamp(0.0f, 1.0f);
 }
 
@@ -403,12 +430,23 @@ void Renderer::changeShadingMethod()
 }
 
 
-void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const vec3& vn1, const vec3& vn2, const vec3& vn3, const vec3& color, const Material& material)
+void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const vec3& vn1, const vec3& vn2, const vec3& vn3, const Material& mat1, const Material& mat2, const Material& mat3)
 {
+	/*
+	Cameraspace coordinates to clipslace coordinates
+	*/
+	vec3 screenvert1 = toEuclidian(mat_project * vert1);
+	vec3 screenvert2 = toEuclidian(mat_project * vert2);
+	vec3 screenvert3 = toEuclidian(mat_project * vert3);
+
+	vec3 screenvn1 = toEuclidian(mat_project * vn1);
+	vec3 screenvn2 = toEuclidian(mat_project * vn2);
+	vec3 screenvn3 = toEuclidian(mat_project * vn3);
+
 	float aspect_ratio = (float)(m_width) / (float)(m_height);
-	vec3 p1 = vec3(RANGE(vert1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vert1.y, -1, 1, 0, m_height), vert1.z);
-	vec3 p2 = vec3(RANGE(vert2.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vert2.y, -1, 1, 0, m_height), vert2.z);
-	vec3 p3 = vec3(RANGE(vert3.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(vert3.y, -1, 1, 0, m_height), vert3.z);
+	vec3 p1 = vec3(RANGE(screenvert1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(screenvert1.y, -1, 1, 0, m_height), screenvert1.z);
+	vec3 p2 = vec3(RANGE(screenvert2.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(screenvert2.y, -1, 1, 0, m_height), screenvert2.z);
+	vec3 p3 = vec3(RANGE(screenvert3.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(screenvert3.y, -1, 1, 0, m_height), screenvert3.z);
 
 	const std::vector<vec3> vertices = { p1, p2, p3 };
 	// Find the minimum and maximum y-coordinates to determine the scanline range
@@ -422,12 +460,12 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 	vec3 color2 = vec3(0,0,0);
 	vec3 color3 = vec3(0,0,0);
 	if(shading_method == FLAT){
-		color1 = phongIllumination(0.33*vert1 + 0.33*vert2 +0.33*vert3, calculateNormal(vert1,vert2,vert3),material,color);
+		color1 = phongIllumination(0.33*vert1 + 0.33*vert2 +0.33*vert3, -calculateNormal(vert1,vert2,vert3), mat1);	//mat1 should be mat1,mat2,mat3,0.33,0.33,0.34
 	}
 	if(shading_method == GOURAUD){
-		color1 = phongIllumination(vert1, normalize(vn1-vert1), material,color);
-		color2 = phongIllumination(vert2, normalize(vn2-vert2), material,color);
-		color3 = phongIllumination(vert3, normalize(vn3-vert3), material,color);
+		color1 = phongIllumination(vert1, normalize(vn1-vert1), mat1);
+		color2 = phongIllumination(vert2, normalize(vn2-vert2), mat2);
+		color3 = phongIllumination(vert3, normalize(vn3-vert3), mat3);
 	}
 	// Iterate through each scanline
 	for (int y = max(0, minY); y <= min(m_height - 1, maxY); y++)
@@ -464,9 +502,9 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 				
 				// Calculate the current Z
 				vec3 surface_point = weights.x * vert1 + weights.y * vert2 + weights.z * vert3;	//Not efficient but easy to work with
-
+				float screen_z = weights.x * screenvert1.z + weights.y * screenvert2.z + weights.z * screenvert3.z;
 				//dont do color calculations for covered pixels!!!
-				if(surface_point.z >= m_zbuffer[Z_INDEX(m_width, x, y)]) {
+				if(screen_z >= m_zbuffer[Z_INDEX(m_width, x, y)]) {
 					continue;
 				}
 
@@ -484,11 +522,12 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 						pixel_color = weights.x * color1 + weights.y * color2 + weights.z * color3;
 						break;
 					case PHONG:
-						pixel_color = phongIllumination(surface_point, norm, material, color);
+						//Material mat = Material::weightedAverage(mat1,mat2,mat3,weights.x,weights.y,weights.z);
+						Material mat = mat1;
+						pixel_color = phongIllumination(surface_point, norm, mat);
 						break;
 				}
-
-				DrawPixel(x, y, surface_point.z, pixel_color);
+				DrawPixel(x, y, screen_z, pixel_color);
       		}
 		}
 	}
