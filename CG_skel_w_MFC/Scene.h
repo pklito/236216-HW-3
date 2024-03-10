@@ -7,6 +7,7 @@
 #include <string>
 #include "Renderer.h"
 #include "util.h"
+#include "Fog.h"
 using namespace std;
 
 class Model {
@@ -71,6 +72,7 @@ class Scene {
 
 	vector<Model*> models;
 	vector<Light*> lights;
+	vector<Fog*> fogs;
 	vector<Camera*> cameras;
 	Renderer *m_renderer;
 
@@ -80,11 +82,12 @@ class Scene {
 
 public:
 	//Scene() : world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false), {std::cout << "NO RENDERER PROVIDED!" << std::endl;};
-	Scene(Renderer *renderer) : m_renderer(renderer), world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false),lights() {m_renderer->setLights(&lights);};
+	Scene(Renderer* renderer) : m_renderer(renderer), world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false), lights(), fogs() { m_renderer->setLights(&lights); m_renderer->setFog(&fogs); };
 	void loadOBJModel(string fileName);
 	void addMeshModel(Model* model);
 	void addCamera(Camera* camera);
 	void addLightSource(Light* light);
+	void addFog(Fog* fog);
 	void draw();
 	void drawDemo();
 

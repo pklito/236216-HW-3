@@ -13,11 +13,13 @@
 Renderer::Renderer() :m_width(512), m_height(512), curr_color(0), shading_method(FLAT)
 {
 	InitOpenGLRendering();
+	draw_fog = false;
 	CreateBuffers(512,512);
 }
 Renderer::Renderer(int width, int height) :m_width(width), m_height(height), curr_color(0), shading_method(FLAT)
 {
 	InitOpenGLRendering();
+	draw_fog = false;
 	CreateBuffers(width,height);
 }
 
@@ -94,7 +96,7 @@ void Renderer::FillBuffer(vec3 color)
 	{
 		for (int x = 0; x < m_width; x++)
 		{
-			DrawPixel(x,y,100,color);
+			DrawPixel(x,y,far_z,color);
 		}
 	}
 }
@@ -222,7 +224,6 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 	if(!material_list){
 		material_list = &matlist;
 	}
-	far_z = 100;
 	//if normals isn't supplied, give this iterator some garbage value (vertices->begin())
 	vector<Material>::const_iterator mat_it = material_list->begin();
 	vector<vec3>::const_iterator normal_it = edge_normals != NULL ? edge_normals->begin() : vertices->begin();
@@ -339,6 +340,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
     		}
 		}
 	}
+	
 }
 
 /*
@@ -417,7 +419,6 @@ void Renderer::changeShadingMethod()
 			break;
 	}
 }
-
 
 void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const vec3& vn1, const vec3& vn2, const vec3& vn3, const Material& mat1, const Material& mat2, const Material& mat3)
 {
@@ -515,6 +516,11 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 						Material mat = mat1;
 						pixel_color = phongIllumination(surface_point, norm, mat);
 						break;
+				}
+				//Blend the color with fog
+				draw_fog = true;
+				if(draw_fog){
+					pixel_color = blendWithFogs(surface_point, pixel_color);
 				}
 				DrawPixel(x, y, screen_z, pixel_color);
       		}
@@ -661,6 +667,109 @@ void Renderer::DrawSymbol(const vec3& vertex, const mat4& world_transform, SYMBO
 	}
 }
 
+vec3 Renderer::GetWorldPosition(int x, int y)
+{
+	// Ensure x and y are within bounds
+	if (x < 0 || x >= m_width || y < 0 || y >= m_height) {
+		return vec3(0.0f, 0.0f, 0.0f);  // Return a default value or handle the out-of-bounds case
+	}
+
+	// Retrieve the depth value from the depth buffer
+	float depth_value = m_zbuffer[Z_INDEX(m_width, x, y)];
+
+	// Normalize the depth value to [0, 1]
+	float normalized_depth = depth_value / far_z;
+
+	// Calculate normalized device coordinates (NDC) from pixel coordinates
+	float ndc_x = (2.0f * x) / m_width - 1.0f;
+	float ndc_y = 1.0f - (2.0f * y) / m_height;
+
+	// Create a homogeneous coordinates vector
+	vec4 homogeneous_coords(ndc_x, ndc_y, normalized_depth, 1.0f);
+
+	// Calculate the inverse view-projection matrix
+	mat4 mat_view_projection_inverse = inverse(mat_project * mat_transform_inverse);
+
+	// Transform the homogeneous coordinates to view space
+	vec4 view_coords = mat_view_projection_inverse * homogeneous_coords;
+
+	// Divide by the w component to get the view space coordinates
+	vec3 view_position = toVec3(view_coords) / view_coords.w;
+
+	// The view position is now in view space. To get the world position, you can transform it by the inverse view matrix
+	vec4 world_coords = mat_transform_inverse * vec4(view_position, 1.0f);
+
+	return toVec3(world_coords);
+}
+
+void Renderer::setFogFlag(bool set_fog)
+{
+	draw_fog = set_fog;
+}
+
+bool Renderer::getFogFlag()
+{
+	return draw_fog;
+}
+
+// Mix function for linear interpolation between two values
+
+vec3 mix(const vec3& x, const vec3& y, float a)
+{
+	return x * (1.0f - a) + y * a;
+}
+
+vec3 Renderer::ComputeFogColor(const Fog& fog, int x, int y)
+{
+	vec3 dir = GetWorldPosition(x, y);
+	float dist = length(dir);
+	float fog_amount = 0.5*fog.ComputeFog(dist);
+
+	vec3 pixel_color = vec3(m_outBuffer[INDEX(m_width, x, y, 0)], m_outBuffer[INDEX(m_width, x, y, 1)], m_outBuffer[INDEX(m_width, x, y, 2)]);
+
+	return mix(pixel_color, fog.getFogColor(), fog_amount);
+}
+
+void Renderer::ApplyFog(const Fog& fog)
+{
+	if (!draw_fog) {
+		return;  // Do nothing if draw_fog is false
+	}
+
+	// Iterate through each pixel in the buffer
+	for (int y = 0; y < m_height; y++)
+	{
+		for (int x = 0; x < m_width; x++)
+		{
+			// Get the pixel's depth from the z-buffer
+			float pixel_depth = m_zbuffer[Z_INDEX(m_width, x, y)];
+
+			// Check if the pixel is within the fog range
+			if (pixel_depth >= fog.getFogStart() && pixel_depth <= fog.getFogEnd())
+			{
+				// Interpolate between the pixel color and the fog color based on the fog factor
+				vec3 fogged_color = ComputeFogColor(fog, x, y);
+
+				// Update the pixel color in the buffer
+				m_outBuffer[INDEX(m_width, x, y, 0)] = fogged_color.x;
+				m_outBuffer[INDEX(m_width, x, y, 1)] = fogged_color.y;
+				m_outBuffer[INDEX(m_width, x, y, 2)] = fogged_color.z;
+			}
+		}
+	}
+}
+
+
+vec3 Renderer::blendWithFogs(const vec3& surface_point, const vec3& pixel_color){
+	//This isn't correct for multiple fogs
+	std::vector<Fog*>& fogs_ref = *fogs;
+	vec3 fogged_color;
+	for (auto& fog : fogs_ref) {
+		float fog_amount = fog->ComputeFog(-surface_point.z);
+		fogged_color = mix(fog->getFogColor(),pixel_color,fog_amount);
+	}
+	return fogged_color;
+}
 
 void Renderer::SetCameraTransformInverse(const mat4& cTransform){
 	mat_transform_inverse = cTransform;

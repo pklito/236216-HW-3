@@ -4,6 +4,7 @@
 #include "vec.h"
 #include "mat.h"
 #include "util.h"
+#include "Fog.h"
 #include "GL/glew.h"
 
 class Camera;
@@ -28,13 +29,15 @@ class Renderer
 	float* m_outBuffer; // 3*width*height
 	float* m_zbuffer; // width*height
 	int m_width, m_height;
-	float far_z = 100.0f;
+	float far_z = 20.0f;
 	mat4 mat_transform_inverse;
 	mat4 mat_project;
 	vec3 camera_position;
 	std::vector<Light*>* lights;
+	std::vector<Fog*>* fogs;
 
 	ShadingMethod shading_method;
+	bool draw_fog;
 
 	int curr_color;
 
@@ -63,10 +66,18 @@ public:
 	void ResizeBuffers(int new_width, int new_height);
 	void Init();
 	void DrawLine(vec3 vert1, vec3 vert2, vec3 color = vec3(1,1,1));
+
 	void DrawTriangles(const std::vector<vec3>* vertices, const mat4& world_transform, const std::vector<Material>* materials, const std::vector<vec3>* edge_normals = NULL, bool draw_normals = false,vec3 edge_color = vec3(1,1,1), bool fill = false);
 	vec3 phongIllumination(const vec3& surface_point, const vec3& surface_normal, Material material);
 	void FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const vec3& vn1, const vec3& vn2, const vec3& vn3, const Material& mat1, const Material& mat2, const Material& mat3);
 
+	vec3 GetWorldPosition(int x, int y);
+	vec3 ComputeFogColor(const Fog& fog, int x, int y);
+	void setFogFlag(bool fog);
+	bool getFogFlag();
+	void setFog(std::vector<Fog*>* fogs) { this->fogs = fogs; };
+	void ApplyFog(const Fog& fog);
+	vec3 blendWithFogs(const vec3& surface_point, const vec3& pixel_color);
 
 	void DrawNormalsToVertices(const std::vector<vec3>* vertices, const std::vector<vec3>* vertex_normals = NULL, bool draw_vertex_normals = false);
 	void setCameraPos(vec3 camera_pos);
@@ -87,7 +98,5 @@ public:
 	//void ClearDepthBuffer();
 	void SetDemoBuffer();
 };
-
-#define CLAMP(x,min,max) ((x) > (max) ? (max) : ((x) < (min) ? (min) : (x)))
 
 #define RANGE(x,min,max,new_min,new_max) (((((x)-(min))*((new_max)-(new_min))/((max)-(min))))+(new_min))
