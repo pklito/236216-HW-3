@@ -36,7 +36,10 @@ void CPopup::DoDataExchange(CDataExchange* pDX)
 
 BOOL CPopup::OnInitDialog(){
 	CDialogEx::OnInitDialog();
-	
+	GetDlgItem(IDC_EDIT1)->SetWindowText(_T("1")); // Replace "Default Text" with your desired default text
+	GetDlgItem(IDC_EDIT2)->SetWindowText(_T("0.5")); // Replace "Default Text" with your desired default text
+	GetDlgItem(IDC_EDIT3)->SetWindowText(_T("5")); // Replace "Default Text" with your desired default text
+
 	 m_slider.SetRange(30,160);
 	 m_slider.SetPos(70);
 
@@ -44,15 +47,17 @@ BOOL CPopup::OnInitDialog(){
 }
 
 BEGIN_MESSAGE_MAP(CPopup, CDialogEx)
-	ON_BN_CLICKED(IDIGNORE, &CPopup::OnBnClickedIgnore)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, &CPopup::OnNMCustomdrawSlider1)
 END_MESSAGE_MAP()
 
 
 // CPopup message handlers
 
 
-void CPopup::OnBnClickedIgnore()
+void CPopup::OnNMCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	CDialogEx::OnOK();
+	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 	// TODO: Add your control notification handler code here
+	//m_sliderval = m_slider.GetPos();
+	//*pResult = m_slider.GetPos();
 }

@@ -28,5 +28,5 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	int m_sliderval;
-	afx_msg void OnBnClickedIgnore();
+	afx_msg void OnNMCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
 };

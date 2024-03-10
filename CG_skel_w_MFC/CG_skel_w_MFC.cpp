@@ -97,7 +97,7 @@ void addProjCamera(){
 	float aspect_ratio = 1;
 	float zNear = 0.5;
 	float zFar = 5;
-	if(result == IDYES){
+	if(result == IDOK){
 		fov_degrees = c.m_sliderval;
 		try{
 			aspect_ratio = _ttof(c.m_msg1);
@@ -110,6 +110,7 @@ void addProjCamera(){
 			zFar = 5;
 		}
 	}
+	
 	fov_degrees = Radians(fov_degrees);
 	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
 	//TEMP ORTHOGRAPHIC
