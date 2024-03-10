@@ -306,6 +306,8 @@ void keyboard( unsigned char key, int x, int y )
 	case '3':
 		scene->changeShadingMethod();
 		break;
+	case '4':
+		renderer->setFogFlag(!(renderer->getFogFlag()));
 	default:
 		return;
 	}
@@ -564,6 +566,8 @@ int my_main(int argc, char** argv)
 	Light* light = new DirectionalLight(1, vec3(1,1,1),vec3(-1,0,0));
 	Light* light2 = new AmbientLight(0.5,vec3(0,0,1));
 
+	Fog* fog = new Fog();
+
 	std::cout << "[ ] Camera transform: " << std::endl;
 	camera->LookAt(vec3(0,0,1),vec3(0,0,-1),vec3(0,1,0));
 	camera->Ortho(-1,1,-1,1,0,5);
@@ -573,6 +577,8 @@ int my_main(int argc, char** argv)
 
 	scene->addLightSource(light);
 	scene->addLightSource(light2);
+
+	scene->addFog(fog);
 
 	std::cout << "[ ] Reading mesh files... ";
 	MeshModel* demo_object = new MeshModel("meshes/bunny.obj");

@@ -67,7 +67,7 @@ MeshModel::MeshModel(string fileName)
 	show_face_normals = false;
 	fill_obj = false;
 	color = vec3(1,1,1);
-	curr_color = 0;
+	curr_color = 1;
 	loadFile(fileName);
 }
 
@@ -269,6 +269,7 @@ void MeshModel::changeColor()
 {
 	if (curr_color == 6) {
 		curr_color = 0;
+		GetColorToFill();
 	}
 	else {
 		curr_color = curr_color + 1;
@@ -283,7 +284,7 @@ void MeshModel::GetColorToFill() {
 		color = vec3(0, 0.6, 0.6);
 		break;
 	case 1:
-		color = vec3(0, 1, 0);
+		color = vec3(1, 1, 1);
 		break;
 	case 2:
 		color = vec3(1, 0, 1);
