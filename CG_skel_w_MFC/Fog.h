@@ -12,21 +12,23 @@
 class Fog
 {
 private:
-	vec4 color = vec4(0.3, 0.3, 0.3, 1);
+
+	vec3 color = vec3(0.3, 0.3, 0.3);
 	float m_start = 0;
 	float m_end = 5;
+	float m_end_intensity = 0.8; // what is the alpha channel at max distance
 public:
-	Fog() : color(vec4(0.3, 0.3, 0.3, 1)), m_start(0), m_end(5) {}
-	Fog(vec4 color, float start, float end) : color(color), m_start(start), m_end(end) {}
+	Fog() : color(vec3(0.3, 0.3, 0.3)), m_start(0), m_end(5) {}
+	Fog(vec3 color, float start, float end) : color(color), m_start(start), m_end(end) {}
 
-	void setColor(const vec4& new_color) { color = new_color; }
+	void setColor(const vec3& new_color) { color = new_color; }
 	void setStart(const float new_start) { m_start = new_start; }
 	void setEnd(const float new_end) { m_end = new_end; }
 
-	vec4 getFogColor() const { return color; }
+	vec3 getFogColor() const { return color; }
 	float getFogStart() const { return m_start; }
 	float getFogEnd() const { return m_end; }
 
-	float ComputeFog(const float distance) const { float dist = (m_end - distance) / (m_end - m_start); return CLAMP(dist, 0, 1); }
+	float ComputeFog(const float distance) const { float dist = (m_end - distance) / (m_end - m_start); return m_end_intensity*CLAMP(dist, 0, 1); }
 };
 

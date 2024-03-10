@@ -727,7 +727,7 @@ vec3 Renderer::ComputeFogColor(const Fog& fog, int x, int y)
 
 	vec3 pixel_color = vec3(m_outBuffer[INDEX(m_width, x, y, 0)], m_outBuffer[INDEX(m_width, x, y, 1)], m_outBuffer[INDEX(m_width, x, y, 2)]);
 
-	return mix(pixel_color, toVec3(fog.getFogColor()), fog_amount);
+	return mix(pixel_color, fog.getFogColor(), fog_amount);
 }
 
 void Renderer::ApplyFog(const Fog& fog)
@@ -766,7 +766,7 @@ vec3 Renderer::blendWithFogs(const vec3& surface_point, const vec3& pixel_color)
 	vec3 fogged_color;
 	for (auto& fog : fogs_ref) {
 		float fog_amount = fog->ComputeFog(-surface_point.z);
-		fogged_color = mix(pixel_color,toVec3(fog->getFogColor()),1-fog_amount);
+		fogged_color = mix(fog->getFogColor(),pixel_color,fog_amount);
 	}
 	return fogged_color;
 }
