@@ -382,12 +382,8 @@ vec3 Renderer::phongIllumination(const vec3& surface_point, const vec3& surface_
 		}
 		DirectionalLight* dlight = dynamic_cast<DirectionalLight*>(light);
 		if(dlight){	
-			//THIS MIGHT BE WRONG
-			vec3 dir_point  = toVec3(mat_transform_inverse * vec4(surface_point+dlight->getDirection()));
-			vec3 origin_point = toVec3(mat_transform_inverse * vec4(surface_point));
-			light_direction = normalize(dir_point - origin_point);
+			light_direction = toVec3(mat_transform_inverse * vec4(dlight->getDirection()));
 		}
-
 
 		// Diffuse component
 		float cos_theta = max(0.0f, dot(surface_normal, light_direction));
