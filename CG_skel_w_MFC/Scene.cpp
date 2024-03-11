@@ -208,6 +208,12 @@ void Scene::drawDemo()
 
 void Scene::cycleSelectedObject()
 {
+	if(!moving_model){
+		if(lights.size() >= 1){
+			activeLight = (activeLight+1)%lights.size();
+		}
+		return;
+	}
 	if (models.size() >= 1) {
 		if (activeModel == models.size()) {
 			activeModel = (activeModel + 1) % models.size();

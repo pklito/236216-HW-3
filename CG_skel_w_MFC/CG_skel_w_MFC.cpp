@@ -580,6 +580,7 @@ int my_main(int argc, char** argv)
 	scene = new Scene(renderer);
 	Camera* camera = new Camera();
 	Light* light = new PointLight(1,vec3(1,1,1),vec3(-2,0,1));
+	Light* light2 = new DirectionalLight(1,vec3(1,0,1),vec3(0,1,0));
 	renderer->setAmbientLight(AmbientLight(1,vec3(0.3,0.3,0.3)));
 	Fog* fog = new Fog();
 
@@ -591,6 +592,7 @@ int my_main(int argc, char** argv)
 	renderer->setCameraMatrixes(scene->getActiveCamera());
 
 	scene->addLightSource(light);
+	scene->addLightSource(light2);
 
 	scene->addFog(fog);
 
