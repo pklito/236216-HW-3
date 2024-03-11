@@ -49,5 +49,6 @@ BOOL CColorPicker::OnInitDialog(){
 	CDialogEx::OnInitDialog();
 	m_slider.SetRange(0,300);
 	 m_slider.SetPos(100);
+	 m_slider.SetTic(100);
 	return TRUE;
 }
