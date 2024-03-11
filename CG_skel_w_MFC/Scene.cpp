@@ -179,11 +179,7 @@ void Scene::draw()
 	}
 
 	for(auto& light : lights){
-		PointLight* plight = dynamic_cast<PointLight*>(light);
-		if(plight){
-			//should be a draw() function at PointLight but theres include errors so i cba
-			m_renderer->DrawSymbol(plight->getPosition(),mat4(),SYM_STAR, 1);
-		}
+		light->draw(m_renderer);
 	}
 
 	

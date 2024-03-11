@@ -9,12 +9,6 @@
 
 class Camera;
 
-typedef enum {
-	SYM_STAR,
-	SYM_SQUARE,
-	SYM_X,
-	SYM_PLUS
-} SYMBOL_TYPE;
 
 
 enum ShadingMethod {
@@ -85,7 +79,7 @@ public:
 	void setLights(std::vector<Light*>* lights) {this->lights = lights;};
 	void setAmbientLight(const AmbientLight& light) {ambient_light = light;};
 	AmbientLight getAmbientLight() {return ambient_light;};
-	
+	void DrawDirLight(const vec3& direction, const vec3& color);
 	void changeShadingMethod();
 
 	void DrawBoundingBox(const vec3* bounding_box, const mat4& world_transform, bool draw_box = false);
