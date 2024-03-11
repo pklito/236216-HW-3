@@ -23,6 +23,7 @@
 #include "MeshModel.h"
 #include <string>
 #include "CPopup.h"
+#include "CColorPicker.h"
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
@@ -156,6 +157,23 @@ void readFromFile(){
 		scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
 		glutPostRedisplay();
 	}
+}
+
+void changeAmbientLight(){
+	/*CColorDialog c;
+	if(c.DoModal() != IDOK){
+		return;
+	}*/
+	CColorPicker colordialog;
+	if(colordialog.DoModal() != IDOK){
+		return;
+	}
+	float intensity = colordialog.m_sliderval/100.f;
+	COLORREF color = colordialog.m_color.GetColor();
+	vec3 colorvec = vec3((float)GetRValue(color)/255.f,
+    (float)GetGValue(color)/255.f,
+    (float)GetBValue(color)/255.f);
+	renderer->setAmbientLight(AmbientLight(intensity,colorvec));
 }
 //----------------------------------------------------------------------------
 // Callbacks
@@ -294,6 +312,9 @@ void keyboard( unsigned char key, int x, int y )
 		break;
 	case '4':
 		renderer->setFogFlag(!(renderer->getFogFlag()));
+		break;
+	case '5':
+		changeAmbientLight();
 		break;
 	default:
 		return;
@@ -551,8 +572,7 @@ int my_main(int argc, char** argv)
 	scene = new Scene(renderer);
 	Camera* camera = new Camera();
 	Light* light = new PointLight(1,vec3(1,1,1),vec3(-2,0,1));
-	Light* light2 = new AmbientLight(0.5,vec3(0,0,1));
-
+	renderer->setAmbientLight(AmbientLight(1,vec3(0.3,0.3,0.3)));
 	Fog* fog = new Fog();
 
 	std::cout << "[ ] Camera transform: " << std::endl;
@@ -563,7 +583,6 @@ int my_main(int argc, char** argv)
 	renderer->setCameraMatrixes(scene->getActiveCamera());
 
 	scene->addLightSource(light);
-	scene->addLightSource(light2);
 
 	scene->addFog(fog);
 

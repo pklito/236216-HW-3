@@ -34,6 +34,7 @@ class Renderer
 	mat4 mat_project;
 	vec3 camera_position;
 	std::vector<Light*>* lights;
+	AmbientLight ambient_light;
 	std::vector<Fog*>* fogs;
 
 	ShadingMethod shading_method;
@@ -82,6 +83,9 @@ public:
 	void DrawNormalsToVertices(const std::vector<vec3>* vertices, const std::vector<vec3>* vertex_normals = NULL, bool draw_vertex_normals = false);
 	void setCameraPos(vec3 camera_pos);
 	void setLights(std::vector<Light*>* lights) {this->lights = lights;};
+	void setAmbientLight(const AmbientLight& light) {ambient_light = light;};
+	AmbientLight getAmbientLight() {return ambient_light;};
+	
 	void changeShadingMethod();
 
 	void DrawBoundingBox(const vec3* bounding_box, const mat4& world_transform, bool draw_box = false);
