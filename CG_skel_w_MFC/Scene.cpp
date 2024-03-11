@@ -179,7 +179,7 @@ void Scene::draw()
 	}
 
 	for(auto& light : lights){
-		light->draw(m_renderer);
+		m_renderer->DrawLightSymbol(light);
 	}
 
 	

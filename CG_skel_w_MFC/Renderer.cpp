@@ -666,17 +666,28 @@ void Renderer::DrawSymbol(const vec3& vertex, const mat4& world_transform, SYMBO
 	}
 }
 
-void Renderer::DrawDirLight(const vec3& direction, const vec3& color){
-	vec3 v1 = -direction;
+void Renderer::DrawLightSymbol(Light* light){
+	PointLight* plight = dynamic_cast<PointLight*>(light);
+	if(plight){
+		DrawSymbol(plight->getPosition(),mat4(),SYM_STAR, 1);
+		return;
+
+	}
+	DirectionalLight* dlight = dynamic_cast<DirectionalLight*>(light);
+	if(dlight){
+		vec3 v1 = -dlight->getDirection();
 	
-	float aspect_ratio = (float)(m_width)/(float)(m_height);
-	vec3 p1 = vec3(RANGE(v1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(v1.y, -1, 1, 0, m_height), v1.z);
-	vec3 dir_pixel = vec3(RANGE(0.1*direction.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(0.1*direction.y, -1, 1, 0, m_height), 0.1*direction.z);
-	DrawLine(p1,p1+dir_pixel,color);
-	DrawLine(p1-vec3(3,3,0),p1+dir_pixel-vec3(3,3,0),color);
-	DrawLine(p1+vec3(3,3,0),p1+dir_pixel+vec3(3,3,0),color);
+		float aspect_ratio = (float)(m_width)/(float)(m_height);
+		vec3 p1 = vec3(RANGE(v1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(v1.y, -1, 1, 0, m_height), v1.z);
+		vec3 dir_pixel = vec3(RANGE(0.1*dlight->getDirection().x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(0.1*dlight->getDirection().y, -1, 1, 0, m_height), 0.1*dlight->getDirection().z);
+		DrawLine(p1,p1+dir_pixel,dlight->getColor());
+		DrawLine(p1-vec3(3,3,0),p1+dir_pixel-vec3(3,3,0),dlight->getColor());
+		DrawLine(p1+vec3(3,3,0),p1+dir_pixel+vec3(3,3,0),dlight->getColor());
+		return;
+	}
 
 }
+
 
 vec3 Renderer::GetWorldPosition(int x, int y)
 {

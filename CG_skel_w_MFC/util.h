@@ -1,7 +1,5 @@
 #pragma once
 #include "mat.h"
-class Renderer;
-
 
 typedef enum {
 	SYM_STAR,
@@ -46,8 +44,6 @@ public:
 	virtual void translate(float x, float y, float z) {}
 	virtual void rotate(float angle, int axis) {}
 	virtual void scale(float x, float y, float z) {}
-	
-	virtual void draw(Renderer* m_renderer) {}
 
 };
 
@@ -64,8 +60,6 @@ public:
 	virtual void translate(float x, float y, float z) override {position += (vec3(x,y,z));}
 	virtual void rotate(float angle, int axis) override {}
 	virtual void scale(float x, float y, float z) override {intensity *= x;}
-
-	virtual void draw(Renderer* m_renderer) override {m_renderer->DrawSymbol(getPosition(),mat4(),SYM_STAR, 1);}
 };
 
 class DirectionalLight : public Light {
@@ -81,10 +75,6 @@ public:
 	virtual void translate(float x, float y, float z) override {}
 	virtual void rotate(float angle, int axis) override {setDirection(toVec3(RotateAxis(angle,axis)*vec4(direction)));}
 	virtual void scale(float x, float y, float z) override {intensity *= x;}
-
-	virtual void draw(Renderer* m_renderer) override {
-		m_renderer->DrawDirLight(direction,color);
-	}
 };
 
 class AmbientLight : public Light {
