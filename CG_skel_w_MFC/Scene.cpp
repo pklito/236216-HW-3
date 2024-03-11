@@ -126,7 +126,7 @@ void Scene::scaleObject(GLfloat scale)
 {
 	if(!moving_model){
 		if(lights.size() >= 1){
-			lights[activeLight]->translate(scale,scale,scale);
+			lights[activeLight]->scale(scale,scale,scale);
 		}
 		return;
 	}

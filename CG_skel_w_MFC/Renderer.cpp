@@ -9,14 +9,14 @@
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 #define Z_INDEX(width,x,y) (x+y*width)
 #define LINE_TOO_LARGE 30
-
-Renderer::Renderer() :m_width(512), m_height(512), curr_color(0), shading_method(FLAT), ambient_light(AmbientLight(0,vec3(0,0,0)))
+#define CLIP_TO_SCREEN(x,y,z) (vec3(RANGE((x),-aspect_ratio, aspect_ratio, 0, m_width), RANGE((y),-1,1,0,m_height), (z)))
+Renderer::Renderer() :m_width(512), m_height(512), aspect_ratio(1), curr_color(0), shading_method(FLAT), ambient_light(AmbientLight(0,vec3(0,0,0)))
 {
 	InitOpenGLRendering();
 	draw_fog = false;
 	CreateBuffers(512,512);
 }
-Renderer::Renderer(int width, int height) :m_width(width), m_height(height), curr_color(0), shading_method(FLAT), ambient_light(AmbientLight(0,vec3(0,0,0)))
+Renderer::Renderer(int width, int height) :m_width(width), m_height(height), aspect_ratio(1), curr_color(0), shading_method(FLAT), ambient_light(AmbientLight(0,vec3(0,0,0)))
 {
 	InitOpenGLRendering();
 	draw_fog = false;
@@ -45,7 +45,8 @@ void Renderer::CreateBuffers(int width, int height)
 {
 	//ReleaseBuffers();
 	m_width=width;
-	m_height=height;	
+	m_height=height;
+	aspect_ratio=(float)(m_width)/(float)(m_height);	
 	CreateOpenGLBuffer(); //Do not remove this line.
 	m_outBuffer = new float[3*m_width*m_height];
 	m_zbuffer = new float[m_width * m_height];
@@ -294,7 +295,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		if (fill) {
 			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), toVec3(vn1), toVec3(vn2), toVec3(vn3), mat1,mat2,mat3);
 		} else {
-			float aspect_ratio = (float)(m_width)/(float)(m_height);
+			
 			/*
 			Cameraspace coordinates to clipslace coordinates
 			*/
@@ -569,7 +570,7 @@ void Renderer::DrawNormalsToVertices(const vector<vec3>* vertices, const vector<
 		
 		// Scale down the normalized vector (make the normals smaller)
 
-		float aspect_ratio = (float)(m_width)/(float)(m_height);
+		
 		// Apply the range to the normalized point
 
 		vec3 first_point = vec3(RANGE(normCoor.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(normCoor.y, -1, 1, 0, m_height), normCoor.z);
@@ -594,7 +595,7 @@ void Renderer::DrawBoundingBox(const vec3* bounding_box, const mat4& world_trans
 		// Convert 3D point to homogeneous coordinates
 		vec4 homogeneous_point = vec4(bounding_box[i], 1.0f);
 		
-		float aspect_ratio = (float)(m_width)/(float)(m_height);
+		
 
 		// Apply transformations
 		new_bounding_box[i] = toEuclidian(mat_project * (mat_transform_inverse * world_transform * homogeneous_point));
@@ -636,7 +637,7 @@ void Renderer::DrawSymbol(const vec3& vertex, const mat4& world_transform, SYMBO
 	const std::vector<vec2> plus_shape = { vec2(0, 1), vec2(0, -1), vec2(-1, 0), vec2(1, 0) };
 
 	const std::vector<vec2>* decided = &square_shape;
-	float aspect_ratio = (float)(m_width)/(float)(m_height);
+	
 	vec4 screen_space = toEuclidian(mat_project * (mat_transform_inverse * world_transform * vec4(vertex, 1.0f)));
 	vec2 image_space = vec2(RANGE(screen_space.x,-aspect_ratio,aspect_ratio, 0, m_width), RANGE(screen_space.y, -1, 1, 0, m_height));
 	switch (symbol) {
@@ -676,13 +677,13 @@ void Renderer::DrawLightSymbol(Light* light){
 	DirectionalLight* dlight = dynamic_cast<DirectionalLight*>(light);
 	if(dlight){
 		vec3 v1 = -dlight->getDirection();
-	
-		float aspect_ratio = (float)(m_width)/(float)(m_height);
-		vec3 p1 = vec3(RANGE(v1.x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(v1.y, -1, 1, 0, m_height), v1.z);
-		vec3 dir_pixel = vec3(RANGE(0.1*dlight->getDirection().x, -aspect_ratio, aspect_ratio, 0, m_width), RANGE(0.1*dlight->getDirection().y, -1, 1, 0, m_height), 0.1*dlight->getDirection().z);
-		DrawLine(p1,p1+dir_pixel,dlight->getColor());
-		DrawLine(p1-vec3(3,3,0),p1+dir_pixel-vec3(3,3,0),dlight->getColor());
-		DrawLine(p1+vec3(3,3,0),p1+dir_pixel+vec3(3,3,0),dlight->getColor());
+		vec3 v2 = v1 + 0.1*dlight->getDirection();
+		
+		vec3 p1 = CLIP_TO_SCREEN(v1.x,v1.y,v1.z);
+		vec3 p2 = CLIP_TO_SCREEN(v2.x,v2.y,v2.z);
+		DrawLine(p1,p2,dlight->getColor());
+		DrawLine(p1-vec3(3,3,0),p2-vec3(3,3,0),dlight->getColor());
+		DrawLine(p1+vec3(3,3,0),p2+vec3(3,3,0),dlight->getColor());
 		return;
 	}
 

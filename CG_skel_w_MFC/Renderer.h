@@ -23,6 +23,7 @@ class Renderer
 	float* m_outBuffer; // 3*width*height
 	float* m_zbuffer; // width*height
 	int m_width, m_height;
+	float aspect_ratio;
 	float far_z = 20.0f;
 	mat4 mat_transform_inverse;
 	mat4 mat_project;
