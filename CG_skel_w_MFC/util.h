@@ -32,6 +32,10 @@ public:
 	void setIntensity(float intensity) {this->intensity = intensity;}
 	virtual float getIntensity() {return intensity;}
 
+	virtual void translate(float x, float y, float z) {}
+	virtual void rotate(float angle, int axis) {}
+	virtual void scale(float x, float y, float z) {}
+
 
 };
 

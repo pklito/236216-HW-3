@@ -180,9 +180,14 @@ void changeAmbientLight(){
 //----------------------------------------------------------------------------
 
 void display( void ){
+	//if false, moving lights
+	if(!scene->getMovingModel()){
+		renderer->FillEdges(0.05, vec3(0.5,0.5,0.2));
+	}
 	if(scene->getWorldControl()){
 		renderer->FillEdges(0.02, vec3(0.1, 0.1, 0.5));
 	}
+
 	scene->draw();
 	renderer->SwapBuffers();
 }
@@ -297,6 +302,9 @@ void keyboard( unsigned char key, int x, int y )
 		break;
 	case 'f':
 		scene->setWorldControl(!scene->getWorldControl());
+		break;
+	case 'g':
+		scene->toggleMovingModel();
 		break;
 	case ' ':
 		swapCameras();

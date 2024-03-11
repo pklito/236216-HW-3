@@ -91,6 +91,10 @@ public:
 	void draw();
 	void drawDemo();
 
+	bool getMovingModel() {return moving_model;}
+	void setMovingModel(bool moving) {moving_model = moving;}
+	bool toggleMovingModel() {moving_model = !moving_model; return moving_model;}
+	
 	void setShowNormalsForMeshModels(bool change);
 	void setShowNormalsToVerticesForMeshModels(bool change);
 	void setShowBoxForMeshModels(bool change);

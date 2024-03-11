@@ -94,6 +94,13 @@ void Scene::setShowBoxForMeshModels(bool change) {
 
 void Scene::translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
 {
+	if(!moving_model){
+		if(lights.size() >= 1){
+			lights[activeLight]->translate(x_trans,y_trans,z_trans);
+		}
+		return;
+	}
+
 	if(world_control){
 		if (models.size() >= 1) {
 			models[activeModel]->applyWorldTransformation(Translate(x_trans, y_trans, z_trans));
@@ -117,6 +124,13 @@ void Scene::returnModelToCenter()
 
 void Scene::scaleObject(GLfloat scale)
 {
+	if(!moving_model){
+		if(lights.size() >= 1){
+			lights[activeLight]->translate(scale,scale,scale);
+		}
+		return;
+	}
+	
 	if(world_control){
 		if (models.size() >= 1) {
 			models[activeModel]->applyWorldTransformation(Scale(scale, scale, scale));
@@ -130,6 +144,12 @@ void Scene::scaleObject(GLfloat scale)
 }
 void Scene::rotateObject(GLfloat theta_angle, int axis)
 {
+	if(!moving_model){
+		if(lights.size() >= 1){
+			lights[activeLight]->rotate(theta_angle, axis);
+		}
+		return;
+	}
 	if(world_control){
 		if (models.size() >= 1) {
 			mat4 rotate_mat = RotateAxis(theta_angle, axis);
