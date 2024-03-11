@@ -676,8 +676,8 @@ void Renderer::DrawLightSymbol(Light* light){
 	}
 	DirectionalLight* dlight = dynamic_cast<DirectionalLight*>(light);
 	if(dlight){
-		vec3 v1 = -dlight->getDirection();
-		vec3 v2 = v1 + 0.1*dlight->getDirection();
+		vec3 v1 = 0.9 * dlight->getDirection();
+		vec3 v2 = v1 - 0.1*dlight->getDirection();
 		
 		vec3 p1 = CLIP_TO_SCREEN(v1.x,v1.y,v1.z);
 		vec3 p2 = CLIP_TO_SCREEN(v2.x,v2.y,v2.z);
