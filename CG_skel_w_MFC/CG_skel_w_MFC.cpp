@@ -315,6 +315,7 @@ void keyboard( unsigned char key, int x, int y )
 		break;
 	case '5':
 		changeAmbientLight();
+		break;
 	default:
 		return;
 	}
