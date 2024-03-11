@@ -23,6 +23,7 @@
 #include "MeshModel.h"
 #include <string>
 #include "CPopup.h"
+#include "CColorPicker.h"
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
@@ -159,15 +160,20 @@ void readFromFile(){
 }
 
 void changeAmbientLight(){
-	CColorDialog c;
+	/*CColorDialog c;
 	if(c.DoModal() != IDOK){
 		return;
+	}*/
+	CColorPicker colordialog;
+	if(colordialog.DoModal() != IDOK){
+		return;
 	}
-	COLORREF color = c.GetColor();
+	float intensity = colordialog.m_sliderval/100.f;
+	COLORREF color = colordialog.m_color.GetColor();
 	vec3 colorvec = vec3((float)GetRValue(color)/255.f,
     (float)GetGValue(color)/255.f,
     (float)GetBValue(color)/255.f);
-	renderer->setAmbientLight(AmbientLight(1,colorvec));
+	renderer->setAmbientLight(AmbientLight(intensity,colorvec));
 }
 //----------------------------------------------------------------------------
 // Callbacks
