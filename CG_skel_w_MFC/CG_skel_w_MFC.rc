@@ -92,6 +92,8 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,227,88,50,14
     CONTROL         "",IDC_MFCCOLORBUTTON1,"MfcColorButton",WS_TABSTOP,51,28,60,48
     CONTROL         "",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | TBS_TOOLTIPS | WS_TABSTOP,128,43,108,22
+    LTEXT           "Light",IDC_STATIC,129,7,17,8
+    CTEXT           "statkc",IDC_EDIT1,95,15,84,8
 END
 
 
