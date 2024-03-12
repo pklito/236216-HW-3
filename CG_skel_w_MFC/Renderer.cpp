@@ -415,7 +415,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		}
 
 		if (fill) {
-			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), toVec3(vn1), toVec3(vn2), toVec3(vn3), mat1,mat2,mat3);
+			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), toVec3(vn1), toVec3(vn2), toVec3(vn3), mat1,mat2,mat3,material_list->size() == vertices->size());
 		} else {
 			
 			/*
@@ -722,7 +722,7 @@ void Renderer::changeShadingMethod()
 	}
 }
 
-void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const vec3& vn1, const vec3& vn2, const vec3& vn3, const Material& mat1, const Material& mat2, const Material& mat3)
+void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const vec3& vn1, const vec3& vn2, const vec3& vn3, const Material& mat1, const Material& mat2, const Material& mat3,bool unique_material)
 {
 	/*
 	Cameraspace coordinates to clipslace coordinates
@@ -814,8 +814,7 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 						pixel_color = weights.x * color1 + weights.y * color2 + weights.z * color3;
 						break;
 					case PHONG:
-						Material mat = Material::weightedAverage(mat1,mat2,mat3,weights.x,weights.y,weights.z);
-						//Material mat = mat1;
+						Material mat = unique_material ? Material::weightedAverage(mat1,mat2,mat3,weights.x,weights.y,weights.z) : mat1;
 						pixel_color = phongIllumination(surface_point, norm, mat);
 						break;
 				}
