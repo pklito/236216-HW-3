@@ -74,7 +74,8 @@ public:
 	void ResizeBuffers(int new_width, int new_height);
 	void Init();
 	void DrawLine(vec3 vert1, vec3 vert2, vec3 color = vec3(1,1,1));
-	void DrawTriangles(const std::vector<vec3>* vertices, const mat4& world_transform, const std::vector<Material>* materials, const std::vector<vec3>* edge_normals = NULL, bool draw_normals = false, vec3 edge_color = vec3(1, 1, 1), bool fill = false);
+
+	void DrawTriangles(const std::vector<vec3>* vertices, const mat4& world_transform, const std::vector<Material>* materials, const std::vector<vec3>* edge_normals = NULL, bool draw_normals = false,vec3 edge_color = vec3(1,1,1), bool fill = false);
 	vec3 phongIllumination(const vec3& surface_point, const vec3& surface_normal, Material material);
 	void FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const vec3& vn1, const vec3& vn2, const vec3& vn3, const Material& mat1, const Material& mat2, const Material& mat3);
 	void RenderSuperBuffer();
@@ -97,8 +98,9 @@ public:
 	void DrawNormalsToVertices(const std::vector<vec3>* vertices, const std::vector<vec3>* vertex_normals = NULL, bool draw_vertex_normals = false);
 	void setCameraPos(vec3 camera_pos);
 	void setLights(std::vector<Light*>* lights) {this->lights = lights;};
-	void setAmbientLight(const AmbientLight& light) { ambient_light = light; };
-	AmbientLight getAmbientLight() { return ambient_light; };
+	void setAmbientLight(const AmbientLight& light) {ambient_light = light;};
+	AmbientLight getAmbientLight() {return ambient_light;};
+	
 	void changeShadingMethod();
 
 	void DrawBoundingBox(const vec3* bounding_box, const mat4& world_transform, bool draw_box = false);
