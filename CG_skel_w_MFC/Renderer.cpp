@@ -1166,7 +1166,13 @@ void Renderer::UpdateBuffer(){
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_downsize_width, m_downsize_height, GL_RGB, GL_FLOAT, m_downsizeBuffer);
 	}
 	else{
-		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, GL_RGB, GL_FLOAT, m_outBuffer);
+		if(applying_bloom){
+			BlurBuffer(m_outBuffer,m_brightBuffer,m_width,m_height);
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, GL_RGB, GL_FLOAT, m_brightBuffer);
+
+		}
+		else
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, GL_RGB, GL_FLOAT, m_outBuffer);
 	}
 	glGenerateMipmap(GL_TEXTURE_2D);
 	a = glGetError();

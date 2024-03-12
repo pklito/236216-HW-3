@@ -357,7 +357,7 @@ void keyboard( unsigned char key, int x, int y )
 		display();
 		break;
 	case '9':
-		//blur bloom
+		renderer->setBloomFlag(!renderer->getBloomFlag());
 		break;
 	default:
 		return;
