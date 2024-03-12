@@ -179,6 +179,17 @@ void queryLight(vec3& color_out, float& intensity_out, Light* light_default=null
 	(float)GetGValue(color)/255.f,
 	(float)GetBValue(color)/255.f);
 }
+void changeFog(){
+	vec3 color_out;
+	float intensity = -1;
+	queryLight(color_out, intensity);
+	if(intensity < 0){
+		return;
+	}
+	scene->getSelectedFog()->setColor(color_out);
+	scene->getSelectedFog()->setEnd(intensity*5);
+
+}
 
 void changeLight(){
 	/*CColorDialog c;
@@ -356,7 +367,7 @@ void keyboard( unsigned char key, int x, int y )
 		changeLight();
 		break;
 	case '5':
-		//change fog
+		changeFog();
 		break;
 	case '8':
 		renderer->setAntiAliasing(!(renderer->getAntiAliasingFlag()));

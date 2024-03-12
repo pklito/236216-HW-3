@@ -119,7 +119,7 @@ public:
 	void changeShadingMethod();
 
 	Light* getSelectedLight();
-
+	Fog* getSelectedFog() {return fogs[0];};
 	int activeModel;
 	int activeLight;
 	int activeCamera;
