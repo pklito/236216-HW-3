@@ -35,10 +35,10 @@ Renderer::~Renderer(void)
 	// Release the memory allocated for m_supersampledBuffer
 	for (int i = 0; i < supersampled_width; i++) {
 		m_supersampledBuffer[i].clear();
-		m_supersampledDepth[i].clear();
+		//m_supersampledDepth[i].clear();
 	}
 	m_supersampledBuffer.clear();
-	m_supersampledDepth.clear();
+	//m_supersampledDepth.clear();
 }
 
 void BubbleSort(std::vector<int>& intersections) {
@@ -81,7 +81,7 @@ void Renderer::CreateSupersampledBuffer()
 
 	// Create a buffer for supersampling
 	m_supersampledBuffer.resize(supersampled_width, std::vector<vec3>(supersampled_height, vec3(0.0f)));
-	m_supersampledDepth.resize(supersampled_width, std::vector<float>(supersampled_height, 0.0f));
+	//m_supersampledDepth.resize(supersampled_width, std::vector<float>(supersampled_height, 0.0f));
 }
 
 void Renderer::SetDemoBuffer()
@@ -461,7 +461,7 @@ void Renderer::DownsampleBuffer()
 		for (int x = 0; x < m_width; x++)
 		{
 			vec3 accumulatedColor(0.0f, 0.0f, 0.0f);
-			float accumulatedDepth = 0.0f;
+			//float accumulatedDepth = 0.0f;
 
 			int validSamples = 0;
 			// Accumulate colors from the supersampled buffer
@@ -480,7 +480,7 @@ void Renderer::DownsampleBuffer()
 					}
 
 					accumulatedColor += m_supersampledBuffer[sx][sy];
-					accumulatedDepth += m_supersampledDepth[sx][sy];
+					//accumulatedDepth += m_supersampledDepth[sx][sy];
 					validSamples++;
 					
 				}
@@ -489,7 +489,7 @@ void Renderer::DownsampleBuffer()
 			if (validSamples > 0)
 			{
 				accumulatedColor /= validSamples;
-				accumulatedDepth /= validSamples;
+				//accumulatedDepth /= validSamples;
 			}
 
 			// Draw the pixel to the screen buffer
@@ -533,7 +533,7 @@ void Renderer::RenderPixel(int x, int y)
 			}
 
 			m_supersampledBuffer[sx][sy] = vec3(0.0f, 0.0f, 0.0f);
-			m_supersampledDepth[sx][sy] = 0.0f;
+			//m_supersampledDepth[sx][sy] = 0.0f;
 		}
 	}
 
@@ -558,7 +558,7 @@ void Renderer::RenderPixel(int x, int y)
 				m_outBuffer[INDEX(m_width, sampleX, sampleY, 1)],
 				m_outBuffer[INDEX(m_width, sampleX, sampleY, 2)]
 			);
-			m_supersampledDepth[sx][sy] += m_zbuffer[Z_INDEX(m_width, sampleX, sampleY)];
+			//m_supersampledDepth[sx][sy] += m_zbuffer[Z_INDEX(m_width, sampleX, sampleY)];
 		}
 	}
 }

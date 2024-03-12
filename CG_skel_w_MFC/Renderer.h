@@ -29,6 +29,7 @@ class Renderer
 	float* m_outBuffer; // 3*width*height
 	float* m_zbuffer; // width*height
 	std::vector<std::vector<vec3>> m_supersampledBuffer;
+	//std::vector<std::vector<float>> m_supersampledDepth;
 	int supersample_factor = 2;
 	int supersampled_width, supersampled_height;
 	int m_width, m_height;
