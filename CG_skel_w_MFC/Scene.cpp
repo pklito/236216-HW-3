@@ -260,7 +260,11 @@ void Scene::removeSelectedCamera(){
 	cameras.erase(cameras.begin()+activeCamera);
 	cycleActiveCamera();
 }
-
+void Scene::removeSelectedLight(){
+	if(lights.size() <= 1)
+		return;
+	lights.erase(lights.begin()+activeLight);
+}
 Camera* Scene::getActiveCamera()
 {
 	return cameras[activeCamera];

@@ -75,7 +75,7 @@ public:
 	vec3 getDirection() {return direction;}
 
 	virtual void translate(float x, float y, float z) override {}
-	virtual void rotate(float angle, int axis) override {setDirection(toVec3(RotateAxis(angle,(2+axis)%3)*vec4(direction)));}
+	virtual void rotate(float angle, int axis) override {setDirection(toVec3(RotateAxis(angle,2-axis)*vec4(direction)));}
 	virtual void scale(float x, float y, float z) override {intensity *= x;}
 
 	virtual CString getName() override { return _T("Directional Light");}

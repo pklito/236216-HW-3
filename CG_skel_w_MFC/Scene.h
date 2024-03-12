@@ -106,6 +106,7 @@ public:
 	void cycleActiveCamera();
 	void removeSelectedObject();
 	void removeSelectedCamera();
+	void removeSelectedLight();
 	Camera* getActiveCamera();
 	void rotateCameraToSelectedObject();
 
