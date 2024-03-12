@@ -117,6 +117,8 @@ public:
 	void changeCurrsColor();
 	void changeShadingMethod();
 
+	Light* getSelectedLight();
+
 	int activeModel;
 	int activeLight;
 	int activeCamera;

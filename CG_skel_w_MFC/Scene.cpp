@@ -266,6 +266,11 @@ Camera* Scene::getActiveCamera()
 	return cameras[activeCamera];
 }
 
+Light* Scene::getSelectedLight(){
+	if(lights.size() < 1)
+		return nullptr;
+	return lights[activeLight];
+}
 void Scene::rotateCameraToSelectedObject(){
 	vec4 model_center = models[activeModel]->getWorldTransformation() * vec4(0, 0, 0, 1);
 	vec4 camera_location = cameras[activeCamera]->getCameraPosition();

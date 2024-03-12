@@ -53,7 +53,7 @@ BOOL CColorPicker::OnInitDialog(){
 	 m_slider.SetTic(100);
 	
 	if(light){
-		m_subtitle.SetWindowText(_T("AMONGUS"));
+		m_subtitle.SetWindowText(light->getName());
 		vec3 col = light->getColor();
 		m_color.SetColor(RGB(col.x*255, col.y*255,col.z*255));
 		m_slider.SetPos(int(light->getIntensity()*100));

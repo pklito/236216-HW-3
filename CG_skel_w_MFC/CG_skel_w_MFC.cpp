@@ -159,21 +159,37 @@ void readFromFile(){
 	}
 }
 
-void changeAmbientLight(){
+void changeLight(){
 	/*CColorDialog c;
 	if(c.DoModal() != IDOK){
 		return;
 	}*/
-	CColorPicker colordialog;
+	Light* light;
+	
+	if(scene->getMovingModel()){
+		light = &renderer->getAmbientLight();
+	}
+	else{
+		light = scene->getSelectedLight();
+	}
+	CColorPicker colordialog(nullptr,light);
 	if(colordialog.DoModal() != IDOK){
 		return;
 	}
 	float intensity = colordialog.m_sliderval/100.f;
 	COLORREF color = colordialog.m_color.GetColor();
+	
 	vec3 colorvec = vec3((float)GetRValue(color)/255.f,
     (float)GetGValue(color)/255.f,
     (float)GetBValue(color)/255.f);
-	renderer->setAmbientLight(AmbientLight(intensity,colorvec));
+	if(scene->getMovingModel()){
+		renderer->setAmbientLight(AmbientLight(intensity,colorvec));
+	}
+	else{
+		light->setColor(colorvec);
+		light->setIntensity(intensity);
+	}
+	
 }
 //----------------------------------------------------------------------------
 // Callbacks
@@ -321,8 +337,8 @@ void keyboard( unsigned char key, int x, int y )
 	case '4':
 		renderer->setFogFlag(!(renderer->getFogFlag()));
 		break;
-	case '5':
-		changeAmbientLight();
+	case 'h':
+		changeLight();
 		break;
 	case '6':
 		renderer->setAntiAliasing(!(renderer->getAntiAliasingFlag()));
