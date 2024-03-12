@@ -415,12 +415,6 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
     		}
 		}
 	}
-	if (draw_fog) {
-		std::vector<Fog*>& fogs_ref = *fogs;
-		for (auto& fog : fogs_ref) {
-			ApplyFog(*dynamic_cast<Fog*>(fog));
-		}
-	}
 
 	if (anti_aliasing)
 	{
