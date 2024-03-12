@@ -91,6 +91,10 @@ public:
 	void draw();
 	void drawDemo();
 
+	bool getMovingModel() {return moving_model;}
+	void setMovingModel(bool moving) {moving_model = moving;}
+	bool toggleMovingModel() {moving_model = !moving_model; return moving_model;}
+	
 	void setShowNormalsForMeshModels(bool change);
 	void setShowNormalsToVerticesForMeshModels(bool change);
 	void setShowBoxForMeshModels(bool change);
@@ -102,6 +106,7 @@ public:
 	void cycleActiveCamera();
 	void removeSelectedObject();
 	void removeSelectedCamera();
+	void removeSelectedLight();
 	Camera* getActiveCamera();
 	void rotateCameraToSelectedObject();
 
@@ -112,6 +117,8 @@ public:
 	bool getFillObj();
 	void changeCurrsColor();
 	void changeShadingMethod();
+
+	Light* getSelectedLight();
 
 	int activeModel;
 	int activeLight;

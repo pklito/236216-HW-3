@@ -10,8 +10,8 @@
 
 IMPLEMENT_DYNAMIC(CColorPicker, CDialogEx)
 
-CColorPicker::CColorPicker(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD_DIALOG3, pParent)
+CColorPicker::CColorPicker(CWnd* pParent /*=nullptr*/, Light* light)
+	: CDialogEx(IDD_DIALOG3, pParent), light(light)
 	, m_sliderval(0)
 {
 
@@ -27,6 +27,7 @@ void CColorPicker::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SLIDER1, m_slider);
 	DDX_Control(pDX, IDC_MFCCOLORBUTTON1, m_color);
 	DDX_Slider(pDX, IDC_SLIDER1, m_sliderval);
+	DDX_Control(pDX, IDC_EDIT1, m_subtitle);
 }
 
 
@@ -50,5 +51,13 @@ BOOL CColorPicker::OnInitDialog(){
 	m_slider.SetRange(0,300);
 	 m_slider.SetPos(100);
 	 m_slider.SetTic(100);
+	
+	if(light){
+		m_subtitle.SetWindowText(light->getName());
+		vec3 col = light->getColor();
+		m_color.SetColor(RGB(col.x*255, col.y*255,col.z*255));
+		m_slider.SetPos(int(light->getIntensity()*100));
+	}
+	
 	return TRUE;
 }

@@ -94,6 +94,13 @@ void Scene::setShowBoxForMeshModels(bool change) {
 
 void Scene::translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
 {
+	if(!moving_model){
+		if(lights.size() >= 1){
+			lights[activeLight]->translate(x_trans,y_trans,z_trans);
+		}
+		return;
+	}
+
 	if(world_control){
 		if (models.size() >= 1) {
 			models[activeModel]->applyWorldTransformation(Translate(x_trans, y_trans, z_trans));
@@ -117,6 +124,13 @@ void Scene::returnModelToCenter()
 
 void Scene::scaleObject(GLfloat scale)
 {
+	if(!moving_model){
+		if(lights.size() >= 1){
+			lights[activeLight]->scale(scale,scale,scale);
+		}
+		return;
+	}
+	
 	if(world_control){
 		if (models.size() >= 1) {
 			models[activeModel]->applyWorldTransformation(Scale(scale, scale, scale));
@@ -130,6 +144,12 @@ void Scene::scaleObject(GLfloat scale)
 }
 void Scene::rotateObject(GLfloat theta_angle, int axis)
 {
+	if(!moving_model){
+		if(lights.size() >= 1){
+			lights[activeLight]->rotate(theta_angle, axis);
+		}
+		return;
+	}
 	if(world_control){
 		if (models.size() >= 1) {
 			mat4 rotate_mat = RotateAxis(theta_angle, axis);
@@ -159,11 +179,7 @@ void Scene::draw()
 	}
 
 	for(auto& light : lights){
-		PointLight* plight = dynamic_cast<PointLight*>(light);
-		if(plight){
-			//should be a draw() function at PointLight but theres include errors so i cba
-			m_renderer->DrawSymbol(plight->getPosition(),mat4(),SYM_STAR, 1);
-		}
+		m_renderer->DrawLightSymbol(light);
 	}
 
 	
@@ -192,6 +208,12 @@ void Scene::drawDemo()
 
 void Scene::cycleSelectedObject()
 {
+	if(!moving_model){
+		if(lights.size() >= 1){
+			activeLight = (activeLight+1)%lights.size();
+		}
+		return;
+	}
 	if (models.size() >= 1) {
 		if (activeModel == models.size()) {
 			activeModel = (activeModel + 1) % models.size();
@@ -238,12 +260,21 @@ void Scene::removeSelectedCamera(){
 	cameras.erase(cameras.begin()+activeCamera);
 	cycleActiveCamera();
 }
-
+void Scene::removeSelectedLight(){
+	if(lights.size() <= 1)
+		return;
+	lights.erase(lights.begin()+activeLight);
+}
 Camera* Scene::getActiveCamera()
 {
 	return cameras[activeCamera];
 }
 
+Light* Scene::getSelectedLight(){
+	if(lights.size() < 1)
+		return nullptr;
+	return lights[activeLight];
+}
 void Scene::rotateCameraToSelectedObject(){
 	vec4 model_center = models[activeModel]->getWorldTransformation() * vec4(0, 0, 0, 1);
 	vec4 camera_location = cameras[activeCamera]->getCameraPosition();

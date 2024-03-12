@@ -37,6 +37,7 @@ enum MENU_STATES {
 
 	DELETE_MESH,
 	DELETE_CAMERA,
+	DELETE_LIGHT,
 
 	RESCALE_WINDOW_MENU_ITEM_UP,
 	RESCALE_WINDOW_MENU_ITEM_DOWN,
@@ -51,7 +52,10 @@ enum MENU_STATES {
 	HIDE_BOUNDING_BOX,
 
 	ADD_TETRAHEDRON,
-	ADD_CUBE
+	ADD_CUBE,
+
+	ADD_LIGHT_POINT,
+	ADD_LIGHT_DIRECTIONAL
 };
 
 Scene* scene;
@@ -158,31 +162,58 @@ void readFromFile(){
 		glutPostRedisplay();
 	}
 }
+void queryLight(vec3& color_out, float& intensity_out, Light* light_default=nullptr){
+	CColorPicker colordialog(nullptr, light_default);
+	if(colordialog.DoModal() != IDOK){
+		return;
+	}
+	intensity_out = colordialog.m_sliderval/100.f;
+	COLORREF color = colordialog.m_color.GetColor();
+	
+	color_out = vec3((float)GetRValue(color)/255.f,
+	(float)GetGValue(color)/255.f,
+	(float)GetBValue(color)/255.f);
+}
 
-void changeAmbientLight(){
+void changeLight(){
 	/*CColorDialog c;
 	if(c.DoModal() != IDOK){
 		return;
 	}*/
-	CColorPicker colordialog;
-	if(colordialog.DoModal() != IDOK){
-		return;
+	if(scene->getMovingModel()){
+		vec3 colorvec;
+		float intensity = -1;
+		queryLight(colorvec,intensity,&renderer->getAmbientLight());
+		if(intensity < 0)
+			return;
+
+		renderer->setAmbientLight(AmbientLight(intensity,colorvec));
 	}
-	float intensity = colordialog.m_sliderval/100.f;
-	COLORREF color = colordialog.m_color.GetColor();
-	vec3 colorvec = vec3((float)GetRValue(color)/255.f,
-    (float)GetGValue(color)/255.f,
-    (float)GetBValue(color)/255.f);
-	renderer->setAmbientLight(AmbientLight(intensity,colorvec));
+	else{
+		Light* light = scene->getSelectedLight();
+		vec3 colorvec;
+		float intensity = -1;
+		queryLight(colorvec,intensity,light);
+		if(intensity < 0)
+			return;
+		
+		light->setColor(colorvec);
+		light->setIntensity(intensity);
+	}
 }
 //----------------------------------------------------------------------------
 // Callbacks
 //----------------------------------------------------------------------------
 
 void display( void ){
+	//if false, moving lights
+	if(!scene->getMovingModel()){
+		renderer->FillEdges(0.05, vec3(0.5,0.5,0.2));
+	}
 	if(scene->getWorldControl()){
 		renderer->FillEdges(0.02, vec3(0.1, 0.1, 0.5));
 	}
+
 	scene->draw();
 	renderer->SwapBuffers();
 }
@@ -298,6 +329,9 @@ void keyboard( unsigned char key, int x, int y )
 	case 'f':
 		scene->setWorldControl(!scene->getWorldControl());
 		break;
+	case 'g':
+		scene->toggleMovingModel();
+		break;
 	case ' ':
 		swapCameras();
 		break;
@@ -313,8 +347,8 @@ void keyboard( unsigned char key, int x, int y )
 	case '4':
 		renderer->setFogFlag(!(renderer->getFogFlag()));
 		break;
-	case '5':
-		changeAmbientLight();
+	case 'h':
+		changeLight();
 		break;
 	case '6':
 		renderer->setAntiAliasing(!(renderer->getAntiAliasingFlag()));
@@ -371,10 +405,41 @@ void deleteMenu(int id){
 			scene->removeSelectedCamera();
 			renderer->setCameraMatrixes(scene->getActiveCamera());
 			break;
+		case DELETE_LIGHT:
+			scene->removeSelectedLight();
+			break;
 	}
 	glutPostRedisplay();
 }
 
+void lightMenu(int id){
+	Light* light;
+	vec3 color;
+	float intensity = -1;
+	switch(id){
+		case ADD_LIGHT_POINT:
+			light = new PointLight(1,vec3(0.5,0,0.5),vec3(0,0,1));
+			
+			queryLight(color,intensity, light);
+			if(intensity>=0){
+				light->setColor(color);
+				light->setIntensity(intensity);
+				scene->addLightSource(light);
+			}
+			break;
+		case ADD_LIGHT_DIRECTIONAL:
+			light = new DirectionalLight(1,vec3(0.5,0,0.5),vec3(0,0,1));
+			color;
+			intensity = -1;
+			queryLight(color,intensity, light);
+			if(intensity>=0){
+				light->setColor(color);
+				light->setIntensity(intensity);
+				scene->addLightSource(light);
+			}
+			break;
+	}
+}
 void primMenu(int id) {
 	PrimMeshModel* model;
 	switch(id){
@@ -503,10 +568,16 @@ void initMenu()
 	glutAddMenuEntry("Tetrahedron", ADD_TETRAHEDRON);
 	glutAddMenuEntry("Cube", ADD_CUBE);
 
+	int lightsMenu = glutCreateMenu(lightMenu);
+	glutAddMenuEntry("Point", ADD_LIGHT_POINT);
+	glutAddMenuEntry("Directional", ADD_LIGHT_DIRECTIONAL);
+
+
 	int menuFile = glutCreateMenu(fileMenu);
 	glutAddMenuEntry("Orthographic Camera", ADD_CAMERA_ORTHO);
 	glutAddMenuEntry("Perspective Camera", ADD_CAMERA_PROJECTION);
 	glutAddMenuEntry(".OBJ Mesh...", OPEN_FILE_OBJ);
+	glutAddSubMenu("light", lightsMenu);
 	glutAddSubMenu("Primitives", primitivesMenu);
 	
 	// Create the "Normal" submenu
@@ -530,6 +601,8 @@ void initMenu()
 	int deleteSubMenu = glutCreateMenu(deleteMenu);
 	glutAddMenuEntry("Delete Sel. Mesh", DELETE_MESH);
 	glutAddMenuEntry("Delete Sel. Camera", DELETE_CAMERA);
+	glutAddMenuEntry("Delete Sel. Light", DELETE_LIGHT);
+
 
 	glutCreateMenu(mainMenu);
 	glutAddSubMenu("New", menuFile);
@@ -575,6 +648,7 @@ int my_main(int argc, char** argv)
 	scene = new Scene(renderer);
 	Camera* camera = new Camera();
 	Light* light = new PointLight(1,vec3(1,1,1),vec3(-2,0,1));
+	Light* light2 = new DirectionalLight(1,vec3(1,0,1),vec3(0,1,0));
 	renderer->setAmbientLight(AmbientLight(1,vec3(0.3,0.3,0.3)));
 	Fog* fog = new Fog();
 
@@ -586,6 +660,7 @@ int my_main(int argc, char** argv)
 	renderer->setCameraMatrixes(scene->getActiveCamera());
 
 	scene->addLightSource(light);
+	scene->addLightSource(light2);
 
 	scene->addFog(fog);
 

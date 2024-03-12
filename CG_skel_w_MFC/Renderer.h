@@ -9,12 +9,6 @@
 
 class Camera;
 
-typedef enum {
-	SYM_STAR,
-	SYM_SQUARE,
-	SYM_X,
-	SYM_PLUS
-} SYMBOL_TYPE;
 
 
 enum ShadingMethod {
@@ -33,6 +27,7 @@ class Renderer
 	int supersample_factor = 2;
 	int supersampled_width, supersampled_height;
 	int m_width, m_height;
+	float aspect_ratio;
 	float far_z = 20.0f;
 	mat4 mat_transform_inverse;
 	mat4 mat_project;
@@ -100,7 +95,7 @@ public:
 	void setLights(std::vector<Light*>* lights) {this->lights = lights;};
 	void setAmbientLight(const AmbientLight& light) {ambient_light = light;};
 	AmbientLight getAmbientLight() {return ambient_light;};
-	
+	void DrawLightSymbol(Light* light);
 	void changeShadingMethod();
 
 	void DrawBoundingBox(const vec3* bounding_box, const mat4& world_transform, bool draw_box = false);

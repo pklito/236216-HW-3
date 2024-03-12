@@ -1,4 +1,13 @@
 #pragma once
+#include "mat.h"
+
+typedef enum {
+	SYM_STAR,
+	SYM_SQUARE,
+	SYM_X,
+	SYM_PLUS
+} SYMBOL_TYPE;
+
 class Material {
 public:
 	vec3 color_ambient;
@@ -32,6 +41,10 @@ public:
 	void setIntensity(float intensity) {this->intensity = intensity;}
 	virtual float getIntensity() {return intensity;}
 
+	virtual void translate(float x, float y, float z) {}
+	virtual void rotate(float angle, int axis) {}
+	virtual void scale(float x, float y, float z) {}
+	virtual CString getName(){ return _T("Generic Light");}
 
 };
 
@@ -44,6 +57,11 @@ public:
 
 	void setPosition(const vec3& postion) {this->position = position;}
 	vec3 getPosition() {return position;}
+
+	virtual void translate(float x, float y, float z) override {position += (vec3(x,y,z));}
+	virtual void rotate(float angle, int axis) override {}
+	virtual void scale(float x, float y, float z) override {intensity *= x;}
+	virtual CString getName() override { return _T("Point Light");}
 };
 
 class DirectionalLight : public Light {
@@ -53,13 +71,20 @@ protected:
 public:
 	DirectionalLight(float intensity, const vec3& color,vec3 direction) : Light(intensity, color), direction(direction) {}
 
-	void setDirection(const vec3& direction) {this->direction = direction;}
+	void setDirection(const vec3& direction) {this->direction = normalize(direction);}
 	vec3 getDirection() {return direction;}
+
+	virtual void translate(float x, float y, float z) override {}
+	virtual void rotate(float angle, int axis) override {setDirection(toVec3(RotateAxis(angle,2-axis)*vec4(direction)));}
+	virtual void scale(float x, float y, float z) override {intensity *= x;}
+
+	virtual CString getName() override { return _T("Directional Light");}
 };
 
 class AmbientLight : public Light {
 public:
 	AmbientLight(float intensity, const vec3& color) : Light(intensity, color) {}
+	virtual CString getName() override { return _T("Ambient Light");}
 };
 
 ////////////// TRIPLE
