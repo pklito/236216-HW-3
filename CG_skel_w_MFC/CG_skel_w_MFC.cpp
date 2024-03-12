@@ -81,7 +81,9 @@ void swapCameras(){
 #define TRY_FLOAT(var, text) try { var = std::stof(text); } catch (const std::invalid_argument& e) {std::cout<<"BAD_INPUT"<<std::endl;return;} catch (const std::out_of_range& e) {return;}
 
 void changeIncrement(){
-	CPopNumber c;
+	CString floatString;
+	floatString.Format(_T("%f"),increment);
+	CPopNumber c(_T("Choose the new increment"),floatString);
 	if(c.DoModal() == IDCANCEL){
 		return;
 	}
