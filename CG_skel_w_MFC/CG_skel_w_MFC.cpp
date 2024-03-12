@@ -24,6 +24,7 @@
 #include <string>
 #include "CPopup.h"
 #include "CColorPicker.h"
+#include "CPopNumber.h"
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
@@ -80,13 +81,15 @@ void swapCameras(){
 #define TRY_FLOAT(var, text) try { var = std::stof(text); } catch (const std::invalid_argument& e) {std::cout<<"BAD_INPUT"<<std::endl;return;} catch (const std::out_of_range& e) {return;}
 
 void changeIncrement(){
-	renderer->FillEdges(0.1, vec3(0.9, 0.1, 0.1));
-	display();
-	std::string userInput;
-	
-	std::cout << "Set increment (default=0.2): ";
-	std::cin >> userInput;
-	TRY_FLOAT(increment, userInput);
+	CPopNumber c;
+	if(c.DoModal() == IDCANCEL){
+		return;
+	}
+	try{
+		increment = _ttof(c.m_inputval);
+	}
+	catch(exception e){
+	}
 }
 
 void addProjCamera(){
