@@ -164,32 +164,34 @@ void changeLight(){
 	if(c.DoModal() != IDOK){
 		return;
 	}*/
-	Light* light;
-	
 	if(scene->getMovingModel()){
-		light = &renderer->getAmbientLight();
-	}
-	else{
-		light = scene->getSelectedLight();
-	}
-	CColorPicker colordialog(nullptr,light);
-	if(colordialog.DoModal() != IDOK){
-		return;
-	}
-	float intensity = colordialog.m_sliderval/100.f;
-	COLORREF color = colordialog.m_color.GetColor();
-	
-	vec3 colorvec = vec3((float)GetRValue(color)/255.f,
-    (float)GetGValue(color)/255.f,
-    (float)GetBValue(color)/255.f);
-	if(scene->getMovingModel()){
+		CColorPicker colordialog(nullptr,&renderer->getAmbientLight());
+		if(colordialog.DoModal() != IDOK){
+			return;
+		}
+		float intensity = colordialog.m_sliderval/100.f;
+		COLORREF color = colordialog.m_color.GetColor();
+		
+		vec3 colorvec = vec3((float)GetRValue(color)/255.f,
+		(float)GetGValue(color)/255.f,
+		(float)GetBValue(color)/255.f);
 		renderer->setAmbientLight(AmbientLight(intensity,colorvec));
 	}
 	else{
+		Light* light = scene->getSelectedLight();
+		CColorPicker colordialog(nullptr,light);
+		if(colordialog.DoModal() != IDOK){
+			return;
+		}
+		float intensity = colordialog.m_sliderval/100.f;
+		COLORREF color = colordialog.m_color.GetColor();
+		
+		vec3 colorvec = vec3((float)GetRValue(color)/255.f,
+		(float)GetGValue(color)/255.f,
+		(float)GetBValue(color)/255.f);
 		light->setColor(colorvec);
 		light->setIntensity(intensity);
 	}
-	
 }
 //----------------------------------------------------------------------------
 // Callbacks
