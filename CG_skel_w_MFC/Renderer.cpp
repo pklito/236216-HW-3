@@ -474,21 +474,22 @@ void Renderer::RenderSuperBuffer()
 
 void BlurDest(float* source, float* dest, int width, int height, bool light=false){
 	float weight[5] = {0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216};
+		int sizeup = 2;
 	for (int y = 0; y < height; y++)
 	{
 		for (int x = 0; x < width; x++)
 		{
 			float r=0,g=0,b=0;
-			for(int i = max(x-4,0); i < min(x+5,width); i ++){
+			for(int i = max(x-4*sizeup,0); i <= min(x+(4*sizeup),width-1); i ++){
 				vec3 color = vec3(source[INDEX(width,i,y,0)],source[INDEX(width,i,y,1)],source[INDEX(width,i,y,2)]);
 				if(light){
 					if(dot(color, vec3(0.2126, 0.7152, 0.0722)) < 1){
 						continue;
 					}
 				}
-				r+=weight[abs(i-x)]*color.x;
-				g+=weight[abs(i-x)]*color.y;
-				b+=weight[abs(i-x)]*color.z;
+				r+=weight[abs((i-x)/sizeup)]*color.x;
+				g+=weight[abs((i-x)/sizeup)]*color.y;
+				b+=weight[abs(i-x)/sizeup]*color.z;
 			}
 			dest[INDEX(width,x,y,0)] = r;
 			dest[INDEX(width,x,y,1)] = g;
@@ -500,16 +501,16 @@ void BlurDest(float* source, float* dest, int width, int height, bool light=fals
 		for (int x = 0; x < width; x++)
 		{
 			float r=0,g=0,b=0;
-			for(int i = max(y-4,0); i < min(y+5,height); i ++){
+			for(int i = max(y-4*sizeup,0); i <= min(y+(4*sizeup),height-1); i ++){
 				vec3 color = vec3(source[INDEX(width,x,i,0)],source[INDEX(width,x,i,1)],source[INDEX(width,x,i,2)]);
 				if(light){
 					if(dot(color, vec3(0.2126, 0.7152, 0.0722)) < 1){
 						continue;
 					}
 				}
-				r+=weight[abs(i-y)]*color.x;
-				g+=weight[abs(i-y)]*color.y;
-				b+=weight[abs(i-y)]*color.z;
+				r+=weight[abs(i-y)/sizeup]*color.x;
+				g+=weight[abs(i-y)/sizeup]*color.y;
+				b+=weight[abs(i-y)/sizeup]*color.z;
 			}
 			dest[INDEX(width,x,y,0)] += r;
 			dest[INDEX(width,x,y,1)] += g;
