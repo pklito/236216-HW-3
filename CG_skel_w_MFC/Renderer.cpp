@@ -7,8 +7,8 @@
 //#include "imgui.h"
 #include "MeshModel.h"
 
-#define INDEX(width,x,y,c) (x+y*width)*3+c
-#define Z_INDEX(width,x,y) (x+y*width)
+#define INDEX(width,x,y,c) ((x)+(y)*(width))*3+c
+#define Z_INDEX(width,x,y) ((x)+(y)*(width))
 #define SUPER_INDEX(width,x,y) (x+y*width)
 #define LINE_TOO_LARGE 30
 #define CLIP_TO_SCREEN(x,y,z) (vec3(RANGE((x),-aspect_ratio, aspect_ratio, 0, m_width), RANGE((y),-1,1,0,m_height), (z)))
