@@ -316,6 +316,9 @@ void keyboard( unsigned char key, int x, int y )
 	case '5':
 		changeAmbientLight();
 		break;
+	case '6':
+		renderer->setAntiAliasing(!(renderer->getAntiAliasingFlag()));
+		break;
 	default:
 		return;
 	}

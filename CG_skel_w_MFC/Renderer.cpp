@@ -3,28 +3,35 @@
 #include "CG_skel_w_MFC.h"
 #include "InitShader.h"
 #include "GL\freeglut.h"
+#include <cmath>
 //#include "imgui.h"
 #include "MeshModel.h"
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 #define Z_INDEX(width,x,y) (x+y*width)
+#define SUPER_INDEX(width,x,y) (x+y*width)
 #define LINE_TOO_LARGE 30
 
-Renderer::Renderer() :m_width(512), m_height(512), curr_color(0), shading_method(FLAT), ambient_light(AmbientLight(0,vec3(0,0,0)))
+Renderer::Renderer() :m_width(512), m_height(512), curr_color(0), shading_method(FLAT), ambient_light(AmbientLight(0,vec3(0,0,0))), m_supersampledBuffer(NULL)
 {
 	InitOpenGLRendering();
+	supersample_factor = 6;
 	draw_fog = false;
+	anti_aliasing = false;
 	CreateBuffers(512,512);
 }
-Renderer::Renderer(int width, int height) :m_width(width), m_height(height), curr_color(0), shading_method(FLAT), ambient_light(AmbientLight(0,vec3(0,0,0)))
+Renderer::Renderer(int width, int height) :m_width(width), m_height(height), curr_color(0), shading_method(FLAT), ambient_light(AmbientLight(0,vec3(0,0,0))), m_supersampledBuffer(NULL)
 {
 	InitOpenGLRendering();
+	supersample_factor = 6;
 	draw_fog = false;
+	anti_aliasing = false;
 	CreateBuffers(width,height);
 }
 
 Renderer::~Renderer(void)
 {
+	ReleaseBuffers(); // Ensure that m_outBuffer and m_zbuffer are deleted
 }
 
 void BubbleSort(std::vector<int>& intersections) {
@@ -47,6 +54,7 @@ void Renderer::CreateBuffers(int width, int height)
 	m_width=width;
 	m_height=height;	
 	CreateOpenGLBuffer(); //Do not remove this line.
+	CreateSupersampledBuffer();
 	m_outBuffer = new float[3*m_width*m_height];
 	m_zbuffer = new float[m_width * m_height];
 }
@@ -54,9 +62,27 @@ void Renderer::CreateBuffers(int width, int height)
 void Renderer::ReleaseBuffers() {
 	delete[] m_outBuffer;
 	delete[] m_zbuffer;
+	delete[] m_supersampledBuffer;
 
 	m_outBuffer = nullptr;
 	m_zbuffer = nullptr;
+	m_supersampledBuffer = nullptr;
+}
+
+void Renderer::CreateSupersampledBuffer()
+{
+	supersampled_width = m_width * supersample_factor;
+	supersampled_height = m_height * supersample_factor;
+
+	// Create a buffer for supersampling
+	try{	
+		m_supersampledBuffer = new vec3[supersampled_width*supersampled_height];
+	}
+	catch (exception e){
+		std::cout << e.what() << std::endl;
+		throw e;
+	}
+	//m_supersampledDepth.resize(supersampled_width, std::vector<float>(supersampled_height, 0.0f));
 }
 
 void Renderer::SetDemoBuffer()
@@ -86,6 +112,9 @@ void Renderer::ResizeBuffers(int new_width, int new_height) {
 void Renderer::ClearBuffer(){
 	std::fill(m_outBuffer,m_outBuffer+(m_width*m_height*3),0);
 	std::fill(m_zbuffer, m_zbuffer + (m_width * m_height), far_z);
+	if(anti_aliasing){
+		std::fill(m_supersampledBuffer, m_supersampledBuffer + (supersampled_width*supersampled_height), vec3(0,0,0));
+	}
 }
 
 void Renderer::FillBuffer(vec3 color)
@@ -127,6 +156,59 @@ void Renderer::FillEdges(float percent, vec3 color) {
 	}
 }
 
+
+// Function to check for differences in color values
+void Renderer::CheckColorDifferences(vec3* supersampledBuffer, const float* finalBuffer, int width, int height) {
+	float epsilon = 1e-5;  // Adjust this threshold based on your expected color differences
+
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			vec3 accumulatedColor(0.0f, 0.0f, 0.0f);
+
+			int validSamples = 0;
+			// Accumulate colors from the supersampled buffer
+			for (int i = 0; i < supersample_factor; i++)
+			{
+				for (int j = 0; j < supersample_factor; j++)
+				{
+					int sx = x * supersample_factor + i;
+					int sy = y * supersample_factor + j;
+
+					if (sx < 0 || sx >= supersampled_width || sy < 0 || sy >= supersampled_height)
+					{
+						// Skip this sample if it's outside the valid range
+						std::cout << "SOMETHING IS WRONG" << std::endl;
+						continue;
+					}
+
+					accumulatedColor += m_supersampledBuffer[SUPER_INDEX(supersampled_width,sx,sy)];
+					validSamples++;	
+				}
+			}
+
+			if (validSamples > 0)
+			{
+				accumulatedColor /= validSamples;
+			}
+			
+			vec3 finalColor = vec3(
+				finalBuffer[INDEX(width, x, y, 0)],
+				finalBuffer[INDEX(width, x, y, 1)],
+				finalBuffer[INDEX(width, x, y, 2)]
+			);
+
+			if (std::abs(accumulatedColor.x - finalColor.x) > epsilon ||
+				std::abs(accumulatedColor.y - finalColor.y) > epsilon ||
+				std::abs(accumulatedColor.z - finalColor.z) > epsilon) {
+				// Print information about the discrepancy
+				std::cout << "Color difference at (" << x << ", " << y << "): ";
+				std::cout << "Supersampled: " << accumulatedColor << ", Final: " << finalColor << std::endl;
+
+				m_outBuffer[INDEX(m_width, x, y, 0)] = accumulatedColor.x;	m_outBuffer[INDEX(m_width, x, y, 1)] = accumulatedColor.y;	m_outBuffer[INDEX(m_width, x, y, 2)] = accumulatedColor.z;
+			}
+		}
+	}
+}
 
 /*
  This function gets two pixels on screen and draws the line between them (rasterization)
@@ -337,7 +419,130 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
     		}
 		}
 	}
-	
+
+	if (anti_aliasing)
+	{
+		RenderSuperBuffer();
+	}
+	else {
+		//std::cout << "NOT DOING ANTI ALIASING" << std::endl;
+	}
+}
+
+void Renderer::RenderSuperBuffer()
+{
+	for (int y = 0; y < m_height; y++)
+	{
+		for (int x = 0; x < m_width; x++)
+		{
+			// Render the scene at the supersampled resolution
+			RenderPixel(x, y);
+		}
+	}
+
+	// Downsample the supersampled buffer to the screen buffer
+	DownsampleBuffer();
+}
+
+void Renderer::DownsampleBuffer()
+{
+	float epsilon = 1e-5;
+	for (int y = 0; y < m_height; y++)
+	{
+		for (int x = 0; x < m_width; x++)
+		{
+			vec3 accumulatedColor(0.0f, 0.0f, 0.0f);
+			//float accumulatedDepth = 0.0f;
+
+			int validSamples = 0;
+			// Accumulate colors from the supersampled buffer
+			for (int i = 0; i < supersample_factor; i++)
+			{
+				for (int j = 0; j < supersample_factor; j++)
+				{
+					int sx = x * supersample_factor + i;
+					int sy = y * supersample_factor + j;
+
+					if (sx < 0 || sx >= supersampled_width || sy < 0 || sy >= supersampled_height)
+					{
+						// Skip this sample if it's outside the valid range
+						std::cout << "SOMETHING IS WRONG" << std::endl;
+						continue;
+					}
+
+					accumulatedColor += m_supersampledBuffer[SUPER_INDEX(supersampled_width,sx,sy)];
+					//accumulatedDepth += m_supersampledDepth[sx][sy];
+					validSamples++;
+					
+				}
+			}
+
+			if (validSamples > 0)
+			{
+				accumulatedColor /= validSamples;
+				//accumulatedDepth /= validSamples;
+			}
+
+			// Draw the pixel to the screen buffer
+			m_outBuffer[INDEX(m_width, x, y, 0)] = accumulatedColor.x;	m_outBuffer[INDEX(m_width, x, y, 1)] = accumulatedColor.y;	m_outBuffer[INDEX(m_width, x, y, 2)] = accumulatedColor.z;
+			
+			/*
+			vec3 finalColor = vec3(
+				m_outBuffer[INDEX(m_width, x, y, 0)],
+				m_outBuffer[INDEX(m_width, x, y, 1)],
+				m_outBuffer[INDEX(m_width, x, y, 2)]
+			);
+
+			if (std::abs(accumulatedColor.x - finalColor.x) > epsilon ||
+				std::abs(accumulatedColor.y - finalColor.y) > epsilon ||
+				std::abs(accumulatedColor.z - finalColor.z) > epsilon) {
+				std::cout << "accumulated color in downsample buffer = " << accumulatedColor << std::endl;
+				std::cout << "after putting the color, the color in m_out buffer is: " << vec3(m_outBuffer[INDEX(m_width, x, y, 0)],
+					m_outBuffer[INDEX(m_width, x, y, 1)],
+					m_outBuffer[INDEX(m_width, x, y, 2)]) << std::endl;
+			}
+			*/
+			
+		}
+	}
+}
+
+void Renderer::RenderPixel(int x, int y)
+{
+	for (int i = 0; i < supersample_factor; i++)
+	{
+		for (int j = 0; j < supersample_factor; j++)
+		{
+			int sx = x * supersample_factor + i;
+			int sy = y * supersample_factor + j;
+
+			if (sx < 0 || sx >= supersampled_width || sy < 0 || sy >= supersampled_height)
+			{
+				// Skip this sample if it's outside the valid range
+				continue;
+			}
+
+			int sampleX = min(x + i, m_width - 1);
+			int sampleY = min(y + j, m_height - 1);
+
+			m_supersampledBuffer[SUPER_INDEX(supersampled_width,sx,sy)] += vec3(
+				m_outBuffer[INDEX(m_width, sampleX, sampleY, 0)],
+				m_outBuffer[INDEX(m_width, sampleX, sampleY, 1)],
+				m_outBuffer[INDEX(m_width, sampleX, sampleY, 2)]
+			);
+			//m_supersampledDepth[sx][sy] += m_zbuffer[Z_INDEX(m_width, sampleX, sampleY)];
+		}
+	}
+}
+
+void Renderer::setAntiAliasing(bool new_anti_aliasing)
+{
+	anti_aliasing = new_anti_aliasing;
+}
+
+bool Renderer::getAntiAliasingFlag()
+{
+	return anti_aliasing;
 }
 
 /*
