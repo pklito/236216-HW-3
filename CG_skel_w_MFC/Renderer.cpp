@@ -35,8 +35,10 @@ Renderer::~Renderer(void)
 	// Release the memory allocated for m_supersampledBuffer
 	for (int i = 0; i < supersampled_width; i++) {
 		m_supersampledBuffer[i].clear();
+		m_supersampledDepth[i].clear();
 	}
 	m_supersampledBuffer.clear();
+	m_supersampledDepth.clear();
 }
 
 void BubbleSort(std::vector<int>& intersections) {
@@ -79,6 +81,7 @@ void Renderer::CreateSupersampledBuffer()
 
 	// Create a buffer for supersampling
 	m_supersampledBuffer.resize(supersampled_width, std::vector<vec3>(supersampled_height, vec3(0.0f)));
+	m_supersampledDepth.resize(supersampled_width, std::vector<float>(supersampled_height, 0.0f));
 }
 
 void Renderer::SetDemoBuffer()
@@ -458,6 +461,7 @@ void Renderer::DownsampleBuffer()
 		for (int x = 0; x < m_width; x++)
 		{
 			vec3 accumulatedColor(0.0f, 0.0f, 0.0f);
+			float accumulatedDepth = 0.0f;
 
 			int validSamples = 0;
 			// Accumulate colors from the supersampled buffer
@@ -476,6 +480,7 @@ void Renderer::DownsampleBuffer()
 					}
 
 					accumulatedColor += m_supersampledBuffer[sx][sy];
+					accumulatedDepth += m_supersampledDepth[sx][sy];
 					validSamples++;
 					
 				}
@@ -484,23 +489,13 @@ void Renderer::DownsampleBuffer()
 			if (validSamples > 0)
 			{
 				accumulatedColor /= validSamples;
+				accumulatedDepth /= validSamples;
 			}
 
 			// Draw the pixel to the screen buffer
 			m_outBuffer[INDEX(m_width, x, y, 0)] = accumulatedColor.x;	m_outBuffer[INDEX(m_width, x, y, 1)] = accumulatedColor.y;	m_outBuffer[INDEX(m_width, x, y, 2)] = accumulatedColor.z;
-			m_zbuffer[Z_INDEX(m_width, x, y)] = Z_INDEX(m_width, x, y);
-			//to delete later
-			if ( x < 0 || x >= m_width) {
-				std::cout << "FOr some reason x out of range, x = " << x << " m_width = " << m_width << std::endl;
-			}
-			else if (y < 0 || y >= m_height) {
-				std::cout << "FOr some reason y out of range, y = " << y << " m_height = " << m_height << std::endl;
-			}
-			else if (Z_INDEX(m_width, x, y) > m_zbuffer[Z_INDEX(m_width, x, y)]) {
-				std::cout << "FOr some reason z bigger then curr z_far, z = " << Z_INDEX(m_width, x, y) << " curr z_far = " << m_zbuffer[Z_INDEX(m_width, x, y)] << std::endl;
-			}
-		
-			//DrawPixelSafe(x, y, Z_INDEX(m_width, x, y), accumulatedColor);
+			
+			/*
 			vec3 finalColor = vec3(
 				m_outBuffer[INDEX(m_width, x, y, 0)],
 				m_outBuffer[INDEX(m_width, x, y, 1)],
@@ -515,6 +510,7 @@ void Renderer::DownsampleBuffer()
 					m_outBuffer[INDEX(m_width, x, y, 1)],
 					m_outBuffer[INDEX(m_width, x, y, 2)]) << std::endl;
 			}
+			*/
 			
 		}
 	}
@@ -537,12 +533,9 @@ void Renderer::RenderPixel(int x, int y)
 			}
 
 			m_supersampledBuffer[sx][sy] = vec3(0.0f, 0.0f, 0.0f);
+			m_supersampledDepth[sx][sy] = 0.0f;
 		}
 	}
-
-	// Supersample the pixel and accumulate colors
-	vec3 accumulatedColor(0.0f, 0.0f, 0.0f);
-	//float accumulatedDepth = 0.0f;
 
 	for (int i = 0; i < supersample_factor; i++)
 	{
@@ -565,6 +558,7 @@ void Renderer::RenderPixel(int x, int y)
 				m_outBuffer[INDEX(m_width, sampleX, sampleY, 1)],
 				m_outBuffer[INDEX(m_width, sampleX, sampleY, 2)]
 			);
+			m_supersampledDepth[sx][sy] += m_zbuffer[Z_INDEX(m_width, sampleX, sampleY)];
 		}
 	}
 }
