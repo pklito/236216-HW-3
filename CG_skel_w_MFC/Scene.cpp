@@ -197,7 +197,7 @@ void Scene::draw()
 			m_renderer->DrawSymbol(vec3(0, 0, 0), models[activeModel]->getWorldTransformation(), SYM_PLUS, 1, vec3(0.1, 0.5, 0.9));
 		}
 	}
-
+	m_renderer->SwapBuffers();
 }
 
 void Scene::drawDemo()

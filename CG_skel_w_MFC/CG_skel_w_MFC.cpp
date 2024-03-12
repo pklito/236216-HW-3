@@ -215,7 +215,6 @@ void display( void ){
 	}
 
 	scene->draw();
-	renderer->SwapBuffers();
 }
 
 void reshape( int width, int height )
@@ -352,6 +351,7 @@ void keyboard( unsigned char key, int x, int y )
 		break;
 	case '6':
 		renderer->setAntiAliasing(!(renderer->getAntiAliasingFlag()));
+		display();
 		break;
 	default:
 		return;

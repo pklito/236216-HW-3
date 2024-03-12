@@ -41,3 +41,4 @@ Debug/*
 freeglut/Debug/*
 glew/Debug/*
 *.aps
+*.pdb
