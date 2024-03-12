@@ -92,8 +92,8 @@ public:
 	void DownsampleBuffer();
 	void RenderPixel(int x, int y);
 
-	void setBloomFlag(bool new_bloom) {applying_bloom = new_bloom;}
-	bool getBloomFlag() {return applying_bloom;}
+	void setBloomFlag(bool new_bloom);
+	bool getBloomFlag();
 	void setAntiAliasing(bool new_anti_aliasing);
 	bool getAntiAliasingFlag();
 	void CheckColorDifferences(vec3* supersampledBuffer, const float* finalBuffer, int width, int height);

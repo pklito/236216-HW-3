@@ -19,6 +19,7 @@ Renderer::Renderer() :m_width(512), m_height(512), aspect_ratio(1), curr_color(0
 	draw_fog = false;
 	anti_aliasing = false;
 	CreateBuffers(512,512);
+	applying_bloom = false;
 }
 Renderer::Renderer(int width, int height) :m_width(width), m_height(height), curr_color(0), shading_method(FLAT), ambient_light(AmbientLight(0,vec3(0,0,0))), m_supersampledBuffer(NULL)
 {
@@ -27,6 +28,7 @@ Renderer::Renderer(int width, int height) :m_width(width), m_height(height), cur
 	draw_fog = false;
 	anti_aliasing = false;
 	CreateBuffers(width,height);
+	applying_bloom = false;
 }
 
 Renderer::~Renderer(void)
@@ -146,7 +148,9 @@ void Renderer::ClearBuffer(){
 	if(m_downsizeBuffer != nullptr){
 		std::fill(m_downsizeBuffer, m_downsizeBuffer + (3*m_downsize_height*m_downsize_width), 0);
 	}
-	std::fill(m_brightBuffer, m_brightBuffer + (m_width*m_height*3), 0);
+	if(m_brightBuffer != nullptr){
+		std::fill(m_brightBuffer, m_brightBuffer + (m_width*m_height*3), 0);
+	}
 }
 
 void Renderer::FillBuffer(vec3 color)
@@ -469,7 +473,6 @@ void Renderer::RenderSuperBuffer()
 }
 
 void BlurBuffer(float* source, float* dest, int width, int height){
-	std::cout << "blurring!" << dest << std::endl;
 	float weight[5] = {0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216};
 	for (int y = 0; y < height; y++)
 	{
@@ -481,12 +484,24 @@ void BlurBuffer(float* source, float* dest, int width, int height){
 				g+=weight[abs(i-x)]*source[INDEX(width,i,y,1)];
 				b+=weight[abs(i-x)]*source[INDEX(width,i,y,2)];
 			}
-			if(x == 0){
-				//std::cout << r << " " << g << " " << b << std::endl;
+			dest[INDEX(width,x,y,0)] += r;
+			dest[INDEX(width,x,y,1)] += g;
+			dest[INDEX(width,x,y,2)] += b;
+		}
+	}
+	for (int y = 0; y < height; y++)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			float r=0,g=0,b=0;
+			for(int i = max(y-4,0); i < min(y+5,height); i ++){
+				r+=weight[abs(i-y)]*source[INDEX(width,x,i,0)];
+				g+=weight[abs(i-y)]*source[INDEX(width,x,i,1)];
+				b+=weight[abs(i-y)]*source[INDEX(width,x,i,2)];
 			}
-			dest[INDEX(width,x,y,0)] = r;
-			dest[INDEX(width,x,y,1)] = g;
-			dest[INDEX(width,x,y,2)] = b;
+			dest[INDEX(width,x,y,0)] += r;
+			dest[INDEX(width,x,y,1)] += g;
+			dest[INDEX(width,x,y,2)] += b;
 		}
 	}
 }
@@ -581,7 +596,14 @@ void Renderer::RenderPixel(int x, int y)
 		}
 	}
 }
-
+void Renderer::setBloomFlag(bool new_bloom){
+	if(new_bloom != applying_bloom){
+		ReleaseBuffers();
+		CreateBuffers(m_downsize_width,m_downsize_height);
+	}
+}
+	bool Renderer::getBloomFlag(){return applying_bloom;}
+	
 void Renderer::setAntiAliasing(bool new_anti_aliasing)
 {
 	anti_aliasing = new_anti_aliasing;
