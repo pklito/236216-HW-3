@@ -112,6 +112,7 @@ void Renderer::ResizeBuffers(int new_width, int new_height) {
 void Renderer::ClearBuffer(){
 	std::fill(m_outBuffer,m_outBuffer+(m_width*m_height*3),0);
 	std::fill(m_zbuffer, m_zbuffer + (m_width * m_height), far_z);
+	std::fill(m_supersampledBuffer, m_supersampledBuffer + (supersampled_width*supersampled_height), vec3(0,0,0));
 }
 
 void Renderer::FillBuffer(vec3 color)
@@ -506,25 +507,6 @@ void Renderer::DownsampleBuffer()
 
 void Renderer::RenderPixel(int x, int y)
 {
-	// Clear the supersampled buffer for this pixel
-	for (int i = 0; i < supersample_factor; i++)
-	{
-		for (int j = 0; j < supersample_factor; j++)
-		{
-			int sx = x * supersample_factor + i;
-			int sy = y * supersample_factor + j;
-
-			if (sx < 0 || sx >= supersampled_width || sy < 0 || sy >= supersampled_height)
-			{
-				// Skip this sample if it's outside the valid range
-				continue;
-			}
-
-			m_supersampledBuffer[SUPER_INDEX(supersampled_width,sx,sy)] = vec3(0.0f, 0.0f, 0.0f);
-			//m_supersampledDepth[sx][sy] = 0.0f;
-		}
-	}
-
 	for (int i = 0; i < supersample_factor; i++)
 	{
 		for (int j = 0; j < supersample_factor; j++)
