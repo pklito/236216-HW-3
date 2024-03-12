@@ -27,6 +27,7 @@ public:
 	virtual mat4 getWorldTransformation() = 0;
 	virtual void applyWorldTransformation(const mat4& transformation) = 0;
 	virtual void applyModelTransformation(const mat4& transformation) = 0;
+	virtual void toggleSpecialMaterial() = 0;
 	void setData(int dat) {data = dat;}
 	virtual void resetToCenter() = 0;
 	virtual void changeColor() = 0;
@@ -117,6 +118,7 @@ public:
 	bool getFillObj();
 	void changeCurrsColor();
 	void changeShadingMethod();
+	void changeCurrsMaterial();
 
 	Light* getSelectedLight();
 	Fog* getSelectedFog() {return fogs[0];};

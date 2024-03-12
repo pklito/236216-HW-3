@@ -356,6 +356,9 @@ void keyboard( unsigned char key, int x, int y )
 	case '2':
 		scene->changeCurrsColor();
 		break;
+	case '6':
+		scene->changeCurrsMaterial();
+		break;
 	case '3':
 		scene->changeShadingMethod();
 		break;

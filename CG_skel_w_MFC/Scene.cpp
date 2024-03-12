@@ -167,6 +167,9 @@ void Scene::changeCurrsColor()
 {
 	models[activeModel]->changeColor();
 }
+void Scene::changeCurrsMaterial(){
+	models[activeModel]->toggleSpecialMaterial();
+}
 
 void Scene::draw()
 {

@@ -10,10 +10,11 @@ using namespace std;
 class MeshModel : public Model
 {
 protected:
-	MeshModel() : vertex_normals_exist(false), show_vertex_normals(false), show_face_normals(false), fill_obj(false) {}
+	MeshModel() : vertex_normals_exist(false), show_vertex_normals(false), show_face_normals(false), fill_obj(false),special_color(0) {}
 	vec3* vertex_positions;
 	vec3* normals_to_vertices;
 	int curr_color;
+	int special_color;
 	Material material;
 
 	bool vertex_normals_exist;
@@ -59,7 +60,7 @@ public:
 
 	void setMaterial(const Material& new_mat){material = new_mat;}
 	Material getMaterial(){return material;}
-
+	void toggleSpecialMaterial() override;
 	void resetToCenter();
 	vec3 calculateBoundingBoxCenter();
 };

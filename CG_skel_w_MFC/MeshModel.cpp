@@ -160,6 +160,18 @@ void MeshModel::draw(Renderer* renderer)
 		std::vector<vec3> norm_to_vert(normals_to_vertices, normals_to_vertices + (3 * face_count));
 		//material 
 		vector<Material> matlist(1,material);	//one element
+		if(special_color == 1){
+			matlist.pop_back();
+			for(auto& v : vec){
+				matlist.push_back(Material(vec3(0.1,0.3,0.2),v,vec3(0.2,v.x/2,0.1),3));
+			}
+		}
+		else if(special_color == 2){
+			matlist.pop_back();
+			for(auto& v : vec){
+				matlist.push_back(Material(vec3(0.2,0.2,0.2),v,vec3(1,1,1)-v,5));
+			}
+		}
 		renderer->DrawTriangles(&vec, _world_transform, &matlist, &norm_to_vert, show_face_normals, vec3(1,1,1), fill_obj);
 	}
 	else{
@@ -277,7 +289,7 @@ void MeshModel::updateMaterial() {
 	int num_of_color = curr_color % 7;
 	switch (num_of_color) {
 	case 0:
-		material.color_diffuse = vec3(0, 0.6, 0.6);
+		material.color_diffuse = vec3(1, 1, 1);
 		break;
 	case 1:
 		material.color_diffuse = vec3(0, 1, 0);
@@ -298,6 +310,10 @@ void MeshModel::updateMaterial() {
 		material.color_diffuse = vec3(0, 0, 0.5);
 		break;
 	}
+}
+
+void MeshModel::toggleSpecialMaterial(){
+	special_color = (special_color + 1) %3;
 }
 
 void MeshModel::calculateBoundingBox()
