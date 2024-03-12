@@ -44,7 +44,7 @@ public:
 	virtual void translate(float x, float y, float z) {}
 	virtual void rotate(float angle, int axis) {}
 	virtual void scale(float x, float y, float z) {}
-	virtual CString getName(){ return _T("Generic");}
+	virtual CString getName(){ return _T("Generic Light");}
 
 };
 
@@ -61,7 +61,7 @@ public:
 	virtual void translate(float x, float y, float z) override {position += (vec3(x,y,z));}
 	virtual void rotate(float angle, int axis) override {}
 	virtual void scale(float x, float y, float z) override {intensity *= x;}
-	virtual CString getName() override { return _T("Point");}
+	virtual CString getName() override { return _T("Point Light");}
 };
 
 class DirectionalLight : public Light {
@@ -75,16 +75,16 @@ public:
 	vec3 getDirection() {return direction;}
 
 	virtual void translate(float x, float y, float z) override {}
-	virtual void rotate(float angle, int axis) override {setDirection(toVec3(RotateAxis(angle,(1+axis)%2)*vec4(direction)));}
+	virtual void rotate(float angle, int axis) override {setDirection(toVec3(RotateAxis(angle,(2+axis)%3)*vec4(direction)));}
 	virtual void scale(float x, float y, float z) override {intensity *= x;}
 
-	virtual CString getName() override { return _T("Directional");}
+	virtual CString getName() override { return _T("Directional Light");}
 };
 
 class AmbientLight : public Light {
 public:
 	AmbientLight(float intensity, const vec3& color) : Light(intensity, color) {}
-	virtual CString getName() override { return _T("Ambient");}
+	virtual CString getName() override { return _T("Ambient Light");}
 };
 
 ////////////// TRIPLE
