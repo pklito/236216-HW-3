@@ -178,7 +178,7 @@ void Renderer::CheckColorDifferences(vec3* supersampledBuffer, const float* fina
 						continue;
 					}
 
-					accumulatedColor += m_supersampledBuffer[SUPER_INDEX(m_width*supersample_factor,sx,sy)];
+					accumulatedColor += m_supersampledBuffer[SUPER_INDEX(supersampled_width,sx,sy)];
 					validSamples++;	
 				}
 			}
@@ -467,7 +467,7 @@ void Renderer::DownsampleBuffer()
 						continue;
 					}
 
-					accumulatedColor += m_supersampledBuffer[SUPER_INDEX(m_width*supersample_factor,sx,sy)];
+					accumulatedColor += m_supersampledBuffer[SUPER_INDEX(supersampled_width,sx,sy)];
 					//accumulatedDepth += m_supersampledDepth[sx][sy];
 					validSamples++;
 					
@@ -520,7 +520,7 @@ void Renderer::RenderPixel(int x, int y)
 				continue;
 			}
 
-			m_supersampledBuffer[SUPER_INDEX(m_width*supersample_factor,sx,sy)] = vec3(0.0f, 0.0f, 0.0f);
+			m_supersampledBuffer[SUPER_INDEX(supersampled_width,sx,sy)] = vec3(0.0f, 0.0f, 0.0f);
 			//m_supersampledDepth[sx][sy] = 0.0f;
 		}
 	}
@@ -541,7 +541,7 @@ void Renderer::RenderPixel(int x, int y)
 			int sampleX = min(x + i, m_width - 1);
 			int sampleY = min(y + j, m_height - 1);
 
-			m_supersampledBuffer[SUPER_INDEX(m_width*supersample_factor,sx,sy)] += vec3(
+			m_supersampledBuffer[SUPER_INDEX(supersampled_width,sx,sy)] += vec3(
 				m_outBuffer[INDEX(m_width, sampleX, sampleY, 0)],
 				m_outBuffer[INDEX(m_width, sampleX, sampleY, 1)],
 				m_outBuffer[INDEX(m_width, sampleX, sampleY, 2)]
