@@ -350,6 +350,7 @@ void keyboard( unsigned char key, int x, int y )
 		break;
 	case '4':
 		renderer->setFogFlag(!(renderer->getFogFlag()));
+		display();
 		break;
 	case 'h':
 		changeLight();

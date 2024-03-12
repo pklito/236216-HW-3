@@ -143,7 +143,12 @@ void Renderer::ResizeBuffers(int new_width, int new_height) {
 }
 
 void Renderer::ClearBuffer(){
+	if(draw_fog){
+		std::fill(m_outBuffer,m_outBuffer+(m_width*m_height*3),(*fogs)[0]->getFogColor().x);
+	}
+	else{
 	std::fill(m_outBuffer,m_outBuffer+(m_width*m_height*3),0);
+	}
 	std::fill(m_zbuffer, m_zbuffer + (m_width * m_height), far_z);
 	if(m_downsizeBuffer != nullptr){
 		std::fill(m_downsizeBuffer, m_downsizeBuffer + (3*m_downsize_height*m_downsize_width), 0);
