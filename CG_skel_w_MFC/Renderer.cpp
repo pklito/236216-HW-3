@@ -15,7 +15,7 @@
 Renderer::Renderer() :m_width(512), m_height(512), aspect_ratio(1), curr_color(0), shading_method(FLAT), ambient_light(AmbientLight(0,vec3(0,0,0))), m_supersampledBuffer(NULL)
 {
 	InitOpenGLRendering();
-	supersample_factor = 6;
+	supersample_factor = 2;
 	draw_fog = false;
 	anti_aliasing = false;
 	CreateBuffers(512,512);
@@ -23,7 +23,7 @@ Renderer::Renderer() :m_width(512), m_height(512), aspect_ratio(1), curr_color(0
 Renderer::Renderer(int width, int height) :m_width(width), m_height(height), curr_color(0), shading_method(FLAT), ambient_light(AmbientLight(0,vec3(0,0,0))), m_supersampledBuffer(NULL)
 {
 	InitOpenGLRendering();
-	supersample_factor = 6;
+	supersample_factor = 2;
 	draw_fog = false;
 	anti_aliasing = false;
 	CreateBuffers(width,height);
@@ -56,6 +56,7 @@ void Renderer::CreateBuffers(int width, int height)
 	m_downsize_width = width;
 	m_width=width * factor;
 	m_height=height * factor;
+	std::cout << "- Creating buffers with sizes " << width*factor << "," << height*factor << std::endl;
 	aspect_ratio=(float)(m_width)/(float)(m_height);	
 	CreateOpenGLBuffer(); //Do not remove this line.
 	//CreateSupersampledBuffer();
@@ -71,6 +72,8 @@ void Renderer::CreateBuffers(int width, int height)
 }
 
 void Renderer::ReleaseBuffers() {
+	
+	std::cout << "- Releasing buffers " << m_outBuffer << "," << m_downsizeBuffer << std::endl;
 	delete[] m_outBuffer;
 	delete[] m_zbuffer;
 	delete[] m_supersampledBuffer;
@@ -547,7 +550,7 @@ void Renderer::RenderPixel(int x, int y)
 void Renderer::setAntiAliasing(bool new_anti_aliasing)
 {
 	anti_aliasing = new_anti_aliasing;
-	ResizeBuffers(m_width,m_height);
+	ResizeBuffers(m_downsize_width,m_downsize_height);
 }
 
 bool Renderer::getAntiAliasingFlag()
@@ -1085,8 +1088,8 @@ void Renderer::CreateOpenGLBuffer()
 {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, gScreenTex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, m_width, m_height, 0, GL_RGB, GL_FLOAT, NULL);
-	glViewport(0, 0, m_width, m_height);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, m_downsize_width, m_downsize_height, 0, GL_RGB, GL_FLOAT, NULL);
+	glViewport(0, 0, m_downsize_width, m_downsize_height);
 }
 
 void Renderer::SwapBuffers()
@@ -1097,6 +1100,7 @@ void Renderer::SwapBuffers()
 }
 
 void Renderer::DownsizeBuffer(){
+	std::cout << "- DOWNSIZING " << m_width << "->" << m_downsize_width << std::endl;
 	// Iterate every pixel
 	for(int i = 0; i < m_downsize_width; i++){
 		for(int j = 0; j < m_downsize_height; j ++ ){
@@ -1126,11 +1130,14 @@ void Renderer::UpdateBuffer(){
 	glBindTexture(GL_TEXTURE_2D, gScreenTex);
 	a = glGetError();
 	if(anti_aliasing){
-		std::cout << anti_aliasing << m_width << m_downsize_width << std::endl;
+		
+		std::cout << "-V DRAWING antialiased " << m_outBuffer << "," << m_downsizeBuffer << std::endl;
 		DownsizeBuffer();
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_downsize_width, m_downsize_height, GL_RGB, GL_FLOAT, m_downsizeBuffer);
 	}
 	else{
+		
+		std::cout << "-N DRAWING normal " << m_outBuffer << "," << m_downsizeBuffer << std::endl;
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, GL_RGB, GL_FLOAT, m_outBuffer);
 	}
 	glGenerateMipmap(GL_TEXTURE_2D);
