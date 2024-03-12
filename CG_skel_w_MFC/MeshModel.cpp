@@ -66,6 +66,7 @@ MeshModel::MeshModel(string fileName)
 	show_vertex_normals = false;
 	show_face_normals = false;
 	fill_obj = false;
+	curr_color = 1;
 	loadFile(fileName);
 }
 
