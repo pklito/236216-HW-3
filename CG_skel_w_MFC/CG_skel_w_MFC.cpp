@@ -351,6 +351,7 @@ void keyboard( unsigned char key, int x, int y )
 		break;
 	case '6':
 		renderer->setAntiAliasing(!(renderer->getAntiAliasingFlag()));
+		display();
 		break;
 	default:
 		return;
