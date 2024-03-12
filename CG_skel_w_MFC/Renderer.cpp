@@ -475,7 +475,7 @@ void BlurBuffer(float* source, float* dest, int width, int height){
 	{
 		for (int x = 0; x < width; x++)
 		{
-			float r,g,b;
+			float r=0,g=0,b=0;
 			for(int i = max(x-4,0); i < min(x+5,width); i ++){
 				r+=weight[abs(i-x)]*source[INDEX(width,i,y,0)];
 				g+=weight[abs(i-x)]*source[INDEX(width,i,y,1)];
