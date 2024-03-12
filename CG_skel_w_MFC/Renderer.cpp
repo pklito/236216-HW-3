@@ -479,7 +479,7 @@ void Renderer::RenderSuperBuffer()
 
 void BlurDest(float* source, float* dest, int width, int height, bool light=false){
 	float weight[5] = {0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216};
-		int sizeup = 2;
+		int sizeup = 1;
 	for (int y = 0; y < height; y++)
 	{
 		for (int x = 0; x < width; x++)
