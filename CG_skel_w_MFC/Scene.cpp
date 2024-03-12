@@ -167,6 +167,13 @@ void Scene::changeCurrsColor()
 {
 	models[activeModel]->changeColor();
 }
+
+Material Scene::getSelectedMaterial(){
+	return dynamic_cast<MeshModel*>(models[activeModel])->getMaterial();
+}
+void Scene::setSelectedMaterial(const Material& mat){
+	dynamic_cast<MeshModel*>(models[activeModel])->setMaterial(mat);
+}
 void Scene::changeCurrsMaterial(){
 	models[activeModel]->toggleSpecialMaterial();
 }

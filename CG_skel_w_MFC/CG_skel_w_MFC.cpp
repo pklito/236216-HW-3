@@ -71,7 +71,18 @@ float increment = 0.2;
 //----------------------------------------------------------------------------
 // Camera + Scene modiications
 //----------------------------------------------------------------------------
-
+void queryLight(vec3& color_out, float& intensity_out, Light* light_default=nullptr){
+	CColorPicker colordialog(nullptr, light_default);
+	if(colordialog.DoModal() != IDOK){
+		return;
+	}
+	intensity_out = colordialog.m_sliderval/100.f;
+	COLORREF color = colordialog.m_color.GetColor();
+	
+	color_out = vec3((float)GetRValue(color)/255.f,
+	(float)GetGValue(color)/255.f,
+	(float)GetBValue(color)/255.f);
+}
 void swapCameras(){
 	scene->cycleActiveCamera();
 	renderer->setCameraMatrixes(scene->getActiveCamera());
@@ -128,6 +139,30 @@ void addProjCamera(){
 	scene->addCamera(camera);
 	glutPostRedisplay();
 }
+int selected_type = 0;
+void changeMaterialColor(){
+	vec3 color_out;
+	float intensity = -1;
+	
+	queryLight(color_out, intensity);
+	if(intensity < 0){
+		return;
+	}
+	Material mat = scene->getSelectedMaterial();
+	if(selected_type == 1){
+		mat.color_diffuse = color_out;
+	}
+	if(selected_type == 0){
+		mat.color_ambient = color_out;
+	}
+	if(selected_type == 2){
+		mat.color_specular = color_out;
+		mat.k_shiny = (int)(intensity*2);
+	}
+	scene->setSelectedMaterial(mat);
+	
+	selected_type = (selected_type += 1)%3;
+}
 
 void addOrthoCamera(){
 	CPopupOrtho c;
@@ -167,18 +202,7 @@ void readFromFile(){
 		glutPostRedisplay();
 	}
 }
-void queryLight(vec3& color_out, float& intensity_out, Light* light_default=nullptr){
-	CColorPicker colordialog(nullptr, light_default);
-	if(colordialog.DoModal() != IDOK){
-		return;
-	}
-	intensity_out = colordialog.m_sliderval/100.f;
-	COLORREF color = colordialog.m_color.GetColor();
-	
-	color_out = vec3((float)GetRValue(color)/255.f,
-	(float)GetGValue(color)/255.f,
-	(float)GetBValue(color)/255.f);
-}
+
 void changeFog(){
 	vec3 color_out;
 	float intensity = -1;
@@ -355,6 +379,9 @@ void keyboard( unsigned char key, int x, int y )
 		break;
 	case '2':
 		scene->changeCurrsColor();
+		break;
+	case '7':
+		changeMaterialColor();
 		break;
 	case '6':
 		scene->changeCurrsMaterial();

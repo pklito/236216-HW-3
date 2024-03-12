@@ -120,6 +120,9 @@ public:
 	void changeShadingMethod();
 	void changeCurrsMaterial();
 
+	Material getSelectedMaterial();
+	void setSelectedMaterial(const Material& mat);
+
 	Light* getSelectedLight();
 	Fog* getSelectedFog() {return fogs[0];};
 	int activeModel;
