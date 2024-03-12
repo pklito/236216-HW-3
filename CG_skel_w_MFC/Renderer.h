@@ -23,6 +23,8 @@ class Renderer
 	float* m_downsizeBuffer; //3*width*height
 	float* m_outBuffer; // 3*width*height
 	float* m_zbuffer; // width*height
+	float* m_brightBuffer;
+
 	vec3* m_supersampledBuffer;
 	
 	int supersample_factor = 2;
@@ -42,6 +44,7 @@ class Renderer
 	bool draw_fog;
 
 	bool anti_aliasing;
+	bool applying_bloom;
 
 	int curr_color;
 
@@ -89,6 +92,8 @@ public:
 	void DownsampleBuffer();
 	void RenderPixel(int x, int y);
 
+	void setBloomFlag(bool new_bloom) {applying_bloom = new_bloom;}
+	bool getBloomFlag() {return applying_bloom;}
 	void setAntiAliasing(bool new_anti_aliasing);
 	bool getAntiAliasingFlag();
 	void CheckColorDifferences(vec3* supersampledBuffer, const float* finalBuffer, int width, int height);

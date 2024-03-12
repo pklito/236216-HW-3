@@ -69,6 +69,13 @@ void Renderer::CreateBuffers(int width, int height)
 	else{
 		m_downsizeBuffer = nullptr;
 	}
+
+	if(applying_bloom){
+		m_brightBuffer = new float[3*m_width*m_height];
+	}
+	else{
+		m_brightBuffer = nullptr;
+	}
 }
 
 void Renderer::ReleaseBuffers() {
@@ -81,6 +88,10 @@ void Renderer::ReleaseBuffers() {
 	if(m_downsizeBuffer != nullptr){
 		delete[] m_downsizeBuffer;
 	}
+	if(m_brightBuffer != nullptr){
+		delete[] m_brightBuffer;
+	}
+	m_brightBuffer = nullptr;
 
 	m_outBuffer = nullptr;
 	m_zbuffer = nullptr;
@@ -454,6 +465,27 @@ void Renderer::RenderSuperBuffer()
 
 	// Downsample the supersampled buffer to the screen buffer
 	DownsampleBuffer();
+}
+
+void BlurBuffer(float* source, float* dest, int width, int height){
+	float weight[5] = {0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216};
+	for (int y = 0; y < height; y++)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			float r,g,b;
+			int w = -4;
+			for(int i = max(x-4,0); i < min(x+4,width-1); i ++){
+				r+=weight[abs(w)]*source[INDEX(width,i,y,0)];
+				g+=weight[abs(w)]*source[INDEX(width,i,y,1)];
+				b+=weight[abs(w)]*source[INDEX(width,i,y,2)];
+				w+=1;
+			}
+			dest[INDEX(width,x,y,0)] = r;
+			dest[INDEX(width,x,y,1)] = g;
+			dest[INDEX(width,x,y,2)] = b;
+		}
+	}
 }
 
 void Renderer::DownsampleBuffer()
@@ -1130,14 +1162,10 @@ void Renderer::UpdateBuffer(){
 	glBindTexture(GL_TEXTURE_2D, gScreenTex);
 	a = glGetError();
 	if(anti_aliasing){
-		
-		std::cout << "-V DRAWING antialiased " << m_outBuffer << "," << m_downsizeBuffer << std::endl;
 		DownsizeBuffer();
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_downsize_width, m_downsize_height, GL_RGB, GL_FLOAT, m_downsizeBuffer);
 	}
 	else{
-		
-		std::cout << "-N DRAWING normal " << m_outBuffer << "," << m_downsizeBuffer << std::endl;
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, GL_RGB, GL_FLOAT, m_outBuffer);
 	}
 	glGenerateMipmap(GL_TEXTURE_2D);

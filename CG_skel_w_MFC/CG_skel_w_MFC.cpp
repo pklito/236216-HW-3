@@ -349,9 +349,15 @@ void keyboard( unsigned char key, int x, int y )
 	case 'h':
 		changeLight();
 		break;
-	case '6':
+	case '5':
+		//change fog
+		break;
+	case '8':
 		renderer->setAntiAliasing(!(renderer->getAntiAliasingFlag()));
 		display();
+		break;
+	case '9':
+		//blur bloom
 		break;
 	default:
 		return;
