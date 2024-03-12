@@ -215,7 +215,6 @@ void display( void ){
 	}
 
 	scene->draw();
-	renderer->SwapBuffers();
 }
 
 void reshape( int width, int height )

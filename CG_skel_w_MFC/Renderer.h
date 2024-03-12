@@ -20,13 +20,15 @@ enum ShadingMethod {
 
 class Renderer
 {
+	float* m_downsizeBuffer; //3*width*height
 	float* m_outBuffer; // 3*width*height
 	float* m_zbuffer; // width*height
 	vec3* m_supersampledBuffer;
-	//std::vector<std::vector<float>> m_supersampledDepth;
+	
 	int supersample_factor = 2;
 	int supersampled_width, supersampled_height;
 	int m_width, m_height;
+	int m_downsize_width, m_downsize_height;
 	float aspect_ratio;
 	float far_z = 20.0f;
 	mat4 mat_transform_inverse;
@@ -57,6 +59,7 @@ class Renderer
 	//////////////////////////////
 
 	void UpdateBuffer();
+	void DownsizeBuffer();
 public:
 	Renderer();
 	Renderer(int width, int height);
