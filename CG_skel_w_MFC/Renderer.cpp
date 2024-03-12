@@ -487,7 +487,9 @@ void Renderer::DownsampleBuffer()
 			}
 
 			// Draw the pixel to the screen buffer
-			DrawPixelSafe(x, y, Z_INDEX(m_width, x, y), accumulatedColor);
+			m_outBuffer[INDEX(m_width, x, y, 0)] = accumulatedColor.x;	m_outBuffer[INDEX(m_width, x, y, 1)] = accumulatedColor.y;	m_outBuffer[INDEX(m_width, x, y, 2)] = accumulatedColor.z;
+			m_zbuffer[Z_INDEX(m_width, x, y)] = INDEX(m_width, x, y, 0);
+			//DrawPixelSafe(x, y, Z_INDEX(m_width, x, y), accumulatedColor);
 			vec3 finalColor = vec3(
 				m_outBuffer[INDEX(m_width, x, y, 0)],
 				m_outBuffer[INDEX(m_width, x, y, 1)],
