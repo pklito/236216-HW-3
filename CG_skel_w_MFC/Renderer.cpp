@@ -488,7 +488,18 @@ void Renderer::DownsampleBuffer()
 
 			// Draw the pixel to the screen buffer
 			m_outBuffer[INDEX(m_width, x, y, 0)] = accumulatedColor.x;	m_outBuffer[INDEX(m_width, x, y, 1)] = accumulatedColor.y;	m_outBuffer[INDEX(m_width, x, y, 2)] = accumulatedColor.z;
-			m_zbuffer[Z_INDEX(m_width, x, y)] = INDEX(m_width, x, y, 0);
+			m_zbuffer[Z_INDEX(m_width, x, y)] = Z_INDEX(m_width, x, y);
+			//to delete later
+			if ( x < 0 || x >= m_width) {
+				std::cout << "FOr some reason x out of range, x = " << x << " m_width = " << m_width << std::endl;
+			}
+			else if (y < 0 || y >= m_height) {
+				std::cout << "FOr some reason y out of range, y = " << y << " m_height = " << m_height << std::endl;
+			}
+			else if (Z_INDEX(m_width, x, y) > m_zbuffer[Z_INDEX(m_width, x, y)]) {
+				std::cout << "FOr some reason z bigger then curr z_far, z = " << Z_INDEX(m_width, x, y) << " curr z_far = " << m_zbuffer[Z_INDEX(m_width, x, y)] << std::endl;
+			}
+		
 			//DrawPixelSafe(x, y, Z_INDEX(m_width, x, y), accumulatedColor);
 			vec3 finalColor = vec3(
 				m_outBuffer[INDEX(m_width, x, y, 0)],
