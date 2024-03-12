@@ -9,9 +9,10 @@
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 #define Z_INDEX(width,x,y) (x+y*width)
+#define SUPER_INDEX(width,x,y) (x+y*width)
 #define LINE_TOO_LARGE 30
 
-Renderer::Renderer() :m_width(512), m_height(512), curr_color(0), shading_method(FLAT), ambient_light(AmbientLight(0,vec3(0,0,0)))
+Renderer::Renderer() :m_width(512), m_height(512), curr_color(0), shading_method(FLAT), ambient_light(AmbientLight(0,vec3(0,0,0))), m_supersampledBuffer(NULL)
 {
 	InitOpenGLRendering();
 	supersample_factor = 6;
@@ -19,7 +20,7 @@ Renderer::Renderer() :m_width(512), m_height(512), curr_color(0), shading_method
 	anti_aliasing = false;
 	CreateBuffers(512,512);
 }
-Renderer::Renderer(int width, int height) :m_width(width), m_height(height), curr_color(0), shading_method(FLAT), ambient_light(AmbientLight(0,vec3(0,0,0)))
+Renderer::Renderer(int width, int height) :m_width(width), m_height(height), curr_color(0), shading_method(FLAT), ambient_light(AmbientLight(0,vec3(0,0,0))), m_supersampledBuffer(NULL)
 {
 	InitOpenGLRendering();
 	supersample_factor = 6;
@@ -31,14 +32,6 @@ Renderer::Renderer(int width, int height) :m_width(width), m_height(height), cur
 Renderer::~Renderer(void)
 {
 	ReleaseBuffers(); // Ensure that m_outBuffer and m_zbuffer are deleted
-
-	// Release the memory allocated for m_supersampledBuffer
-	for (int i = 0; i < supersampled_width; i++) {
-		m_supersampledBuffer[i].clear();
-		//m_supersampledDepth[i].clear();
-	}
-	m_supersampledBuffer.clear();
-	//m_supersampledDepth.clear();
 }
 
 void BubbleSort(std::vector<int>& intersections) {
@@ -69,9 +62,11 @@ void Renderer::CreateBuffers(int width, int height)
 void Renderer::ReleaseBuffers() {
 	delete[] m_outBuffer;
 	delete[] m_zbuffer;
+	delete[] m_supersampledBuffer;
 
 	m_outBuffer = nullptr;
 	m_zbuffer = nullptr;
+	m_supersampledBuffer = nullptr;
 }
 
 void Renderer::CreateSupersampledBuffer()
@@ -80,7 +75,14 @@ void Renderer::CreateSupersampledBuffer()
 	supersampled_height = m_height * supersample_factor;
 
 	// Create a buffer for supersampling
-	m_supersampledBuffer.resize(supersampled_width, std::vector<vec3>(supersampled_height, vec3(0.0f)));
+	std::cout << m_supersampledBuffer << std::endl;
+	try{	
+		m_supersampledBuffer = new vec3[supersampled_width*supersampled_height];
+	}
+	catch (exception e){
+		std::cout << e.what() << std::endl;
+		throw e;
+	}
 	//m_supersampledDepth.resize(supersampled_width, std::vector<float>(supersampled_height, 0.0f));
 }
 
@@ -154,7 +156,7 @@ void Renderer::FillEdges(float percent, vec3 color) {
 
 
 // Function to check for differences in color values
-void Renderer::CheckColorDifferences(const std::vector<std::vector<vec3>>& supersampledBuffer, const float* finalBuffer, int width, int height) {
+void Renderer::CheckColorDifferences(vec3* supersampledBuffer, const float* finalBuffer, int width, int height) {
 	float epsilon = 1e-5;  // Adjust this threshold based on your expected color differences
 
 	for (int y = 0; y < height; y++) {
@@ -177,7 +179,7 @@ void Renderer::CheckColorDifferences(const std::vector<std::vector<vec3>>& super
 						continue;
 					}
 
-					accumulatedColor += m_supersampledBuffer[sx][sy];
+					accumulatedColor += m_supersampledBuffer[SUPER_INDEX(m_width*supersample_factor,sx,sy)];
 					validSamples++;	
 				}
 			}
@@ -468,7 +470,7 @@ void Renderer::DownsampleBuffer()
 						continue;
 					}
 
-					accumulatedColor += m_supersampledBuffer[sx][sy];
+					accumulatedColor += m_supersampledBuffer[SUPER_INDEX(m_width*supersample_factor,sx,sy)];
 					//accumulatedDepth += m_supersampledDepth[sx][sy];
 					validSamples++;
 					
@@ -521,7 +523,7 @@ void Renderer::RenderPixel(int x, int y)
 				continue;
 			}
 
-			m_supersampledBuffer[sx][sy] = vec3(0.0f, 0.0f, 0.0f);
+			m_supersampledBuffer[SUPER_INDEX(m_width*supersample_factor,sx,sy)] = vec3(0.0f, 0.0f, 0.0f);
 			//m_supersampledDepth[sx][sy] = 0.0f;
 		}
 	}
@@ -542,7 +544,7 @@ void Renderer::RenderPixel(int x, int y)
 			int sampleX = min(x + i, m_width - 1);
 			int sampleY = min(y + j, m_height - 1);
 
-			m_supersampledBuffer[sx][sy] += vec3(
+			m_supersampledBuffer[SUPER_INDEX(m_width*supersample_factor,sx,sy)] += vec3(
 				m_outBuffer[INDEX(m_width, sampleX, sampleY, 0)],
 				m_outBuffer[INDEX(m_width, sampleX, sampleY, 1)],
 				m_outBuffer[INDEX(m_width, sampleX, sampleY, 2)]

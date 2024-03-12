@@ -28,7 +28,7 @@ class Renderer
 {
 	float* m_outBuffer; // 3*width*height
 	float* m_zbuffer; // width*height
-	std::vector<std::vector<vec3>> m_supersampledBuffer;
+	vec3* m_supersampledBuffer;
 	//std::vector<std::vector<float>> m_supersampledDepth;
 	int supersample_factor = 2;
 	int supersampled_width, supersampled_height;
@@ -93,7 +93,7 @@ public:
 
 	void setAntiAliasing(bool new_anti_aliasing);
 	bool getAntiAliasingFlag();
-	void CheckColorDifferences(const std::vector<std::vector<vec3>>& supersampledBuffer, const float* finalBuffer, int width, int height);
+	void CheckColorDifferences(vec3* supersampledBuffer, const float* finalBuffer, int width, int height);
 
 	void DrawNormalsToVertices(const std::vector<vec3>* vertices, const std::vector<vec3>* vertex_normals = NULL, bool draw_vertex_normals = false);
 	void setCameraPos(vec3 camera_pos);
