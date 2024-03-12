@@ -146,6 +146,7 @@ void Renderer::ClearBuffer(){
 	if(m_downsizeBuffer != nullptr){
 		std::fill(m_downsizeBuffer, m_downsizeBuffer + (3*m_downsize_height*m_downsize_width), 0);
 	}
+	std::fill(m_brightBuffer, m_brightBuffer + (m_width*m_height*3), 0);
 }
 
 void Renderer::FillBuffer(vec3 color)
@@ -468,18 +469,20 @@ void Renderer::RenderSuperBuffer()
 }
 
 void BlurBuffer(float* source, float* dest, int width, int height){
+	std::cout << "blurring!" << dest << std::endl;
 	float weight[5] = {0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216};
 	for (int y = 0; y < height; y++)
 	{
 		for (int x = 0; x < width; x++)
 		{
 			float r,g,b;
-			int w = -4;
-			for(int i = max(x-4,0); i < min(x+4,width-1); i ++){
-				r+=weight[abs(w)]*source[INDEX(width,i,y,0)];
-				g+=weight[abs(w)]*source[INDEX(width,i,y,1)];
-				b+=weight[abs(w)]*source[INDEX(width,i,y,2)];
-				w+=1;
+			for(int i = max(x-4,0); i < min(x+5,width); i ++){
+				r+=weight[abs(i-x)]*source[INDEX(width,i,y,0)];
+				g+=weight[abs(i-x)]*source[INDEX(width,i,y,1)];
+				b+=weight[abs(i-x)]*source[INDEX(width,i,y,2)];
+			}
+			if(x == 0){
+				//std::cout << r << " " << g << " " << b << std::endl;
 			}
 			dest[INDEX(width,x,y,0)] = r;
 			dest[INDEX(width,x,y,1)] = g;
@@ -1168,11 +1171,17 @@ void Renderer::UpdateBuffer(){
 	else{
 		if(applying_bloom){
 			BlurBuffer(m_outBuffer,m_brightBuffer,m_width,m_height);
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, GL_RGB, GL_FLOAT, m_brightBuffer);
+			for(int i = 0; i < m_width; i ++){
+				for(int j = 0; j < m_height; j++){
+					for(int c = 0; c < 3; c++){
+						m_outBuffer[INDEX(m_width,i,j,c)] = m_brightBuffer[INDEX(m_width,i,j,c)];
+					}
+
+				}
+			}
 
 		}
-		else
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, GL_RGB, GL_FLOAT, m_outBuffer);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, GL_RGB, GL_FLOAT, m_outBuffer);
 	}
 	glGenerateMipmap(GL_TEXTURE_2D);
 	a = glGetError();
