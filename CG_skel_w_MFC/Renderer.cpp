@@ -75,7 +75,6 @@ void Renderer::CreateSupersampledBuffer()
 	supersampled_height = m_height * supersample_factor;
 
 	// Create a buffer for supersampling
-	std::cout << m_supersampledBuffer << std::endl;
 	try{	
 		m_supersampledBuffer = new vec3[supersampled_width*supersampled_height];
 	}
@@ -420,12 +419,10 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 
 	if (anti_aliasing)
 	{
-		std::cout << "DOING ANTI ALIASING" << std::endl;
 		RenderSuperBuffer();
-		//CheckColorDifferences(m_supersampledBuffer, m_outBuffer, m_width, m_height);
 	}
 	else {
-		std::cout << "NOT DOING ANTI ALIASING" << std::endl;
+		//std::cout << "NOT DOING ANTI ALIASING" << std::endl;
 	}
 }
 
