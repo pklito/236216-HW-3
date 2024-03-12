@@ -92,6 +92,8 @@ public:
 	void DownsampleBuffer();
 	void RenderPixel(int x, int y);
 
+	void BlurScreen();
+	void BloomScreen();
 	void setBloomFlag(bool new_bloom);
 	bool getBloomFlag();
 	void setAntiAliasing(bool new_anti_aliasing);

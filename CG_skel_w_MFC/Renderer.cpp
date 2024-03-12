@@ -472,7 +472,7 @@ void Renderer::RenderSuperBuffer()
 	DownsampleBuffer();
 }
 
-void BlurBuffer(float* source, float* dest, int width, int height){
+void BlurDest(float* source, float* dest, int width, int height, bool light=false){
 	float weight[5] = {0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216};
 	for (int y = 0; y < height; y++)
 	{
@@ -480,13 +480,19 @@ void BlurBuffer(float* source, float* dest, int width, int height){
 		{
 			float r=0,g=0,b=0;
 			for(int i = max(x-4,0); i < min(x+5,width); i ++){
-				r+=weight[abs(i-x)]*source[INDEX(width,i,y,0)];
-				g+=weight[abs(i-x)]*source[INDEX(width,i,y,1)];
-				b+=weight[abs(i-x)]*source[INDEX(width,i,y,2)];
+				vec3 color = vec3(source[INDEX(width,i,y,0)],source[INDEX(width,i,y,1)],source[INDEX(width,i,y,2)]);
+				if(light){
+					if(dot(color, vec3(0.2126, 0.7152, 0.0722)) < 1){
+						continue;
+					}
+				}
+				r+=weight[abs(i-x)]*color.x;
+				g+=weight[abs(i-x)]*color.y;
+				b+=weight[abs(i-x)]*color.z;
 			}
-			dest[INDEX(width,x,y,0)] += r;
-			dest[INDEX(width,x,y,1)] += g;
-			dest[INDEX(width,x,y,2)] += b;
+			dest[INDEX(width,x,y,0)] = r;
+			dest[INDEX(width,x,y,1)] = g;
+			dest[INDEX(width,x,y,2)] = b;
 		}
 	}
 	for (int y = 0; y < height; y++)
@@ -495,14 +501,28 @@ void BlurBuffer(float* source, float* dest, int width, int height){
 		{
 			float r=0,g=0,b=0;
 			for(int i = max(y-4,0); i < min(y+5,height); i ++){
-				r+=weight[abs(i-y)]*source[INDEX(width,x,i,0)];
-				g+=weight[abs(i-y)]*source[INDEX(width,x,i,1)];
-				b+=weight[abs(i-y)]*source[INDEX(width,x,i,2)];
+				vec3 color = vec3(source[INDEX(width,x,i,0)],source[INDEX(width,x,i,1)],source[INDEX(width,x,i,2)]);
+				if(light){
+					if(dot(color, vec3(0.2126, 0.7152, 0.0722)) < 1){
+						continue;
+					}
+				}
+				r+=weight[abs(i-y)]*color.x;
+				g+=weight[abs(i-y)]*color.y;
+				b+=weight[abs(i-y)]*color.z;
 			}
 			dest[INDEX(width,x,y,0)] += r;
 			dest[INDEX(width,x,y,1)] += g;
 			dest[INDEX(width,x,y,2)] += b;
 		}
+	}
+}
+
+void BlurBuffer(float* source, int width, int height){
+	float* dest = new float[width*height*3];
+	BlurDest(source,dest,width,height);
+	for(int i = 0; i < width*height*3; i ++){
+		source[i] = dest[i];
 	}
 }
 
@@ -598,6 +618,7 @@ void Renderer::RenderPixel(int x, int y)
 }
 void Renderer::setBloomFlag(bool new_bloom){
 	if(new_bloom != applying_bloom){
+		applying_bloom = new_bloom;
 		ReleaseBuffers();
 		CreateBuffers(m_downsize_width,m_downsize_height);
 	}
@@ -1178,6 +1199,16 @@ void Renderer::DownsizeBuffer(){
 		}
 	}
 }
+
+void Renderer::BlurScreen(){
+	BlurBuffer(m_outBuffer,m_width,m_height);
+}
+void Renderer::BloomScreen(){
+	BlurDest(m_outBuffer,m_brightBuffer, m_width,m_height,true);
+	for(int i = 0; i < m_width*m_height*3; i++){
+		m_outBuffer[i] += m_brightBuffer[i];
+	}
+}
 //Doesn't clear the buffer afterwards!
 void Renderer::UpdateBuffer(){
 
@@ -1186,23 +1217,14 @@ void Renderer::UpdateBuffer(){
 	a = glGetError();
 	glBindTexture(GL_TEXTURE_2D, gScreenTex);
 	a = glGetError();
+	if(applying_bloom){
+		BloomScreen();
+	}
 	if(anti_aliasing){
-		DownsizeBuffer();
+		DownsizeBuffer();	//copy m_outBuffer to m_downsizeBuffer
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_downsize_width, m_downsize_height, GL_RGB, GL_FLOAT, m_downsizeBuffer);
 	}
 	else{
-		if(applying_bloom){
-			BlurBuffer(m_outBuffer,m_brightBuffer,m_width,m_height);
-			for(int i = 0; i < m_width; i ++){
-				for(int j = 0; j < m_height; j++){
-					for(int c = 0; c < 3; c++){
-						m_outBuffer[INDEX(m_width,i,j,c)] = m_brightBuffer[INDEX(m_width,i,j,c)];
-					}
-
-				}
-			}
-
-		}
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, GL_RGB, GL_FLOAT, m_outBuffer);
 	}
 	glGenerateMipmap(GL_TEXTURE_2D);
