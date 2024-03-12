@@ -570,7 +570,7 @@ void initMenu()
 
 	int lightsMenu = glutCreateMenu(lightMenu);
 	glutAddMenuEntry("Point", ADD_LIGHT_POINT);
-	glutAddMenuEntry("Directional", ADD_LIGHT_POINT);
+	glutAddMenuEntry("Directional", ADD_LIGHT_DIRECTIONAL);
 
 
 	int menuFile = glutCreateMenu(fileMenu);
