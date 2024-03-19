@@ -19,6 +19,7 @@ Renderer::Renderer() :m_width(512), m_height(512), aspect_ratio(1), curr_color(0
 	draw_fog = false;
 	anti_aliasing = false;
 	CreateBuffers(512,512);
+	applying_bloom = false;
 }
 Renderer::Renderer(int width, int height) :m_width(width), m_height(height), curr_color(0), shading_method(FLAT), ambient_light(AmbientLight(0,vec3(0,0,0))), m_supersampledBuffer(NULL)
 {
@@ -27,6 +28,7 @@ Renderer::Renderer(int width, int height) :m_width(width), m_height(height), cur
 	draw_fog = false;
 	anti_aliasing = false;
 	CreateBuffers(width,height);
+	applying_bloom = false;
 }
 
 Renderer::~Renderer(void)
@@ -69,6 +71,13 @@ void Renderer::CreateBuffers(int width, int height)
 	else{
 		m_downsizeBuffer = nullptr;
 	}
+
+	if(applying_bloom){
+		m_brightBuffer = new float[3*m_width*m_height];
+	}
+	else{
+		m_brightBuffer = nullptr;
+	}
 }
 
 void Renderer::ReleaseBuffers() {
@@ -81,6 +90,10 @@ void Renderer::ReleaseBuffers() {
 	if(m_downsizeBuffer != nullptr){
 		delete[] m_downsizeBuffer;
 	}
+	if(m_brightBuffer != nullptr){
+		delete[] m_brightBuffer;
+	}
+	m_brightBuffer = nullptr;
 
 	m_outBuffer = nullptr;
 	m_zbuffer = nullptr;
@@ -130,10 +143,18 @@ void Renderer::ResizeBuffers(int new_width, int new_height) {
 }
 
 void Renderer::ClearBuffer(){
+	if(draw_fog){
+		std::fill(m_outBuffer,m_outBuffer+(m_width*m_height*3),(*fogs)[0]->getFogColor().x);
+	}
+	else{
 	std::fill(m_outBuffer,m_outBuffer+(m_width*m_height*3),0);
+	}
 	std::fill(m_zbuffer, m_zbuffer + (m_width * m_height), far_z);
 	if(m_downsizeBuffer != nullptr){
 		std::fill(m_downsizeBuffer, m_downsizeBuffer + (3*m_downsize_height*m_downsize_width), 0);
+	}
+	if(m_brightBuffer != nullptr){
+		std::fill(m_brightBuffer, m_brightBuffer + (m_width*m_height*3), 0);
 	}
 }
 
@@ -394,7 +415,7 @@ void Renderer::DrawTriangles(const vector<vec3>* vertices, const mat4& world_tra
 		}
 
 		if (fill) {
-			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), toVec3(vn1), toVec3(vn2), toVec3(vn3), mat1,mat2,mat3);
+			FillPolygon(toVec3(vert1), toVec3(vert2), toVec3(vert3), toVec3(vn1), toVec3(vn2), toVec3(vn3), mat1,mat2,mat3,material_list->size() == vertices->size());
 		} else {
 			
 			/*
@@ -454,6 +475,61 @@ void Renderer::RenderSuperBuffer()
 
 	// Downsample the supersampled buffer to the screen buffer
 	DownsampleBuffer();
+}
+
+void BlurDest(float* source, float* dest, int width, int height, bool light=false){
+	float weight[5] = {0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216};
+		int sizeup = 1;
+	for (int y = 0; y < height; y++)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			float r=0,g=0,b=0;
+			for(int i = max(x-4*sizeup,0); i <= min(x+(4*sizeup),width-1); i ++){
+				vec3 color = vec3(source[INDEX(width,i,y,0)],source[INDEX(width,i,y,1)],source[INDEX(width,i,y,2)]);
+				if(light){
+					if(dot(color, vec3(0.2126, 0.7152, 0.0722)) < 1){
+						continue;
+					}
+				}
+				r+=weight[abs((i-x)/sizeup)]*color.x;
+				g+=weight[abs((i-x)/sizeup)]*color.y;
+				b+=weight[abs(i-x)/sizeup]*color.z;
+			}
+			dest[INDEX(width,x,y,0)] = r;
+			dest[INDEX(width,x,y,1)] = g;
+			dest[INDEX(width,x,y,2)] = b;
+		}
+	}
+	for (int y = 0; y < height; y++)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			float r=0,g=0,b=0;
+			for(int i = max(y-4*sizeup,0); i <= min(y+(4*sizeup),height-1); i ++){
+				vec3 color = vec3(source[INDEX(width,x,i,0)],source[INDEX(width,x,i,1)],source[INDEX(width,x,i,2)]);
+				if(light){
+					if(dot(color, vec3(0.2126, 0.7152, 0.0722)) < 1){
+						continue;
+					}
+				}
+				r+=weight[abs(i-y)/sizeup]*color.x;
+				g+=weight[abs(i-y)/sizeup]*color.y;
+				b+=weight[abs(i-y)/sizeup]*color.z;
+			}
+			dest[INDEX(width,x,y,0)] += r;
+			dest[INDEX(width,x,y,1)] += g;
+			dest[INDEX(width,x,y,2)] += b;
+		}
+	}
+}
+
+void BlurBuffer(float* source, int width, int height){
+	float* dest = new float[width*height*3];
+	BlurDest(source,dest,width,height);
+	for(int i = 0; i < width*height*3; i ++){
+		source[i] = dest[i];
+	}
 }
 
 void Renderer::DownsampleBuffer()
@@ -546,7 +622,15 @@ void Renderer::RenderPixel(int x, int y)
 		}
 	}
 }
-
+void Renderer::setBloomFlag(bool new_bloom){
+	if(new_bloom != applying_bloom){
+		applying_bloom = new_bloom;
+		ReleaseBuffers();
+		CreateBuffers(m_downsize_width,m_downsize_height);
+	}
+}
+	bool Renderer::getBloomFlag(){return applying_bloom;}
+	
 void Renderer::setAntiAliasing(bool new_anti_aliasing)
 {
 	anti_aliasing = new_anti_aliasing;
@@ -638,7 +722,7 @@ void Renderer::changeShadingMethod()
 	}
 }
 
-void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const vec3& vn1, const vec3& vn2, const vec3& vn3, const Material& mat1, const Material& mat2, const Material& mat3)
+void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& vert3, const vec3& vn1, const vec3& vn2, const vec3& vn3, const Material& mat1, const Material& mat2, const Material& mat3,bool unique_material)
 {
 	/*
 	Cameraspace coordinates to clipslace coordinates
@@ -730,8 +814,7 @@ void Renderer::FillPolygon(const vec3& vert1, const vec3& vert2, const vec3& ver
 						pixel_color = weights.x * color1 + weights.y * color2 + weights.z * color3;
 						break;
 					case PHONG:
-						//Material mat = Material::weightedAverage(mat1,mat2,mat3,weights.x,weights.y,weights.z);
-						Material mat = mat1;
+						Material mat = unique_material ? Material::weightedAverage(mat1,mat2,mat3,weights.x,weights.y,weights.z) : mat1;
 						pixel_color = phongIllumination(surface_point, norm, mat);
 						break;
 				}
@@ -1121,6 +1204,16 @@ void Renderer::DownsizeBuffer(){
 		}
 	}
 }
+
+void Renderer::BlurScreen(){
+	BlurBuffer(m_outBuffer,m_width,m_height);
+}
+void Renderer::BloomScreen(){
+	BlurDest(m_outBuffer,m_brightBuffer, m_width,m_height,true);
+	for(int i = 0; i < m_width*m_height*3; i++){
+		m_outBuffer[i] += m_brightBuffer[i];
+	}
+}
 //Doesn't clear the buffer afterwards!
 void Renderer::UpdateBuffer(){
 
@@ -1129,15 +1222,14 @@ void Renderer::UpdateBuffer(){
 	a = glGetError();
 	glBindTexture(GL_TEXTURE_2D, gScreenTex);
 	a = glGetError();
+	if(applying_bloom){
+		BloomScreen();
+	}
 	if(anti_aliasing){
-		
-		std::cout << "-V DRAWING antialiased " << m_outBuffer << "," << m_downsizeBuffer << std::endl;
-		DownsizeBuffer();
+		DownsizeBuffer();	//copy m_outBuffer to m_downsizeBuffer
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_downsize_width, m_downsize_height, GL_RGB, GL_FLOAT, m_downsizeBuffer);
 	}
 	else{
-		
-		std::cout << "-N DRAWING normal " << m_outBuffer << "," << m_downsizeBuffer << std::endl;
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_width, m_height, GL_RGB, GL_FLOAT, m_outBuffer);
 	}
 	glGenerateMipmap(GL_TEXTURE_2D);

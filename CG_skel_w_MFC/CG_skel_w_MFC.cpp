@@ -24,6 +24,7 @@
 #include <string>
 #include "CPopup.h"
 #include "CColorPicker.h"
+#include "CPopNumber.h"
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
@@ -70,7 +71,18 @@ float increment = 0.2;
 //----------------------------------------------------------------------------
 // Camera + Scene modiications
 //----------------------------------------------------------------------------
-
+void queryLight(vec3& color_out, float& intensity_out, Light* light_default=nullptr){
+	CColorPicker colordialog(nullptr, light_default);
+	if(colordialog.DoModal() != IDOK){
+		return;
+	}
+	intensity_out = colordialog.m_sliderval/100.f;
+	COLORREF color = colordialog.m_color.GetColor();
+	
+	color_out = vec3((float)GetRValue(color)/255.f,
+	(float)GetGValue(color)/255.f,
+	(float)GetBValue(color)/255.f);
+}
 void swapCameras(){
 	scene->cycleActiveCamera();
 	renderer->setCameraMatrixes(scene->getActiveCamera());
@@ -80,13 +92,17 @@ void swapCameras(){
 #define TRY_FLOAT(var, text) try { var = std::stof(text); } catch (const std::invalid_argument& e) {std::cout<<"BAD_INPUT"<<std::endl;return;} catch (const std::out_of_range& e) {return;}
 
 void changeIncrement(){
-	renderer->FillEdges(0.1, vec3(0.9, 0.1, 0.1));
-	display();
-	std::string userInput;
-	
-	std::cout << "Set increment (default=0.2): ";
-	std::cin >> userInput;
-	TRY_FLOAT(increment, userInput);
+	CString floatString;
+	floatString.Format(_T("%f"),increment);
+	CPopNumber c(_T("Choose the new increment"),floatString);
+	if(c.DoModal() == IDCANCEL){
+		return;
+	}
+	try{
+		increment = _ttof(c.m_inputval);
+	}
+	catch(exception e){
+	}
 }
 
 void addProjCamera(){
@@ -122,6 +138,30 @@ void addProjCamera(){
 	camera->Perspective(fov_degrees,aspect_ratio,zNear,zFar);
 	scene->addCamera(camera);
 	glutPostRedisplay();
+}
+int selected_type = 0;
+void changeMaterialColor(){
+	vec3 color_out;
+	float intensity = -1;
+	
+	queryLight(color_out, intensity);
+	if(intensity < 0){
+		return;
+	}
+	Material mat = scene->getSelectedMaterial();
+	if(selected_type == 1){
+		mat.color_diffuse = color_out;
+	}
+	if(selected_type == 0){
+		mat.color_ambient = color_out;
+	}
+	if(selected_type == 2){
+		mat.color_specular = color_out;
+		mat.k_shiny = (int)(intensity*2);
+	}
+	scene->setSelectedMaterial(mat);
+	
+	selected_type = (selected_type += 1)%3;
 }
 
 void addOrthoCamera(){
@@ -162,17 +202,17 @@ void readFromFile(){
 		glutPostRedisplay();
 	}
 }
-void queryLight(vec3& color_out, float& intensity_out, Light* light_default=nullptr){
-	CColorPicker colordialog(nullptr, light_default);
-	if(colordialog.DoModal() != IDOK){
+
+void changeFog(){
+	vec3 color_out;
+	float intensity = -1;
+	queryLight(color_out, intensity);
+	if(intensity < 0){
 		return;
 	}
-	intensity_out = colordialog.m_sliderval/100.f;
-	COLORREF color = colordialog.m_color.GetColor();
-	
-	color_out = vec3((float)GetRValue(color)/255.f,
-	(float)GetGValue(color)/255.f,
-	(float)GetBValue(color)/255.f);
+	scene->getSelectedFog()->setColor(color_out);
+	scene->getSelectedFog()->setEnd(intensity*5);
+
 }
 
 void changeLight(){
@@ -340,17 +380,31 @@ void keyboard( unsigned char key, int x, int y )
 	case '2':
 		scene->changeCurrsColor();
 		break;
+	case '7':
+		changeMaterialColor();
+		break;
+	case '6':
+		scene->changeCurrsMaterial();
+		break;
 	case '3':
 		scene->changeShadingMethod();
 		break;
 	case '4':
 		renderer->setFogFlag(!(renderer->getFogFlag()));
+		display();
 		break;
 	case 'h':
 		changeLight();
 		break;
-	case '6':
+	case '5':
+		changeFog();
+		break;
+	case '8':
 		renderer->setAntiAliasing(!(renderer->getAntiAliasingFlag()));
+		display();
+		break;
+	case '9':
+		renderer->setBloomFlag(!renderer->getBloomFlag());
 		display();
 		break;
 	default:

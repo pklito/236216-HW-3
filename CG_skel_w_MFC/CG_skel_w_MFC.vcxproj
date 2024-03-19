@@ -99,6 +99,7 @@
   <ItemGroup>
     <ClCompile Include="CColorPicker.cpp" />
     <ClCompile Include="CG_skel_w_MFC.cpp" />
+    <ClCompile Include="CPopNumber.cpp" />
     <ClCompile Include="CPopup.cpp" />
     <ClCompile Include="InitShader.cpp" />
     <ClCompile Include="MeshModel.cpp" />
@@ -112,6 +113,7 @@
   <ItemGroup>
     <ClInclude Include="CColorPicker.h" />
     <ClInclude Include="CG_skel_w_MFC.h" />
+    <ClInclude Include="CPopNumber.h" />
     <ClInclude Include="CPopup.h" />
     <ClInclude Include="InitShader.h" />
     <ClInclude Include="mat.h" />
