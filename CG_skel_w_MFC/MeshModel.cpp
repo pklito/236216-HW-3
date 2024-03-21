@@ -74,6 +74,7 @@ void MeshModel::loadFile(string fileName)
 	ifstream ifile(fileName.c_str());
 	vector<FaceIdcs> faces;
 	vector<vec3> vertices;
+	vector<vec3> normals_to_vert;
 	// while not end of file
 	while (!ifile.eof())
 	{
@@ -88,17 +89,24 @@ void MeshModel::loadFile(string fileName)
 		issLine >> std::ws >> lineType;
 
 		// based on the type parse data
-		if (lineType == "?") /*BUG*/
+		if (lineType == "v")	//BUG FIXED
 			vertices.push_back(vec3fFromStream(issLine));
-		else if (lineType == "?") /*BUG*/
+		else if (lineType == "f")	//BUG FIXED
 			faces.push_back(issLine);
+		else if (lineType == "vn") {
+			//normal to vertices
+			normals_to_vert.push_back(vec3fFromStream(issLine));
+		}
+		else if (lineType == "vt") {
+			//texture
+		}
 		else if (lineType == "#" || lineType == "")
 		{
 			// comment / empty line
 		}
 		else
 		{
-			cout<< "Found unknown line Type \"" << lineType << "\"";
+			cout << "Found unknown line Type \"" << lineType << "\"";
 		}
 	}
 	//Vertex_positions is an array of vec3. Every three elements define a triangle in 3D.
@@ -107,20 +115,29 @@ void MeshModel::loadFile(string fileName)
 	//f 1 3 4
 	//Then vertex_positions should contain:
 	//vertex_positions={v1,v2,v3,v1,v3,v4}
-
-	vertex_positions = new vec3[7]; /*BUG*/
+	face_count = faces.size();
+	vertex_positions = new vec3[3 * faces.size()]; //In our project every face is a triangle. BUG FIXED
+	normals = new vec3[3 * faces.size()];
+	normals_to_vertices = new vec3[3 * faces.size()];
+	
+	std::cout << "[ ] Read model "<<vertices.size() << " VN:" <<  normals_to_vert.size() << std::endl;
+	vertex_normals_exist = normals_to_vert.size() != 0;
+	if(!vertex_normals_exist){
+		vertex_normals_exist = true;
+	}
 	// iterate through all stored faces and create triangles
-	int k=0;
+	int k = 0;
 	for (vector<FaceIdcs>::iterator it = faces.begin(); it != faces.end(); ++it)
 	{
 		for (int i = 0; i < 3; i++)
 		{
-			vertex_positions[k++] = vec3(); /*BUG*/
+			if(vertex_normals_exist){
+				normals_to_vertices[k] = 0.1*normals_to_vert[it->vn[i] - 1] + vertices[it->v[i] - 1];
+			}
+			vertex_positions[k++] = vertices[it->v[i] - 1]; 	//Take the face indexes from the vertix array BUG FIXED
 		}
 	}
 }
-
-
 
 void MeshModel::draw()
 {
