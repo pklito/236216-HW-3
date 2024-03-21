@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include "GL/freeglut.h"
 
 using namespace std;
 
@@ -67,6 +68,10 @@ MeshModel::MeshModel(string fileName)
 
 MeshModel::~MeshModel(void)
 {
+	glDeleteBuffers(1, &vbo_vertices);
+	glDeleteBuffers(1, &vbo_textures);
+	glDeleteBuffers(1, &vbo_normals);
+	glDeleteVertexArrays(1, &vao);
 }
 
 void MeshModel::loadFile(string fileName)
@@ -74,7 +79,8 @@ void MeshModel::loadFile(string fileName)
 	ifstream ifile(fileName.c_str());
 	vector<FaceIdcs> faces;
 	vector<vec3> vertices;
-	vector<vec3> normals_to_vert;
+	vector<vec3> vertex_normals;
+	vector<vec3> vertex_textures;
 	// while not end of file
 	while (!ifile.eof())
 	{
@@ -95,9 +101,10 @@ void MeshModel::loadFile(string fileName)
 			faces.push_back(issLine);
 		else if (lineType == "vn") {
 			//normal to vertices
-			normals_to_vert.push_back(vec3fFromStream(issLine));
+			vertex_normals.push_back(vec3fFromStream(issLine));
 		}
 		else if (lineType == "vt") {
+			vertex_textures.push_back(vec3fFromStream(issLine));
 			//texture
 		}
 		else if (lineType == "#" || lineType == "")
@@ -109,34 +116,45 @@ void MeshModel::loadFile(string fileName)
 			cout << "Found unknown line Type \"" << lineType << "\"";
 		}
 	}
-	//Vertex_positions is an array of vec3. Every three elements define a triangle in 3D.
-	//If the face part of the obj is
-	//f 1 2 3
-	//f 1 3 4
-	//Then vertex_positions should contain:
-	//vertex_positions={v1,v2,v3,v1,v3,v4}
-	face_count = faces.size();
-	vertex_positions = new vec3[3 * faces.size()]; //In our project every face is a triangle. BUG FIXED
-	normals = new vec3[3 * faces.size()];
-	normals_to_vertices = new vec3[3 * faces.size()];
 	
-	std::cout << "[ ] Read model "<<vertices.size() << " VN:" <<  normals_to_vert.size() << std::endl;
-	vertex_normals_exist = normals_to_vert.size() != 0;
-	if(!vertex_normals_exist){
-		vertex_normals_exist = true;
-	}
-	// iterate through all stored faces and create triangles
+	//Three vertices per face, three coordinates per vertex
+	static GLfloat* vertices_array = new GLfloat[faces.size()*3 * 3];
+	static GLfloat* vertex_normals_array = new GLfloat[faces.size()*3*3];
+	static GLfloat* vertex_textures_array = new GLfloat[faces.size()*3*3];
+	// * Convert buffers to float arrays to send to the GPU *
 	int k = 0;
 	for (vector<FaceIdcs>::iterator it = faces.begin(); it != faces.end(); ++it)
 	{
 		for (int i = 0; i < 3; i++)
 		{
-			if(vertex_normals_exist){
-				normals_to_vertices[k] = 0.1*normals_to_vert[it->vn[i] - 1] + vertices[it->v[i] - 1];
+			for (int coord = 0; coord < 3; coord ++){ //x, y, z
+				vertices_array[k + coord] = vertices[it->v[i] - 1][coord];
+				vertex_normals_array[k + coord] = vertex_normals[it->vn[i] - 1][coord];
+				vertex_textures_array[k + coord] = vertex_textures[it->vt[i] - 1][coord]; 	//Take the face indexes from the vertix array BUG FIXED
 			}
-			vertex_positions[k++] = vertices[it->v[i] - 1]; 	//Take the face indexes from the vertix array BUG FIXED
+			// iterate to next face
+			k+=3;
 		}
 	}
+
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	glGenBuffers(1, &vbo_vertices);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_array),
+		vertices_array, GL_STATIC_DRAW);
+
+	glGenBuffers(1, &vbo_normals);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_normals);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_normals_array),
+		vertex_normals_array, GL_STATIC_DRAW);
+
+	glGenBuffers(1, &vbo_textures);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_textures);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_textures_array),
+		vertex_textures_array, GL_STATIC_DRAW);
+
 }
 
 void MeshModel::draw()

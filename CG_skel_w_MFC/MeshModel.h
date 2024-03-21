@@ -10,7 +10,10 @@ class MeshModel : public Model
 {
 protected :
 	MeshModel() {}
-	vec3 *vertex_positions;
+	GLuint vao;
+	GLuint vbo_vertices;
+	GLuint vbo_normals;
+	GLuint vbo_textures;
 	//add more attributes
 	mat4 _world_transform;
 	mat3 _normal_transform;
