@@ -1,7 +1,5 @@
-// Microsoft Visual C++ generated resource script.
+//Microsoft Visual C++ generated resource script.
 //
-#pragma code_page(65001)
-
 #include "resource.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
@@ -10,15 +8,13 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #include "afxres.h"
-
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
-/////////////////////////////////////////////////////////////////////////////
-// English (United States) resources
-
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+LANGUAGE 9, 1
+#pragma code_page(1252)
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -26,18 +22,18 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE 
+1 TEXTINCLUDE
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE 
+2 TEXTINCLUDE
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE 
+3 TEXTINCLUDE
 BEGIN
     "\r\n"
     "\0"
@@ -45,160 +41,17 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-
 /////////////////////////////////////////////////////////////////////////////
 //
-// Dialog
+// String Table
 //
 
-IDD_DIALOG1 DIALOGEX 0, 0, 260, 109
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "PERSPECTIVE CAMERA"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
+STRINGTABLE
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,148,88,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,203,88,50,14
-    CONTROL         "",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | TBS_TOOLTIPS | WS_TABSTOP,90,19,95,11
-    EDITTEXT        IDC_EDIT1,105,36,57,12,ES_AUTOHSCROLL
-    LTEXT           "Enter FOV (degrees):",IDC_STATIC,16,19,79,10
-    LTEXT           "Znear-Zfar",IDC_STATIC,17,57,37,10
-    LTEXT           "Enter aspect ratio:",IDC_STATIC,17,36,79,10
-    EDITTEXT        IDC_EDIT2,78,55,57,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_EDIT3,150,55,57,12,ES_AUTOHSCROLL
+   IDS_APP_TITLE       "CG_skel_w_MFC"
 END
 
-IDD_DIALOG2 DIALOGEX 0, 0, 260, 109
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "ORTHOGRAPHIC CAMERA"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,148,88,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,203,88,50,14
-    EDITTEXT        IDC_EDIT1,84,19,57,12,ES_AUTOHSCROLL
-    LTEXT           "width:",IDC_STATIC,16,19,50,10
-    LTEXT           "Znear-Zfar",IDC_STATIC,17,57,37,10
-    LTEXT           "height:",IDC_STATIC,17,36,43,10
-    EDITTEXT        IDC_EDIT2,84,37,57,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_EDIT3,68,54,57,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_EDIT4,132,54,57,12,ES_AUTOHSCROLL
-END
-
-IDD_DIALOG3 DIALOGEX 0, 0, 284, 109
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_SYSMENU
-EXSTYLE WS_EX_TRANSPARENT
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,169,88,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,227,88,50,14
-    CONTROL         "",IDC_MFCCOLORBUTTON1,"MfcColorButton",WS_TABSTOP,51,28,60,48
-    CONTROL         "",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | TBS_TOOLTIPS | WS_TABSTOP,128,43,108,22
-    CTEXT           "Light",IDC_EDIT1,95,7,84,8
-END
-
-IDD_DIALOG4 DIALOGEX 0, 0, 289, 123
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_SYSMENU
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,179,102,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,232,102,50,14
-    CTEXT           "Static",IDC_EDIT1,49,17,182,8
-    EDITTEXT        IDC_EDIT2,122,53,40,14,ES_AUTOHSCROLL
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
-BEGIN
-    IDD_DIALOG1, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 253
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 102
-    END
-
-    IDD_DIALOG2, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 253
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 102
-    END
-
-    IDD_DIALOG3, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 277
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 102
-    END
-
-    IDD_DIALOG4, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 282
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 116
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// AFX_DIALOG_LAYOUT
-//
-
-IDD_DIALOG1 AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_DIALOG2 AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_DIALOG3 AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_DIALOG4 AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog Info
-//
-
-IDD_DIALOG3 DLGINIT
-BEGIN
-    IDC_MFCCOLORBUTTON1, 0x37c, 215, 0
-0x4d3c, 0x4346, 0x6f43, 0x6f6c, 0x4272, 0x7475, 0x6f74, 0x5f6e, 0x6e45, 
-0x6261, 0x656c, 0x744f, 0x6568, 0x4272, 0x7475, 0x6f74, 0x3e6e, 0x5254, 
-0x4555, 0x2f3c, 0x464d, 0x4343, 0x6c6f, 0x726f, 0x7542, 0x7474, 0x6e6f, 
-0x455f, 0x616e, 0x6c62, 0x4f65, 0x6874, 0x7265, 0x7542, 0x7474, 0x6e6f, 
-0x3c3e, 0x464d, 0x4343, 0x6c6f, 0x726f, 0x7542, 0x7474, 0x6e6f, 0x455f, 
-0x616e, 0x6c62, 0x4165, 0x7475, 0x6d6f, 0x7461, 0x6369, 0x7542, 0x7474, 
-0x6e6f, 0x463e, 0x4c41, 0x4553, 0x2f3c, 0x464d, 0x4343, 0x6c6f, 0x726f, 
-0x7542, 0x7474, 0x6e6f, 0x455f, 0x616e, 0x6c62, 0x4165, 0x7475, 0x6d6f, 
-0x7461, 0x6369, 0x7542, 0x7474, 0x6e6f, 0x3c3e, 0x464d, 0x4343, 0x6c6f, 
-0x726f, 0x7542, 0x7474, 0x6e6f, 0x435f, 0x6c6f, 0x6d75, 0x736e, 0x6f43, 
-0x6e75, 0x3e74, 0x3c35, 0x4d2f, 0x4346, 0x6f43, 0x6f6c, 0x4272, 0x7475, 
-0x6f74, 0x5f6e, 0x6f43, 0x756c, 0x6e6d, 0x4373, 0x756f, 0x746e, "\076" 
-    0
-END
-
-#endif    // English (United States) resources
+#endif
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -208,8 +61,9 @@ END
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
+#ifndef _AFXDLL
+#include "afxres.rc"
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
-

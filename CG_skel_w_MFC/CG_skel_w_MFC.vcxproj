@@ -28,7 +28,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>Dynamic</UseOfMfc>
     <CharacterSet>NotSet</CharacterSet>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -97,10 +97,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CColorPicker.cpp" />
     <ClCompile Include="CG_skel_w_MFC.cpp" />
-    <ClCompile Include="CPopNumber.cpp" />
-    <ClCompile Include="CPopup.cpp" />
     <ClCompile Include="InitShader.cpp" />
     <ClCompile Include="MeshModel.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -111,10 +108,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CColorPicker.h" />
     <ClInclude Include="CG_skel_w_MFC.h" />
-    <ClInclude Include="CPopNumber.h" />
-    <ClInclude Include="CPopup.h" />
     <ClInclude Include="InitShader.h" />
     <ClInclude Include="mat.h" />
     <ClInclude Include="MeshModel.h" />
@@ -130,6 +124,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="fshader.glsl" />
+    <None Include="minimal_fshader.glsl" />
+    <None Include="minimal_vshader.glsl" />
     <None Include="vshader.glsl" />
     <None Include="ReadMe.txt" />
   </ItemGroup>

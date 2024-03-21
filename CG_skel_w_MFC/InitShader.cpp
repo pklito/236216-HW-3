@@ -8,7 +8,7 @@
 static char*
 readShaderSource(const char* shaderFile)
 {
-    FILE* fp = fopen(shaderFile, "rb");
+    FILE* fp = fopen(shaderFile, "r");
 
     if ( fp == NULL ) { return NULL; }
 
