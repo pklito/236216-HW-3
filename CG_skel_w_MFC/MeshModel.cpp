@@ -140,17 +140,21 @@ void MeshModel::loadFile(string fileName)
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-	glGenBuffers(1, &vbo_vertices);
+
+	GLuint vbos[3] = {0,0,0};
+	glGenBuffers(3, vbos);
+	vbo_vertices = vbos[0];
+	vbo_normals = vbos[1];
+	vbo_textures = vbos[2];
+
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_array),
 		vertices_array, GL_STATIC_DRAW);
 
-	glGenBuffers(1, &vbo_normals);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_normals);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_normals_array),
 		vertex_normals_array, GL_STATIC_DRAW);
 
-	glGenBuffers(1, &vbo_textures);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_textures);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_textures_array),
 		vertex_textures_array, GL_STATIC_DRAW);
