@@ -20,13 +20,10 @@ void Scene::draw()
 					  "minimal_fshader.glsl" );
 
 	glUseProgram(program);
-
-	GLuint loc = glGetAttribLocation(program, "vPosition");
-	glEnableVertexAttribArray(loc);
-	glVertexAttribPointer(loc, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 
 	glClear(GL_COLOR_BUFFER_BIT);
+	std::cout<<"started" << std::endl;
 	for(auto it = models.begin(); it != models.end(); it++){
 		(*(it))->draw(m_renderer);
 	}

@@ -153,14 +153,20 @@ void MeshModel::loadFile(string fileName)
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_array),
 		vertices_array, GL_STATIC_DRAW);
-
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+/*
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_normals);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_normals_array),
 		vertex_normals_array, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1); 
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_textures);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_textures_array),
 		vertex_textures_array, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(2); */
 
 }
 

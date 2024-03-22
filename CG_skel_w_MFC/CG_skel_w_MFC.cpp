@@ -154,7 +154,7 @@ int my_main( int argc, char **argv )
 
 	
 	
-	renderer = new Renderer(512,512);
+	renderer = new Renderer();
 	scene = new Scene(renderer);
 
 	scene->loadOBJModel("meshes/bunny.obj");
