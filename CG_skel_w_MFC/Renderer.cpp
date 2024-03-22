@@ -47,6 +47,12 @@ void Renderer::SetDemoBuffer()
 	}
 }
 
+void Renderer::DrawMesh(GLuint vao, GLuint face_count){
+	
+    glBindVertexArray(vao);
+    glDrawArrays(GL_TRIANGLES, 0, face_count);
+    glBindVertexArray(0);
+}
 
 
 

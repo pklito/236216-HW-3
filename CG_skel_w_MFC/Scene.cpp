@@ -16,8 +16,22 @@ void Scene::draw()
 {
 	// 1. Send the renderer the current camera transform and the projection
 	// 2. Tell all models to draw themselves
+	GLuint program = InitShader( "minimal_vshader.glsl", 
+					  "minimal_fshader.glsl" );
 
-	m_renderer->SwapBuffers();
+	glUseProgram(program);
+
+	GLuint loc = glGetAttribLocation(program, "vPosition");
+	glEnableVertexAttribArray(loc);
+	glVertexAttribPointer(loc, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
+
+	glClear(GL_COLOR_BUFFER_BIT);
+	for(auto it = models.begin(); it != models.end(); it++){
+		(*(it))->draw(m_renderer);
+	}
+	glFlush();
+	glutSwapBuffers();
 }
 
 void Scene::drawDemo()

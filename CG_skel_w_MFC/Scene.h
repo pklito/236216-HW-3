@@ -9,7 +9,8 @@ using namespace std;
 class Model {
 protected:
 	virtual ~Model() {}
-	void virtual draw()=0;
+public:
+	void virtual draw(Renderer* renderer)=0;
 };
 
 

@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include "GL/freeglut.h"
+#include "InitShader.h"
 
 using namespace std;
 
@@ -118,9 +119,11 @@ void MeshModel::loadFile(string fileName)
 	}
 	
 	//Three vertices per face, three coordinates per vertex
-	static GLfloat* vertices_array = new GLfloat[faces.size()*3 * 3];
-	static GLfloat* vertex_normals_array = new GLfloat[faces.size()*3*3];
-	static GLfloat* vertex_textures_array = new GLfloat[faces.size()*3*3];
+	
+	face_num = faces.size();
+	static GLfloat* vertices_array = new GLfloat[face_num*3 * 3];
+	static GLfloat* vertex_normals_array = new GLfloat[face_num*3*3];
+	static GLfloat* vertex_textures_array = new GLfloat[face_num*3*3];
 	// * Convert buffers to float arrays to send to the GPU *
 	int k = 0;
 	for (vector<FaceIdcs>::iterator it = faces.begin(); it != faces.end(); ++it)
@@ -161,7 +164,7 @@ void MeshModel::loadFile(string fileName)
 
 }
 
-void MeshModel::draw()
+void MeshModel::draw(Renderer* renderer)
 {
-	
+	renderer->DrawMesh(vao, face_num);
 }

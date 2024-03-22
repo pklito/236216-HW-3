@@ -20,6 +20,7 @@
 #include "InitShader.h"
 #include "Scene.h"
 #include "Renderer.h"
+#include "MeshModel.h"
 #include <string>
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
@@ -39,7 +40,7 @@ bool lb_down,rb_down,mb_down;
 
 void display( void )
 {
-//Call the scene and ask it to draw itself
+	scene->draw();
 }
 
 void reshape( int width, int height )
@@ -155,6 +156,8 @@ int my_main( int argc, char **argv )
 	
 	renderer = new Renderer(512,512);
 	scene = new Scene(renderer);
+
+	scene->loadOBJModel("meshes/bunny.obj");
 	//----------------------------------------------------------------------------
 	// Initialize Callbacks
 
