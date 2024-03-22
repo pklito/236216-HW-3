@@ -133,7 +133,7 @@ void MeshModel::loadFile(string fileName)
 			for (int coord = 0; coord < 3; coord ++){ //x, y, z
 				vertices_array[k + coord] = vertices[it->v[i] - 1][coord];
 				vertex_normals_array[k + coord] = vertex_normals[it->vn[i] - 1][coord];
-				vertex_textures_array[k + coord] = vertex_textures[it->vt[i] - 1][coord]; 	//Take the face indexes from the vertix array BUG FIXED
+				//vertex_textures_array[k + coord] = vertex_textures[it->vt[i] - 1][coord]; 	//Take the face indexes from the vertix array BUG FIXED
 			}
 			// iterate to next face
 			k+=3;
