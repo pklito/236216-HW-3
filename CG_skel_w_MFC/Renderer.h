@@ -11,8 +11,10 @@ class Renderer
 	float *m_outBuffer; // 3*width*height
 	float *m_zbuffer; // width*height
 	int m_width, m_height;
+	GLuint program;
 
 	void CreateBuffers(int width, int height);
+	void CreateProgram(const char* vshader, const char* fshader);
 	void CreateLocalBuffer();
 
 	//////////////////////////////
@@ -25,10 +27,10 @@ class Renderer
 	//////////////////////////////
 public:
 	Renderer();
-	Renderer(int width, int height);
+	Renderer(int width, int height, const char* vshader, const char* fshader);
 	~Renderer(void);
 	void Init();
-	void DrawTriangles(const vector<vec3>* vertices, const vector<vec3>* normals=NULL);
+	void DrawMesh(GLuint vao,GLuint face_count);
 	void SetCameraTransform(const mat4& cTransform);
 	void SetProjection(const mat4& projection);
 	void SetObjectMatrices(const mat4& oTransform, const mat3& nTransform);

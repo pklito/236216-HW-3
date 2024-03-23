@@ -6,19 +6,21 @@
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 
-Renderer::Renderer() :m_width(512), m_height(512)
-{
-	InitOpenGLRendering();
-	CreateBuffers(512,512);
-}
-Renderer::Renderer(int width, int height) :m_width(width), m_height(height)
+Renderer::Renderer() : Renderer(512,512,"vshader.glsl","fshader.glsl")
+{}
+
+Renderer::Renderer(int width, int height, const char* vshader, const char* fshader) :m_width(width), m_height(height), program(0)
 {
 	InitOpenGLRendering();
 	CreateBuffers(width,height);
+	CreateProgram(vshader,fshader);
 }
 
 Renderer::~Renderer(void)
 {
+	if(program != 0){
+		glDeleteProgram(program);
+	}
 }
 
 
@@ -29,6 +31,13 @@ void Renderer::CreateBuffers(int width, int height)
 	m_height=height;	
 	CreateOpenGLBuffer(); //Do not remove this line.
 	m_outBuffer = new float[3*m_width*m_height];
+}
+
+void Renderer::CreateProgram(const char* vshader, const char* fshader){
+	if(program != 0){
+		glDeleteProgram(program);
+	}
+	program = InitShader(vshader, fshader);
 }
 
 void Renderer::SetDemoBuffer()
@@ -47,6 +56,11 @@ void Renderer::SetDemoBuffer()
 	}
 }
 
+void Renderer::DrawMesh(GLuint vao, GLuint face_count){
+    glBindVertexArray(vao);
+    glDrawArrays(GL_TRIANGLES, 0, face_count*3);
+    glBindVertexArray(0);
+}
 
 
 
