@@ -20,6 +20,11 @@ void Scene::draw()
 					  "minimal_fshader.glsl" );
 
 	glUseProgram(program);
+	
+	GLuint loc = glGetAttribLocation(program, "vPosition");
+	glEnableVertexAttribArray(loc);
+	glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -27,6 +32,7 @@ void Scene::draw()
 	for(auto it = models.begin(); it != models.end(); it++){
 		(*(it))->draw(m_renderer);
 	}
+
 	glFlush();
 	glutSwapBuffers();
 }
@@ -35,10 +41,10 @@ void Scene::drawDemo()
 {
 	std::cout << "out " << std::endl;
 	const int pnum = 3;
-	static const GLfloat points[pnum][4] = {
-		{-0.1, -0.1f, 0.0f,1.0f},
-		{0.1f, -0.1f, 0.0f,1.0f},
-		{0.0f,  0.1f, 0.0f,1.0f}
+	static const GLfloat points[pnum][3] = {
+		{-0.1, -0.1f, 0.0f},
+		{0.1f, -0.1f, 0.0f},
+		{0.0f,  0.1f, 0.0f}
 	};
 
 	GLuint program = InitShader( "minimal_vshader.glsl", 
@@ -62,11 +68,11 @@ void Scene::drawDemo()
 	
 	GLuint loc = glGetAttribLocation(program, "vPosition");
 	glEnableVertexAttribArray(loc);
-	glVertexAttribPointer(loc, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 
 	glClear(GL_COLOR_BUFFER_BIT);
-	glDrawArrays(GL_LINE_LOOP, 0, pnum);
+	glDrawArrays(GL_TRIANGLES, 0, pnum);
 	glFlush();
 	glutSwapBuffers();
 	
