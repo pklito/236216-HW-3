@@ -27,5 +27,35 @@ public:
 	~MeshModel(void);
 	void loadFile(string fileName);
 	void draw(Renderer* renderer) override;
+
+	// TODO UNIMPLEMENTED: 
+	mat4 getWorldTransformation();
+	void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans) override;
+	void rotate(GLfloat theta_angle, int mode) override;
+	void scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) override;
+
+	void calculateBoundingBox();
+	void normalToFace();
+	void CalculateVertexNormals();
+
+	void applyWorldTransformation(const mat4& transformation) override;
+	void applyModelTransformation(const mat4& transformation) override;
+
+	void setShowNormals(bool change) override;
+	void setShowNormalsToVertices(bool change) override;
+	void setShowBox(bool change) override;
+	void setFillObj(bool fill);
+
+	void changeColor();
+
+	/*
+	void setMaterial(const Material& new_mat){material = new_mat;}
+	Material getMaterial(){return material;}
+	*/
+	void toggleSpecialMaterial() override;
+	void resetToCenter();
+	vec3 calculateBoundingBoxCenter();
+
+
 	
 };

@@ -179,3 +179,90 @@ void MeshModel::draw(Renderer* renderer)
 {
 	renderer->DrawMesh(vao, face_num);
 }
+
+// TODO: Implement this function
+mat4 MeshModel::getWorldTransformation() {
+	// Placeholder implementation
+	return mat4(); // Return identity matrix for now
+}
+
+// TODO: Implement this function
+void MeshModel::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans) {
+	// Placeholder implementation
+}
+
+// TODO: Implement this function
+void MeshModel::rotate(GLfloat theta_angle, int mode) {
+	// Placeholder implementation
+}
+
+// TODO: Implement this function
+void MeshModel::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) {
+	// Placeholder implementation
+}
+
+// TODO: Implement this function
+void MeshModel::calculateBoundingBox() {
+	// Placeholder implementation
+}
+
+// TODO: Implement this function
+void MeshModel::normalToFace() {
+	// Placeholder implementation
+}
+
+// TODO: Implement this function
+void MeshModel::CalculateVertexNormals() {
+	// Placeholder implementation
+}
+
+// TODO: Implement this function
+void MeshModel::applyWorldTransformation(const mat4& transformation) {
+	// Placeholder implementation
+}
+
+// TODO: Implement this function
+void MeshModel::applyModelTransformation(const mat4& transformation) {
+	// Placeholder implementation
+}
+
+// TODO: Implement this function
+void MeshModel::setShowNormals(bool change) {
+	// Placeholder implementation
+}
+
+// TODO: Implement this function
+void MeshModel::setShowNormalsToVertices(bool change) {
+	// Placeholder implementation
+}
+
+// TODO: Implement this function
+void MeshModel::setShowBox(bool change) {
+	// Placeholder implementation
+}
+
+// TODO: Implement this function
+void MeshModel::setFillObj(bool fill) {
+	// Placeholder implementation
+}
+
+// TODO: Implement this function
+void MeshModel::changeColor() {
+	// Placeholder implementation
+}
+
+// TODO: Implement this function
+void MeshModel::toggleSpecialMaterial() {
+	// Placeholder implementation
+}
+
+// TODO: Implement this function
+void MeshModel::resetToCenter() {
+	// Placeholder implementation
+}
+
+// TODO: Implement this function
+vec3 MeshModel::calculateBoundingBoxCenter() {
+	// Placeholder implementation
+	return vec3(); // Return default vec3 for now
+}
