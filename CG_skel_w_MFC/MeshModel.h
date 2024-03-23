@@ -18,6 +18,8 @@ protected :
 	//add more attributes
 	mat4 _world_transform;
 	mat4 _model_transform;
+	mat4 _world_normal_transform;
+	mat4 _model_normal_transform;
 
 public:
 
