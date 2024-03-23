@@ -151,7 +151,7 @@ void MeshModel::loadFile(string fileName)
 	vbo_textures = vbos[2];
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_array),
+	glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float)*3*3,
 		vertices_array, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);

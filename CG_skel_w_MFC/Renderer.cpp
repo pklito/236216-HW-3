@@ -57,14 +57,8 @@ void Renderer::SetDemoBuffer()
 }
 
 void Renderer::DrawMesh(GLuint vao, GLuint face_count){
-
-	glUseProgram(program);
     glBindVertexArray(vao);
-	GLuint loc = glGetAttribLocation(program, "vPosition");
-	glEnableVertexAttribArray(loc);
-	glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	std::cout << loc << std::endl;
-    glDrawArrays(GL_TRIANGLES, 0, face_count);
+    glDrawArrays(GL_LINE_LOOP, 0, face_count);
     glBindVertexArray(0);
 }
 
