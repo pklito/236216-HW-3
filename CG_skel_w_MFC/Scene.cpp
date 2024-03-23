@@ -20,7 +20,7 @@ void Scene::draw()
 					  "minimal_fshader.glsl" );
 
 	glUseProgram(program);
-
+	glEnable(GL_CULL_FACE);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 
 	glClear(GL_COLOR_BUFFER_BIT);
