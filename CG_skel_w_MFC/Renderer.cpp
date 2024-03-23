@@ -58,7 +58,7 @@ void Renderer::SetDemoBuffer()
 
 void Renderer::DrawMesh(GLuint vao, GLuint face_count){
     glBindVertexArray(vao);
-    glDrawArrays(GL_LINE_LOOP, 0, face_count);
+    glDrawArrays(GL_LINE_LOOP, 0, face_count*3);
     glBindVertexArray(0);
 }
 
