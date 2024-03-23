@@ -150,24 +150,29 @@ void MeshModel::loadFile(string fileName)
 	vbo_normals = vbos[1];
 	vbo_textures = vbos[2];
 
+
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
 	glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float)*3*3,
 		vertices_array, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-/*
+
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_normals);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_normals_array),
+	glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float)*3*3,
 		vertex_normals_array, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(1); 
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_textures);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_textures_array),
+	glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float)*3*3,
 		vertex_textures_array, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(2); */
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(2);
 
+	glBindVertexArray(0);
+	delete[] vertices_array;
+	delete[] vertex_normals_array;
+	delete[] vertex_textures_array;
 }
 
 void MeshModel::draw(Renderer* renderer)
