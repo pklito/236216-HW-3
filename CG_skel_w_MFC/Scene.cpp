@@ -75,6 +75,267 @@ void Scene::drawDemo()
 
 }
 
+// Scene
+
+void Scene::setShowNormalsToVerticesForMeshModels(bool change) {
+	for (Model* model : models) {
+		// Check if the model is of type MeshModel
+		MeshModel* meshModel = dynamic_cast<MeshModel*>(model);
+		if (meshModel != nullptr) {
+			// It's a MeshModel, call setShowNormals
+			meshModel->setShowNormalsToVertices(change);
+		}
+		// You can handle other types of models here if needed
+	}
+}
+
+void Camera::Perspective(float fovy, float aspect, float zNear, float zFar) {
+	Frustum(-fovy*aspect*zNear,fovy*aspect*zNear,-fovy*zNear,fovy*zNear,zNear,zFar);
+}
+
+void Scene::addMeshModel(Model* model)
+{
+	models.push_back(model);
+}
+
+void Scene::addCamera(Camera* camera){
+	cameras.push_back(camera);
+	/*
+	if (cameras.size() == 1) {
+		vec3 cameraPosition = camera->getCameraPosition();
+		m_renderer->setCameraPos(cameraPosition);
+	}
+	*/
+}
+
+void Scene::setWorldControl(bool ctrl){
+	world_control = ctrl;
+}
+bool Scene::getWorldControl(){
+	return world_control;
+}
+
+// Iterate over the models and call setShowNormals for MeshModels
+void Scene::setShowNormalsForMeshModels(bool change) {
+	for (Model* model : models) {
+		// Check if the model is of type MeshModel
+		MeshModel* meshModel = dynamic_cast<MeshModel*>(model);
+		if (meshModel != nullptr) {
+			// It's a MeshModel, call setShowNormals
+			meshModel->setShowNormals(change);
+		}
+		// You can handle other types of models here if needed
+	}
+}
+
+void Scene::setShowBoxForMeshModels(bool change) {
+	for (Model* model : models) {
+		// Check if the model is of type MeshModel
+		MeshModel* meshModel = dynamic_cast<MeshModel*>(model);
+		if (meshModel != nullptr) {
+			// It's a MeshModel, call setShowBox
+			meshModel->setShowBox(change);
+		}
+		// You can handle other types of models here if needed
+	}
+}
+
+void Scene::translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
+{
+	if(!moving_model){
+		/* TODO implement
+		if(lights.size() >= 1){
+			lights[activeLight]->translate(x_trans,y_trans,z_trans);
+		}
+		*/
+		return;
+	}
+
+	if(world_control){
+		if (models.size() >= 1) {
+			models[activeModel]->applyWorldTransformation(Translate(x_trans, y_trans, z_trans));
+		}
+	}
+	else {
+		//should be: models[activeModel]->applyModelTransformation(Translate(x_trans,y_trans,z_trans));
+		if (models.size() >= 1) {
+			models[activeModel]->translate(x_trans, y_trans, z_trans);
+		}
+	}
+
+}
+
+void Scene::returnModelToCenter()
+{
+	if (models.size() >= 1) {
+		models[activeModel]->resetToCenter();
+	}
+}
+
+void Scene::scaleObject(GLfloat scale)
+{
+	if(!moving_model){
+		/* TODO implement
+		if(lights.size() >= 1){
+			lights[activeLight]->scale(scale,scale,scale);
+		}
+		*/
+		return;
+	}
+	
+	if(world_control){
+		if (models.size() >= 1) {
+			models[activeModel]->applyWorldTransformation(Scale(scale, scale, scale));
+		}
+	}
+	else{
+		if (models.size() >= 1) {
+			models[activeModel]->scale(scale, scale, scale);
+		}
+	}
+}
+void Scene::rotateObject(GLfloat theta_angle, int axis)
+{
+	if(!moving_model){
+		/*
+		TODO implement
+		if(lights.size() >= 1){
+			lights[activeLight]->rotate(theta_angle, axis);
+		}
+		*/
+		return;
+	}
+	if(world_control){
+		if (models.size() >= 1) {
+			mat4 rotate_mat = RotateAxis(theta_angle, axis);
+			models[activeModel]->applyWorldTransformation(rotate_mat);
+		}
+	}
+	else{
+		if (models.size() >= 1) {
+			models[activeModel]->rotate(theta_angle, axis);
+		}
+	}
+}
+
+void Scene::changeCurrsColor()
+{
+	models[activeModel]->changeColor();
+}
+
+void Scene::changeCurrsMaterial(){
+	models[activeModel]->toggleSpecialMaterial();
+}
+
+void Scene::cycleSelectedObject()
+{
+	if(!moving_model){
+		/* TODO implement
+		if(lights.size() >= 1){
+			activeLight = (activeLight+1)%lights.size();
+		} */
+		return;
+	}
+	if (models.size() >= 1) {
+		if (activeModel == models.size()) {
+			activeModel = (activeModel + 1) % models.size();
+			models[activeModel]->setData(1);
+			return;
+		}
+		models[activeModel]->setData(0);
+		activeModel = (activeModel + 1) % models.size();
+		models[activeModel]->setData(1);
+	}
+}
+
+void Scene::cycleActiveCamera()
+{
+	activeCamera = (activeCamera+1) % cameras.size();
+	/*
+	vec3 cameraPosition = getActiveCamera()->getCameraPosition();
+	m_renderer->setCameraPos(cameraPosition);*/
+}
+
+void Scene::setFillObj(bool fill)
+{
+	fillCurrObj = fill;
+	if (models.size() >= 1) {
+		models[activeModel]->setFillObj(fillCurrObj);
+	}
+}
+
+bool Scene::getFillObj()
+{
+	return fillCurrObj;
+}
+
+void Scene::removeSelectedObject(){
+	if(models.size() < 1)
+		return;
+
+	models.erase(models.begin()+activeModel);
+	cycleSelectedObject();
+}
+
+void Scene::removeSelectedCamera(){
+	if(cameras.size() <= 1)
+		return;
+	cameras.erase(cameras.begin()+activeCamera);
+	cycleActiveCamera();
+}
+
+
+Camera* Scene::getActiveCamera()
+{
+	return cameras[activeCamera];
+}
+
+void Scene::rotateCameraToSelectedObject(){
+	vec4 model_center = models[activeModel]->getWorldTransformation() * vec4(0, 0, 0, 1);
+	vec4 camera_location = cameras[activeCamera]->getCameraPosition();
+	cameras[activeCamera]->LookAt(camera_location, model_center, vec3(0, 1, 0));
+
+}
+
+// SCENE UNIMPLEMENTED
+
+/*
+void Scene::addLightSource(Light* light)
+{
+	lights.push_back(light);
+}
+
+void Scene::addFog(Fog* fog)
+{
+	fogs.push_back(fog);
+}
+
+void Scene::removeSelectedLight(){
+	if(lights.size() <= 1)
+		return;
+	lights.erase(lights.begin()+activeLight);
+}
+
+Light* Scene::getSelectedLight(){
+	if(lights.size() < 1)
+		return nullptr;
+	return lights[activeLight];
+}
+Material Scene::getSelectedMaterial(){
+	return dynamic_cast<MeshModel*>(models[activeModel])->getMaterial();
+}
+void Scene::setSelectedMaterial(const Material& mat){
+	dynamic_cast<MeshModel*>(models[activeModel])->setMaterial(mat);
+}
+
+void Scene::changeShadingMethod()
+{
+	m_renderer->changeShadingMethod();
+}
+
+*/
+// Camera
+
 vec3 Camera::getCameraPosition(){
 	vec4 base = vec4(1,2,3,1);
 	vec4 point = cTransform * vec4(0,0,0,1);
