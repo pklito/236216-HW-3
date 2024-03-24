@@ -204,18 +204,6 @@ void readFromFile(){
 	}
 }
 
-void changeFog(){
-	vec3 color_out;
-	float intensity = -1;
-	queryLight(color_out, intensity);
-	if(intensity < 0){
-		return;
-	}
-	scene->getSelectedFog()->setColor(color_out);
-	scene->getSelectedFog()->setEnd(intensity*5);
-
-}
-
 void changeLight(){
 
 	/* TODO
@@ -382,15 +370,8 @@ void keyboard( unsigned char key, int x, int y )
 	case '3':
 		scene->changeShadingMethod();
 		break;
-	case '4':
-		renderer->setFogFlag(!(renderer->getFogFlag()));
-		display();
-		break;
 	case 'h':
 		changeLight();
-		break;
-	case '5':
-		changeFog();
 		break;
 	case '8':
 		renderer->setAntiAliasing(!(renderer->getAntiAliasingFlag()));
@@ -702,7 +683,6 @@ int my_main(int argc, char** argv)
 	Light* light = new PointLight(1,vec3(1,1,1),vec3(-2,0,1));
 	Light* light2 = new DirectionalLight(1,vec3(1,0,1),vec3(0,1,0));
 	//renderer->setAmbientLight(AmbientLight(1,vec3(0.3,0.3,0.3)));
-	Fog* fog = new Fog();
 
 	std::cout << "[ ] Camera transform: " << std::endl;
 	camera->LookAt(vec3(0,0,1),vec3(0,0,-1),vec3(0,1,0));
@@ -715,7 +695,6 @@ int my_main(int argc, char** argv)
 	scene->addLightSource(light);
 	scene->addLightSource(light2);
 
-	scene->addFog(fog);
 	*/
 
 	std::cout << "[ ] Reading mesh files... ";

@@ -305,11 +305,6 @@ void Scene::addLightSource(Light* light)
 	lights.push_back(light);
 }
 
-void Scene::addFog(Fog* fog)
-{
-	fogs.push_back(fog);
-}
-
 void Scene::removeSelectedLight(){
 	if(lights.size() <= 1)
 		return;

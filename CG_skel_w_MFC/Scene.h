@@ -6,7 +6,6 @@
 #include <string>
 #include "Renderer.h"
 #include "util.h"
-#include "Fog.h"
 using namespace std;
 
 class Model {
@@ -70,7 +69,6 @@ public:
 class Scene {
 
 	vector<Model*> models;
-	Fog fog;
 	vector<Camera*> cameras;
 	Renderer *m_renderer;
 
@@ -80,7 +78,7 @@ class Scene {
 
 public:
 	//Scene() : world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false), {std::cout << "NO RENDERER PROVIDED!" << std::endl;};
-	Scene(Renderer* renderer) : m_renderer(renderer), world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false), fog() { /*m_renderer->setLights(&lights); m_renderer->setFog(&fogs); */};
+	Scene(Renderer* renderer) : m_renderer(renderer), world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false) { /*m_renderer->setLights(&lights); */};
 	void loadOBJModel(string fileName);
 	void draw();
 	void drawDemo();
@@ -94,7 +92,6 @@ public:
 	void addMeshModel(Model* model);
 	void addCamera(Camera* camera);
 	void addLightSource(Light* light);
-	void addFog(Fog* fog);
 	
 	void setShowNormalsForMeshModels(bool change);
 	void setShowNormalsToVerticesForMeshModels(bool change);
@@ -124,7 +121,6 @@ public:
 	void setSelectedMaterial(const Material& mat);
 
 	Light* getSelectedLight();
-	Fog* getSelectedFog() {return &fog;};
 	int activeModel;
 	int activeLight;
 	int activeCamera;
