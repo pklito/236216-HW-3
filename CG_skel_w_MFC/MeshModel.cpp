@@ -266,3 +266,75 @@ vec3 MeshModel::calculateBoundingBoxCenter() {
 	// Placeholder implementation
 	return vec3(); // Return default vec3 for now
 }
+
+
+//------------
+// PRIM
+//------------
+
+
+void PrimMeshModel::Cube()
+{
+	const vec3 cube_points[] = {vec3(-0.5f, -0.5f, -0.5f),vec3(0.5f, -0.5f, -0.5f),vec3(0.5f, 0.5f, -0.5f),vec3(-0.5f, 0.5f, -0.5f),vec3(-0.5f, -0.5f, 0.5f),vec3(0.5f, -0.5f, 0.5f),vec3(0.5f, 0.5f, 0.5f),vec3(-0.5f, 0.5f, 0.5f)};
+	const int face_indices[] = {
+        0, 1, 2,
+        2, 3, 0,
+        1, 5, 6,
+        6, 2, 1,
+        5, 4, 7,
+        7, 6, 5,
+        4, 0, 3,
+        3, 7, 4,
+        3, 2, 6,
+        6, 7, 3,
+        0, 4, 5,
+        5, 1, 0
+    };
+
+	// Hardcoded cube vertices
+	face_num = 12;
+	
+	static GLfloat vertices_array[12 * 3 * 3];
+	for(int i = 0; i < 3*face_num; i++){
+		for(int coord = 0; coord < 3; coord++){
+		vertices_array[3*i + coord] = cube_points[face_indices[i]][coord];
+		}
+	}
+
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	glGenBuffers(1, &vbo_vertices);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
+	glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float)*3*3,
+		vertices_array, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	glBindVertexArray(0);
+}
+
+
+void PrimMeshModel::Tetrahedron()
+{
+	#define base3 0, 0, -1
+	#define base2 -0.866, 0, 0.5
+	#define base1 0.866, 0, 0.5
+	#define top 0, 1, 0
+	face_num = 4;
+	static GLfloat vertices_array[3*4*3] = {base3, base2, base1, top, base3, base1, top, base1, base2, top, base2, base3};
+
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	glGenBuffers(1, &vbo_vertices);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
+	glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float)*3*3,
+		vertices_array, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	glBindVertexArray(0);
+}

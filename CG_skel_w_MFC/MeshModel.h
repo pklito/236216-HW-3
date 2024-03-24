@@ -59,3 +59,30 @@ public:
 
 	
 };
+
+
+
+
+typedef enum{
+	PRIM_CUBE,
+	PRIM_TETRAHEDRON
+} PRIM_MODEL;
+class PrimMeshModel : public MeshModel
+{
+	protected:
+		void Cube();
+		void Tetrahedron();
+	public:
+	PrimMeshModel(PRIM_MODEL model){	
+		switch(model){
+			case PRIM_CUBE:
+				Cube();
+				break;
+			case PRIM_TETRAHEDRON:
+				Tetrahedron();
+				break;
+		}
+		calculateBoundingBox();
+	}
+
+};
