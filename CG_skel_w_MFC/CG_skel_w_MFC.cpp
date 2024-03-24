@@ -158,6 +158,11 @@ int my_main( int argc, char **argv )
 	scene = new Scene(renderer);
 
 	scene->loadOBJModel("meshes/bunny.obj");
+
+	Camera* camera = new Camera();
+	camera->LookAt(vec3(0,0,1),vec3(0,0,-1),vec3(0,1,0));
+	camera->Ortho(-1,1,-1,1,0,5);
+	renderer->setCameraMatrixes(camera);
 	//----------------------------------------------------------------------------
 	// Initialize Callbacks
 

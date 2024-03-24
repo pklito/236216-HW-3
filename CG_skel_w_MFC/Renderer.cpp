@@ -66,7 +66,7 @@ void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4& transform){
 
 	GLfloat full_transform_array[16];
 	toFloatArray(full_transform_array, full_transform);
-	glUniformMatrix4fv(0, 1, GL_FALSE,full_transform_array);		//TODO get position of "full_transform" uniform
+	glUniformMatrix4fv(0, 1, GL_TRUE,full_transform_array);		//TODO get position of "full_transform" uniform
 	//Draw
     glDrawArrays(GL_TRIANGLES, 0, face_count*3);
     glBindVertexArray(0);
