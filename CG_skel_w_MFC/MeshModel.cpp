@@ -177,7 +177,7 @@ void MeshModel::loadFile(string fileName)
 
 void MeshModel::draw(Renderer* renderer)
 {
-	renderer->DrawMesh(vao, face_num);
+	renderer->DrawMesh(vao, face_num, _world_transform * _model_transform);	//TODO: calculate this transform on change
 }
 
 // TODO: Implement this function

@@ -3,6 +3,7 @@
 #include "CG_skel_w_MFC.h"
 #include "InitShader.h"
 #include "GL\freeglut.h"
+#include "scene.h"
 
 #define INDEX(width,x,y,c) (x+y*width)*3+c
 
@@ -56,13 +57,43 @@ void Renderer::SetDemoBuffer()
 	}
 }
 
-void Renderer::DrawMesh(GLuint vao, GLuint face_count){
+void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4& transform){
+	//Bind the models settings
     glBindVertexArray(vao);
+
+	//Calculate and convert the transformation
+	mat4 full_transform = mat_project * (mat_transform_inverse * transform);
+
+	GLfloat full_transform_array[16];
+	toFloatArray(full_transform_array, full_transform);
+	glUniformMatrix4fv(0, 1, GL_FALSE,full_transform_array);		//TODO get position of "full_transform" uniform
+	//Draw
     glDrawArrays(GL_TRIANGLES, 0, face_count*3);
     glBindVertexArray(0);
 }
 
+// Camera
+void Renderer::SetCameraTransformInverse(const mat4& cTransform){
+	mat_transform_inverse = cTransform;
+}
+void Renderer::SetProjection(const mat4& projection){
+	mat_project = projection;
+}
 
+void Renderer::setCameraMatrixes(const mat4& cTransformInverse, const mat4& Projection){
+	SetCameraTransformInverse(cTransformInverse);
+	SetProjection(Projection);
+}
+
+void Renderer::setCameraMatrixes(Camera* camera){
+	setCameraMatrixes(camera->getTransformInverse(), camera->getProjection());
+}
+
+
+void Renderer::Init(){
+	CreateBuffers(m_width,m_height);
+
+}
 
 
 /////////////////////////////////////////////////////
