@@ -1,9 +1,8 @@
-#version 150
+#version 330
 
-
-in  vec3 vPosition;
-in  vec3 vNormal;
-in  vec3 vTexture;
+layout (location = 0) in  vec3 vPosition;
+layout (location = 1) in  vec3 vNormal;
+layout (location = 2) in  vec3 vTexture;
 uniform mat4 full_transform;
 varying vec3 fNormal;
 

@@ -72,10 +72,6 @@ InitShader(const char* vShaderFile, const char* fShaderFile)
 	glAttachShader( program, shader );
     }
 
-	/* Assign the inputs to be set numbers (Code added by Paulo) */
-	glBindAttribLocation(program, 0 , "vPosition");
-	glBindAttribLocation(program, 1 , "vNormal");
-	glBindAttribLocation(program, 2 , "vTexture");
 
     /* link  and error check */
     glLinkProgram(program);
