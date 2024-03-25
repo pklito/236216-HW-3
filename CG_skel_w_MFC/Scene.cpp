@@ -16,23 +16,11 @@ void Scene::draw()
 {
 	// 1. Send the renderer the current camera transform and the projection
 	// 2. Tell all models to draw themselves
-	GLuint program = InitShader( "minimal_vshader.glsl", 
-					  "minimal_fshader.glsl" );
-
-	glUseProgram(program);
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-	glClearColor(0.0, 0.0, 0.0, 1.0);
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
-	glDepthFunc(GL_LESS);
-
+	m_renderer->StartDraw();
 	for(auto it = models.begin(); it != models.end(); it++){
 		(*(it))->draw(m_renderer);
 	}
-
-	glFlush();
-	glutSwapBuffers();
+	m_renderer->EndDraw();
 }
 
 void Scene::drawDemo()

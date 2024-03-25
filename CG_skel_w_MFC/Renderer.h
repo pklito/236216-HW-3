@@ -37,7 +37,12 @@ public:
 	Renderer();
 	Renderer(int width, int height, const char* vshader, const char* fshader);
 	~Renderer(void);
+
+	void StartDraw();
+	void EndDraw();
+
 	void Init();
+	
 	void DrawMesh(GLuint vao,GLuint face_count, const mat4& transform);
 	void SetCameraTransformInverse(const mat4& cTransform);
 	void SetProjection(const mat4& projection);
