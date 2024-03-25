@@ -313,19 +313,19 @@ void PrimMeshModel::Cube()
 {
 	const vec3 cube_points[] = {vec3(-0.5f, -0.5f, -0.5f),vec3(0.5f, -0.5f, -0.5f),vec3(0.5f, 0.5f, -0.5f),vec3(-0.5f, 0.5f, -0.5f),vec3(-0.5f, -0.5f, 0.5f),vec3(0.5f, -0.5f, 0.5f),vec3(0.5f, 0.5f, 0.5f),vec3(-0.5f, 0.5f, 0.5f)};
 	const int face_indices[] = {
-        0, 1, 2,
-        2, 3, 0,
-        1, 5, 6,
-        6, 2, 1,
-        5, 4, 7,
-        7, 6, 5,
-        4, 0, 3,
-        3, 7, 4,
-        3, 2, 6,
-        6, 7, 3,
-        0, 4, 5,
-        5, 1, 0
-    };
+    2, 1, 0,
+    0, 3, 2,
+    6, 5, 1,
+    1, 2, 6,
+    7, 4, 5,
+    5, 6, 7,
+    3, 0, 4,
+    4, 7, 3,
+    6, 2, 3,
+    3, 7, 6,
+    5, 4, 0,
+    0, 1, 5
+};
 
 	// Hardcoded cube vertices
 	face_num = 12;
@@ -348,7 +348,7 @@ void PrimMeshModel::Tetrahedron()
 	#define base1 0.866, 0, 0.5
 	#define top 0, 1, 0
 	face_num = 4;
-	static GLfloat vertices_array[3*4*3] = {base3, base2, base1, top, base3, base1, top, base1, base2, top, base2, base3};
+	static GLfloat vertices_array[3*4*3] = {base1, base2, base3, top, base1, base3, top, base2, base1, top, base3, base2};
 
 	generateBuffers(vertices_array, nullptr, nullptr, face_num);
 }
