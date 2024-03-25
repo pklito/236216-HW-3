@@ -10,7 +10,7 @@
 Renderer::Renderer() : Renderer(512,512,"vshader.glsl","fshader.glsl")
 {}
 
-Renderer::Renderer(int width, int height, const char* vshader, const char* fshader) :m_width(width), m_height(height), program(0)
+Renderer::Renderer(int width, int height, const char* vshader, const char* fshader) :m_width(width), m_height(height), programs(), current_program(0)
 {
 	InitOpenGLRendering();
 	CreateBuffers(width,height);
@@ -19,14 +19,14 @@ Renderer::Renderer(int width, int height, const char* vshader, const char* fshad
 
 Renderer::~Renderer(void)
 {
-	if(program != 0){
-		glDeleteProgram(program);
+	for(Program p : programs){
+		glDeleteProgram(p.program);
 	}
 }
 
 void Renderer::StartDraw()
 {
-	glUseProgram(program);
+	glUseProgram(programs[current_program].program);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -50,11 +50,23 @@ void Renderer::CreateBuffers(int width, int height)
 }
 
 void Renderer::CreateProgram(const char* vshader, const char* fshader){
-	if(program != 0){
-		glDeleteProgram(program);
-	}
-	program = InitShader(vshader, fshader);
+	programs.push_back(Program(InitShader(vshader, fshader),"world_transform","camera_transform",""));
 }
+
+void Renderer::RemoveProgram(int index){
+	if(index >= programs.size())
+		return;
+
+	//Delete the shaders from the GPU
+	glDeleteProgram(programs[index].program);
+
+	//Remove from vector
+	programs.erase(programs.begin() + index);
+
+	//ensure we didn't erase the last program
+	current_program %= programs.size();
+}
+
 
 void Renderer::SetDemoBuffer()
 {
@@ -78,11 +90,11 @@ void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4& wm_transform)
 
 	GLfloat full_transform_array[16];
 	toFloatArray(full_transform_array, wm_transform);
-	glUniformMatrix4fv(0, 1, GL_FALSE,full_transform_array);		//TODO get position of "full_transform" uniform
+	glUniformMatrix4fv(programs[current_program].uniform_loc1, 1, GL_FALSE,full_transform_array);		//TODO get position of "full_transform" uniform
 
 	GLfloat proj_array[16];
 	toFloatArray(proj_array, mat_project * mat_transform_inverse);
-	glUniformMatrix4fv(1, 1, GL_FALSE,proj_array);		//TODO get position of "full_transform" uniform
+	glUniformMatrix4fv(programs[current_program].uniform_loc2, 1, GL_FALSE,proj_array);		//TODO get position of "full_transform" uniform
 
 	//Draw
     glDrawArrays(GL_TRIANGLES, 0, face_count*3);
