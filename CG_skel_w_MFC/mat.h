@@ -798,7 +798,7 @@ void toFloatArray(GLfloat* array, const mat4& mat){
     const int size = 4;
     for(int i = 0; i < size; i++){
         for(int j = 0; j < size; j++){
-            array[j+size*i] = mat[i][j];
+            array[j+size*i] = mat[j][i];
         }
     }
 }
@@ -808,7 +808,7 @@ void toFloatArray(GLfloat* array, const mat3& mat){
     const int size = 3;
     for(int i = 0; i < size; i++){
         for(int j = 0; j < size; j++){
-            array[j+size*i] = mat[i][j];
+            array[j+size*i] = mat[j][i];
         }
     }
 }
@@ -818,7 +818,7 @@ void toFloatArray(GLfloat* array, const mat2& mat){
     const int size = 2;
     for(int i = 0; i < size; i++){
         for(int j = 0; j < size; j++){
-            array[j+size*i] = mat[i][j];
+            array[j+size*i] = mat[j][i];
         }
     }
 }
