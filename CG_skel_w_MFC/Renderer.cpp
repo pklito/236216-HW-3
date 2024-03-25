@@ -61,15 +61,12 @@ void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4& wm_transform)
 	//Bind the models settings
     glBindVertexArray(vao);
 
-	//Calculate model -> camera space transformation
-	mat4 full_transform = (mat_transform_inverse * wm_transform);
-
 	GLfloat full_transform_array[16];
-	toFloatArray(full_transform_array, full_transform);
+	toFloatArray(full_transform_array, wm_transform);
 	glUniformMatrix4fv(0, 1, GL_TRUE,full_transform_array);		//TODO get position of "full_transform" uniform
 
 	GLfloat proj_array[16];
-	toFloatArray(proj_array, mat_project);
+	toFloatArray(proj_array, mat_project * mat_transform_inverse);
 	glUniformMatrix4fv(1, 1, GL_TRUE,proj_array);		//TODO get position of "full_transform" uniform
 
 	//Draw
