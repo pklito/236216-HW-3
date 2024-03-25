@@ -132,17 +132,33 @@ void MeshModel::loadFile(string fileName)
 		{
 			for (int coord = 0; coord < 3; coord ++){ //x, y, z
 				vertices_array[k + coord] = vertices[it->v[i] - 1][coord];
-				vertex_normals_array[k + coord] = vertex_normals[it->vn[i] - 1][coord];
-				//vertex_textures_array[k + coord] = vertex_textures[it->vt[i] - 1][coord]; 	//Take the face indexes from the vertix array BUG FIXED
+				if(vertex_normals.size() > 0)
+					vertex_normals_array[k + coord] = vertex_normals[it->vn[i] - 1][coord];
+				if(vertex_textures.size() > 0)
+					vertex_textures_array[k + coord] = vertex_textures[it->vt[i] - 1][coord]; 	//Take the face indexes from the vertix array BUG FIXED
 			}
 			// iterate to next face
 			k+=3;
 		}
 	}
 
+	// pass only the arrays that were filled.
+	generateBuffers(vertices_array, (vertex_normals.size() > 0) ? vertex_normals_array : nullptr, (vertex_textures.size() > 0) ? vertex_textures_array : nullptr, face_num);
+	delete[] vertices_array;
+	delete[] vertex_normals_array;
+	delete[] vertex_textures_array;
+}
+
+void MeshModel::generateBuffers(const GLfloat* vertices_array,const GLfloat* vertex_normals_array,const GLfloat* vertex_textures_array,int face_num){
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
+	if(vertex_normals_array == nullptr){
+		//TODO handle no normals (calculate them per face(?))
+	}
+	if(vertex_textures_array == nullptr){
+		//TODO handle no textures
+	}
 
 	GLuint vbos[3] = {0,0,0};
 	glGenBuffers(3, vbos);
@@ -170,9 +186,6 @@ void MeshModel::loadFile(string fileName)
 	glEnableVertexAttribArray(2);
 
 	glBindVertexArray(0);
-	delete[] vertices_array;
-	delete[] vertex_normals_array;
-	delete[] vertex_textures_array;
 }
 
 void MeshModel::draw(Renderer* renderer)
@@ -301,18 +314,7 @@ void PrimMeshModel::Cube()
 		}
 	}
 
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-
-	glGenBuffers(1, &vbo_vertices);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
-	glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float)*3*3,
-		vertices_array, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glBindVertexArray(0);
+	generateBuffers(vertices_array, nullptr, nullptr, face_num);
 }
 
 

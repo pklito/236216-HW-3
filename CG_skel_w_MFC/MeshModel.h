@@ -10,6 +10,8 @@ class MeshModel : public Model
 {
 protected :
 	MeshModel() {}
+	void generateBuffers(const GLfloat* vertices_array,const GLfloat* vertex_normals_array,const GLfloat* vertex_textures_array,int face_num);
+
 	int face_num;
 	GLuint vao;
 	GLuint vbo_vertices;
