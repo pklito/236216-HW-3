@@ -366,6 +366,16 @@ vec3 cross(const vec3& a, const vec3& b)
     //here there was a bug
 }
 
+inline
+vec3 calculateNormal(vec3 first_point, vec3 second_point, vec3 third_point)
+{
+	vec3 a = third_point - first_point;
+	vec3 b = second_point - first_point;
+
+	vec3 c = cross(a, b);
+
+	return normalize(c);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //

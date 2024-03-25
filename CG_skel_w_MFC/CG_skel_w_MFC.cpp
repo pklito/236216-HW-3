@@ -472,7 +472,7 @@ void lightMenu(int id){
 	*/
 }
 void primMenu(int id) {
-	/* TODO
+	std::cout << "start prim" << std::endl;
 	PrimMeshModel* model;
 	switch(id){
 		case ADD_CUBE:
@@ -486,7 +486,6 @@ void primMenu(int id) {
 	}
 	scene->addMeshModel(model);
 	glutPostRedisplay();
-	*/
 }
 
 void fileMenu(int id)
@@ -715,7 +714,8 @@ int my_main(int argc, char** argv)
 	
 	//Init the renderer
 	renderer->Init();
-
+	PrimMeshModel* model = new PrimMeshModel(PRIM_CUBE);
+	scene->addMeshModel(model);
 	std::cout << scene->getWorldControl() << " : (#)" << std::endl;
 	
 	//Set the camera projection we want and send it to renderer (vec3 cast to vec4)

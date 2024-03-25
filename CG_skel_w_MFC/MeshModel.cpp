@@ -144,19 +144,36 @@ void MeshModel::loadFile(string fileName)
 
 	// pass only the arrays that were filled.
 	generateBuffers(vertices_array, (vertex_normals.size() > 0) ? vertex_normals_array : nullptr, (vertex_textures.size() > 0) ? vertex_textures_array : nullptr, face_num);
+
 	delete[] vertices_array;
 	delete[] vertex_normals_array;
 	delete[] vertex_textures_array;
 }
 
-void MeshModel::generateBuffers(const GLfloat* vertices_array,const GLfloat* vertex_normals_array,const GLfloat* vertex_textures_array,int face_num){
+void MeshModel::generateBuffers(const GLfloat* vertices_array, const GLfloat* vertex_normals_array, const GLfloat* vertex_textures_array, int face_num){
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
+	//Generate a new array instead
+	GLfloat* vn_arr = vertex_normals_array != nullptr ? nullptr : new GLfloat[3 * 3 * face_num];
+	GLfloat* vt_arr = vertex_textures_array != nullptr ? nullptr : new GLfloat[3 * 3 * face_num];
 	if(vertex_normals_array == nullptr){
-		//TODO handle no normals (calculate them per face(?))
+		//Caclulate normal per face
+		for(int face = 0; face < face_num; face ++){
+			vec3 p1 = vec3(vertices_array[9*face + 0],vertices_array[9*face + 1],vertices_array[9*face + 2]);
+			vec3 p2 = vec3(vertices_array[9*face + 3],vertices_array[9*face + 4],vertices_array[9*face + 5]);
+			vec3 p3 = vec3(vertices_array[9*face + 6],vertices_array[9*face + 7],vertices_array[9*face + 8]);
+			vec3 norm = calculateNormal(p1, p2, p3);
+
+			for(int coord = 0; coord < 3; coord ++){
+				vn_arr[9*face + coord] = norm[coord];
+				vn_arr[9*face + 3 + coord] = norm[coord];
+				vn_arr[9*face + 6 + coord] = norm[coord];
+			}
+		}
 	}
 	if(vertex_textures_array == nullptr){
+		std::fill(vt_arr,vt_arr+(9*face_num),0);
 		//TODO handle no textures
 	}
 
@@ -174,17 +191,23 @@ void MeshModel::generateBuffers(const GLfloat* vertices_array,const GLfloat* ver
 	glEnableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_normals);
-	glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float)*3*3,
-		vertex_normals_array, GL_STATIC_DRAW);
+	if(vertex_normals_array)
+		glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float)*3*3, vertex_normals_array, GL_STATIC_DRAW);
+	else
+		glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float)*3*3, vn_arr, GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(1); 
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_textures);
-	glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float)*3*3,
-		vertex_textures_array, GL_STATIC_DRAW);
+	if(vertex_textures_array)
+		glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float)*3*3, vertex_textures_array, GL_STATIC_DRAW);
+	else
+		glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float)*3*3, vt_arr, GL_STATIC_DRAW);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(2);
 
+	delete[] vt_arr;
+	delete[] vn_arr;
 	glBindVertexArray(0);
 }
 
@@ -327,16 +350,5 @@ void PrimMeshModel::Tetrahedron()
 	face_num = 4;
 	static GLfloat vertices_array[3*4*3] = {base3, base2, base1, top, base3, base1, top, base1, base2, top, base2, base3};
 
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-
-	glGenBuffers(1, &vbo_vertices);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
-	glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float)*3*3,
-		vertices_array, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glBindVertexArray(0);
+	generateBuffers(vertices_array, nullptr, nullptr, face_num);
 }
