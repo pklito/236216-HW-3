@@ -22,6 +22,10 @@ protected :
 	mat4 _model_transform;
 	mat4 _world_normal_transform;
 	mat4 _model_normal_transform;
+	
+
+	void applyWorldTransformation(const mat4& transformation);
+	void applyModelTransformation(const mat4& transformation);
 
 public:
 
@@ -31,17 +35,14 @@ public:
 	void draw(Renderer* renderer) override;
 
 	// TODO UNIMPLEMENTED: 
-	mat4 getWorldTransformation();
-	void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans) override;
-	void rotate(GLfloat theta_angle, int mode) override;
-	void scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) override;
+	mat4 getFullTransformation();
+	void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, bool isWorld = false) override;
+	void rotate(GLfloat theta_angle, int mode, bool isWorld = false) override;
+	void scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale, bool isWorld = false) override;
 
 	void calculateBoundingBox();
 	void normalToFace();
 	void CalculateVertexNormals();
-
-	void applyWorldTransformation(const mat4& transformation) override;
-	void applyModelTransformation(const mat4& transformation) override;
 
 	void setShowNormals(bool change) override;
 	void setShowNormalsToVertices(bool change) override;

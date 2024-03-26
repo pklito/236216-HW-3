@@ -132,6 +132,7 @@ void Scene::setShowBoxForMeshModels(bool change) {
 
 void Scene::translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
 {
+	std::cout << moving_model << std::endl;
 	if(!moving_model){
 		/* TODO implement
 		if(lights.size() >= 1){
@@ -141,16 +142,8 @@ void Scene::translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
 		return;
 	}
 
-	if(world_control){
-		if (models.size() >= 1) {
-			models[activeModel]->applyWorldTransformation(Translate(x_trans, y_trans, z_trans));
-		}
-	}
-	else {
-		//should be: models[activeModel]->applyModelTransformation(Translate(x_trans,y_trans,z_trans));
-		if (models.size() >= 1) {
-			models[activeModel]->translate(x_trans, y_trans, z_trans);
-		}
+	if (models.size() >= 1) {
+		models[activeModel]->translate(x_trans, y_trans, z_trans,world_control);
 	}
 
 }
@@ -173,15 +166,8 @@ void Scene::scaleObject(GLfloat scale)
 		return;
 	}
 	
-	if(world_control){
-		if (models.size() >= 1) {
-			models[activeModel]->applyWorldTransformation(Scale(scale, scale, scale));
-		}
-	}
-	else{
-		if (models.size() >= 1) {
-			models[activeModel]->scale(scale, scale, scale);
-		}
+	if (models.size() >= 1) {
+		models[activeModel]->scale(scale,scale,scale,world_control);
 	}
 }
 void Scene::rotateObject(GLfloat theta_angle, int axis)
@@ -195,16 +181,8 @@ void Scene::rotateObject(GLfloat theta_angle, int axis)
 		*/
 		return;
 	}
-	if(world_control){
-		if (models.size() >= 1) {
-			mat4 rotate_mat = RotateAxis(theta_angle, axis);
-			models[activeModel]->applyWorldTransformation(rotate_mat);
-		}
-	}
-	else{
-		if (models.size() >= 1) {
-			models[activeModel]->rotate(theta_angle, axis);
-		}
+	if (models.size() >= 1) {
+		models[activeModel]->rotate(theta_angle, axis,world_control);
 	}
 }
 
@@ -281,7 +259,7 @@ Camera* Scene::getActiveCamera()
 }
 
 void Scene::rotateCameraToSelectedObject(){
-	vec4 model_center = models[activeModel]->getWorldTransformation() * vec4(0, 0, 0, 1);
+	vec4 model_center = models[activeModel]->getFullTransformation() * vec4(0, 0, 0, 1);
 	vec4 camera_location = cameras[activeCamera]->getCameraPosition();
 	cameras[activeCamera]->LookAt(camera_location, model_center, vec3(0, 1, 0));
 

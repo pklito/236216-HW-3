@@ -19,12 +19,10 @@ public:
 	virtual void setShowNormalsToVertices(bool change) = 0;
 	virtual void setFillObj(bool fill) = 0;
 	virtual void setShowBox(bool change) = 0;
-	virtual void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans) = 0;
-	virtual void rotate(GLfloat theta_angle, int axis) = 0;
-	virtual void scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) = 0;
-	virtual mat4 getWorldTransformation() = 0;
-	virtual void applyWorldTransformation(const mat4& transformation) = 0;
-	virtual void applyModelTransformation(const mat4& transformation) = 0;
+	virtual void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, bool isWorld = false) = 0;
+	virtual void rotate(GLfloat theta_angle, int axis, bool isWorld = false) = 0;
+	virtual void scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale, bool isWorld = false) = 0;
+	virtual mat4 getFullTransformation() = 0;
 	virtual void toggleSpecialMaterial() = 0;
 	void setData(int dat) {data = dat;}
 	virtual void resetToCenter() = 0;

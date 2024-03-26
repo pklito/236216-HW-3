@@ -216,24 +216,26 @@ void MeshModel::draw(Renderer* renderer)
 	renderer->DrawMesh(vao, face_num, _world_transform * _model_transform);	//TODO: calculate this transform on change
 }
 
-// TODO: Implement this function
-mat4 MeshModel::getWorldTransformation() {
-	// Placeholder implementation
-	return mat4(); // Return identity matrix for now
+mat4 MeshModel::getFullTransformation() {
+	return _world_transform * _model_transform;
+}
+
+void MeshModel::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, bool isWorld) {
+	if(isWorld){
+		applyWorldTransformation(Translate(x_trans,y_trans,z_trans));
+	}
+	else{
+		applyModelTransformation(Translate(x_trans,y_trans,z_trans));
+	}
 }
 
 // TODO: Implement this function
-void MeshModel::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans) {
+void MeshModel::rotate(GLfloat theta_angle, int mode, bool isWorld) {
 	// Placeholder implementation
 }
 
 // TODO: Implement this function
-void MeshModel::rotate(GLfloat theta_angle, int mode) {
-	// Placeholder implementation
-}
-
-// TODO: Implement this function
-void MeshModel::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale) {
+void MeshModel::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale, bool isWorld) {
 	// Placeholder implementation
 }
 
@@ -252,15 +254,14 @@ void MeshModel::CalculateVertexNormals() {
 	// Placeholder implementation
 }
 
-// TODO: Implement this function
 void MeshModel::applyWorldTransformation(const mat4& transformation) {
-	// Placeholder implementation
+	_world_transform = transformation * _world_transform;
 }
 
-// TODO: Implement this function
 void MeshModel::applyModelTransformation(const mat4& transformation) {
-	// Placeholder implementation
+	_model_transform = transformation * _model_transform;
 }
+
 
 // TODO: Implement this function
 void MeshModel::setShowNormals(bool change) {
