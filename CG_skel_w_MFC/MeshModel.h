@@ -32,7 +32,11 @@ protected :
 	mat4 _model_transform;
 	mat4 _world_normal_transform;
 	mat4 _model_normal_transform;
-	
+
+	bool draw_wireframe;
+	bool draw_vertex_normals;
+	bool draw_face_normals;
+	bool draw_bounding_box;
 
 	void applyWorldTransformation(const mat4& transformation);
 	void applyModelTransformation(const mat4& transformation);

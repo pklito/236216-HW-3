@@ -333,11 +333,22 @@ void MeshModel::draw(Renderer *renderer)
 {
 	mat4 full_trans = _world_transform * _model_transform;
 	mat4 full_norm_trans = _world_normal_transform * _model_normal_transform;
-	// renderer->DrawMesh(vao, face_num, full_trans, full_norm_trans);	//TODO: calculate this transform on change
-	renderer->DrawWireframe(vao, face_num, full_trans);
-	renderer->DrawLines(vert_vao, 2 * 3 * face_num, full_trans, vec3(0.1, 0.1, 0.9));
-	renderer->DrawLines(face_vao, 2 * face_num, full_trans, vec3(0, 1, 0.2));
-	// renderer->DrawLines(box_vao, 24, full_trans);
+	if(!draw_wireframe){
+		renderer->DrawMesh(vao, face_num, full_trans, full_norm_trans);	//TODO: calculate this transform on change
+	}
+	else{
+		renderer->DrawWireframe(vao, face_num, full_trans);
+	}
+	if(draw_vertex_normals){
+		renderer->DrawLines(vert_vao, 2 * 3 * face_num, full_trans, vec3(0.1, 0.1, 0.9));
+	}
+	if(draw_face_normals){
+		renderer->DrawLines(face_vao, 2 * face_num, full_trans, vec3(0, 1, 0.2));
+	}
+	//TODO: implement bounding box
+	if(draw_bounding_box){
+		renderer->DrawLines(box_vao, 24, full_trans);
+	}
 }
 
 mat4 MeshModel::getFullTransformation()
@@ -411,25 +422,25 @@ void MeshModel::applyModelNormalTransformation(const mat4 &transformation_inv)
 // TODO: Implement this function
 void MeshModel::setShowNormals(bool change)
 {
-	// Placeholder implementation
+	draw_face_normals = change;
 }
 
 // TODO: Implement this function
 void MeshModel::setShowNormalsToVertices(bool change)
 {
-	// Placeholder implementation
+	draw_vertex_normals = change;
 }
 
 // TODO: Implement this function
 void MeshModel::setShowBox(bool change)
 {
-	// Placeholder implementation
+	draw_bounding_box = change;
 }
 
 // TODO: Implement this function
 void MeshModel::setFillObj(bool fill)
 {
-	// Placeholder implementation
+	draw_wireframe = !fill;
 }
 
 // TODO: Implement this function
