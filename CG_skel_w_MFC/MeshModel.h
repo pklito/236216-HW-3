@@ -8,9 +8,9 @@ using namespace std;
 
 class MeshModel : public Model
 {
-protected :
+protected:
 	MeshModel() {}
-	void generateBuffers(const GLfloat* vertices_array,const GLfloat* vertex_normals_array,const GLfloat* vertex_textures_array,int face_num);
+	void generateBuffers(const GLfloat *vertices_array, const GLfloat *vertex_normals_array, const GLfloat *vertex_textures_array, int face_num);
 
 	int face_num;
 	GLuint vao;
@@ -27,7 +27,7 @@ protected :
 	GLuint box_vao;
 	GLuint box_vbo;
 
-	//add more attributes
+	// add more attributes
 	mat4 _world_transform;
 	mat4 _model_transform;
 	mat4 _world_normal_transform;
@@ -38,19 +38,18 @@ protected :
 	bool draw_face_normals;
 	bool draw_bounding_box;
 
-	void applyWorldTransformation(const mat4& transformation);
-	void applyModelTransformation(const mat4& transformation);
-	void applyWorldNormalTransformation(const mat4& transformation_inv);
-	void applyModelNormalTransformation(const mat4& transformation_inv);
+	void applyWorldTransformation(const mat4 &transformation);
+	void applyModelTransformation(const mat4 &transformation);
+	void applyWorldNormalTransformation(const mat4 &transformation_inv);
+	void applyModelNormalTransformation(const mat4 &transformation_inv);
 
 public:
-
 	MeshModel(string fileName);
 	~MeshModel(void);
 	void loadFile(string fileName);
-	void draw(Renderer* renderer) override;
+	void draw(Renderer *renderer) override;
 
-	// TODO UNIMPLEMENTED: 
+	// TODO UNIMPLEMENTED:
 	mat4 getFullTransformation();
 	void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, bool isWorld = false) override;
 	void rotate(GLfloat theta_angle, int mode, bool isWorld = false) override;
@@ -69,33 +68,30 @@ public:
 	*/
 	void toggleSpecialMaterial() override;
 	void resetToCenter();
-
-
-	
 };
 
-
-
-
-typedef enum{
+typedef enum
+{
 	PRIM_CUBE,
 	PRIM_TETRAHEDRON
 } PRIM_MODEL;
 class PrimMeshModel : public MeshModel
 {
-	protected:
-		void Cube();
-		void Tetrahedron();
-	public:
-	PrimMeshModel(PRIM_MODEL model){	
-		switch(model){
-			case PRIM_CUBE:
-				Cube();
-				break;
-			case PRIM_TETRAHEDRON:
-				Tetrahedron();
-				break;
+protected:
+	void Cube();
+	void Tetrahedron();
+
+public:
+	PrimMeshModel(PRIM_MODEL model)
+	{
+		switch (model)
+		{
+		case PRIM_CUBE:
+			Cube();
+			break;
+		case PRIM_TETRAHEDRON:
+			Tetrahedron();
+			break;
 		}
 	}
-
 };

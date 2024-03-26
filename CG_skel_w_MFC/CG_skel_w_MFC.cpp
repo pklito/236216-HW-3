@@ -4,11 +4,9 @@
 #include "stdafx.h"
 #include "CG_skel_w_MFC.h"
 
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
 
 // The one and only application object
 
@@ -26,10 +24,10 @@
 #include "CColorPicker.h"
 #include "CPopNumber.h"
 
-#define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
+#define BUFFER_OFFSET(offset) ((GLvoid *)(offset))
 
-
-enum MENU_STATES {
+enum MENU_STATES
+{
 	OPEN_FILE_OBJ,
 	ADD_CAMERA_ORTHO,
 	ADD_CAMERA_PROJECTION,
@@ -59,92 +57,118 @@ enum MENU_STATES {
 	ADD_LIGHT_DIRECTIONAL
 };
 
-Scene* scene;
-Renderer* renderer;
+Scene *scene;
+Renderer *renderer;
 float m_time;
 
-int last_x,last_y;
-bool lb_down,rb_down,mb_down;
+int last_x, last_y;
+bool lb_down, rb_down, mb_down;
 
 float increment = 0.2;
 
 //----------------------------------------------------------------------------
 // Camera + Scene modiications
 //----------------------------------------------------------------------------
-void queryLight(vec3& color_out, float& intensity_out, Light* light_default=nullptr){
+void queryLight(vec3 &color_out, float &intensity_out, Light *light_default = nullptr)
+{
 	CColorPicker colordialog(nullptr, light_default);
-	if(colordialog.DoModal() != IDOK){
+	if (colordialog.DoModal() != IDOK)
+	{
 		return;
 	}
-	intensity_out = colordialog.m_sliderval/100.f;
+	intensity_out = colordialog.m_sliderval / 100.f;
 	COLORREF color = colordialog.m_color.GetColor();
-	
-	color_out = vec3((float)GetRValue(color)/255.f,
-	(float)GetGValue(color)/255.f,
-	(float)GetBValue(color)/255.f);
+
+	color_out = vec3((float)GetRValue(color) / 255.f,
+					 (float)GetGValue(color) / 255.f,
+					 (float)GetBValue(color) / 255.f);
 }
-void swapCameras(){
+void swapCameras()
+{
 	scene->cycleActiveCamera();
 	renderer->setCameraMatrixes(scene->getActiveCamera());
 	glutPostRedisplay();
 }
 
-#define TRY_FLOAT(var, text) try { var = std::stof(text); } catch (const std::invalid_argument& e) {std::cout<<"BAD_INPUT"<<std::endl;return;} catch (const std::out_of_range& e) {return;}
+#define TRY_FLOAT(var, text)                   \
+	try                                        \
+	{                                          \
+		var = std::stof(text);                 \
+	}                                          \
+	catch (const std::invalid_argument &e)     \
+	{                                          \
+		std::cout << "BAD_INPUT" << std::endl; \
+		return;                                \
+	}                                          \
+	catch (const std::out_of_range &e)         \
+	{                                          \
+		return;                                \
+	}
 
-void changeIncrement(){
+void changeIncrement()
+{
 	CString floatString;
-	floatString.Format(_T("%f"),increment);
-	CPopNumber c(_T("Choose the new increment"),floatString);
-	if(c.DoModal() == IDCANCEL){
+	floatString.Format(_T("%f"), increment);
+	CPopNumber c(_T("Choose the new increment"), floatString);
+	if (c.DoModal() == IDCANCEL)
+	{
 		return;
 	}
-	try{
+	try
+	{
 		increment = _ttof(c.m_inputval);
 	}
-	catch(exception e){
+	catch (exception e)
+	{
 	}
 }
 
-void addProjCamera(){
-	
+void addProjCamera()
+{
+
 	CPopup c;
 	int result = c.DoModal();
-	if(result == IDCANCEL){
+	if (result == IDCANCEL)
+	{
 		return;
 	}
-	
-	Camera* camera = new Camera();
+
+	Camera *camera = new Camera();
 	float fov_degrees = 70;
 	float aspect_ratio = 1;
 	float zNear = 0.5;
 	float zFar = 5;
-	if(result == IDOK){
+	if (result == IDOK)
+	{
 		fov_degrees = c.m_sliderval;
-		try{
+		try
+		{
 			aspect_ratio = _ttof(c.m_msg1);
 			zNear = _ttof(c.m_msg2);
 			zFar = _ttof(c.m_msg3);
 		}
-		catch(exception e){
+		catch (exception e)
+		{
 			aspect_ratio = 1;
 			zNear = 0.5;
 			zFar = 5;
 		}
 	}
-	
+
 	fov_degrees = Radians(fov_degrees);
-	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
-	//TEMP ORTHOGRAPHIC
-	camera->Perspective(fov_degrees,aspect_ratio,zNear,zFar);
+	camera->LookAt(vec3(1, 1, 1), vec3(-1, 0, 0), vec3(0, 1, 0));
+	// TEMP ORTHOGRAPHIC
+	camera->Perspective(fov_degrees, aspect_ratio, zNear, zFar);
 	scene->addCamera(camera);
 	glutPostRedisplay();
 }
 int selected_type = 0;
-void changeMaterialColor(){
+void changeMaterialColor()
+{
 	/*
 	vec3 color_out;
 	float intensity = -1;
-	
+
 	queryLight(color_out, intensity);
 	if(intensity < 0){
 		return;
@@ -161,40 +185,45 @@ void changeMaterialColor(){
 		mat.k_shiny = (int)(intensity*2);
 	}
 	scene->setSelectedMaterial(mat);
-	
+
 	selected_type = (selected_type += 1)%3;*/
 }
 
-void addOrthoCamera(){
+void addOrthoCamera()
+{
 	CPopupOrtho c;
 	int result = c.DoModal();
-	if(result == IDCANCEL){
+	if (result == IDCANCEL)
+	{
 		return;
 	}
 	float width = 2;
 	float height = 2;
 	float zNear = 0.5;
 	float zFar = 5;
-	if(result == IDOK){
-		try{
+	if (result == IDOK)
+	{
+		try
+		{
 			width = _ttof(c.m_msg1);
 			height = _ttof(c.m_msg2);
 			zNear = _ttof(c.m_msg3);
 			zFar = _ttof(c.m_msg4);
 		}
-		catch(exception e){
-
+		catch (exception e)
+		{
 		}
 	}
-	Camera* camera = new Camera();
+	Camera *camera = new Camera();
 
-	camera->LookAt(vec3(1,0,1),vec3(-1,0,0),vec3(0,1,0));
-	camera->Ortho(-width/2,width/2,-height/2,height/2,zNear,zFar);
+	camera->LookAt(vec3(1, 0, 1), vec3(-1, 0, 0), vec3(0, 1, 0));
+	camera->Ortho(-width / 2, width / 2, -height / 2, height / 2, zNear, zFar);
 	scene->addCamera(camera);
 	glutPostRedisplay();
 }
 
-void readFromFile(){
+void readFromFile()
+{
 	CFileDialog dlg(TRUE, _T(".obj"), NULL, NULL, _T("*.obj|*.*"));
 	if (dlg.DoModal() == IDOK)
 	{
@@ -204,7 +233,8 @@ void readFromFile(){
 	}
 }
 
-void changeLight(){
+void changeLight()
+{
 
 	/* TODO
 	if(scene->getMovingModel()){
@@ -223,7 +253,7 @@ void changeLight(){
 		queryLight(colorvec,intensity,light);
 		if(intensity < 0)
 			return;
-		
+
 		light->setColor(colorvec);
 		light->setIntensity(intensity);
 	}*/
@@ -232,8 +262,9 @@ void changeLight(){
 // Callbacks
 //----------------------------------------------------------------------------
 
-void display( void ){
-	//if false, moving lights
+void display(void)
+{
+	// if false, moving lights
 
 	/* TODO
 	if(!scene->getMovingModel()){
@@ -247,40 +278,43 @@ void display( void ){
 	scene->draw();
 }
 
-void reshape( int width, int height )
+void reshape(int width, int height)
 {
-//update the renderer's buffers
+	// update the renderer's buffers
 }
 
-void keyboard_special( int key, int x, int y ){
-	switch (key) {
-		case GLUT_KEY_LEFT:
-			scene->getActiveCamera()->translate(-0.1, 0, 0, scene->getWorldControl());
-			break;
-		case GLUT_KEY_RIGHT:
-			scene->getActiveCamera()->translate(0.1, 0, 0, scene->getWorldControl());
-			break;
-		case GLUT_KEY_UP:
-			scene->getActiveCamera()->translate(0, 0.1, 0, scene->getWorldControl());
-			break;
-		case GLUT_KEY_DOWN:
-			scene->getActiveCamera()->translate(0, -0.1, 0, scene->getWorldControl());
-			break;
-		default:
-			//fail
-			return;
+void keyboard_special(int key, int x, int y)
+{
+	switch (key)
+	{
+	case GLUT_KEY_LEFT:
+		scene->getActiveCamera()->translate(-0.1, 0, 0, scene->getWorldControl());
+		break;
+	case GLUT_KEY_RIGHT:
+		scene->getActiveCamera()->translate(0.1, 0, 0, scene->getWorldControl());
+		break;
+	case GLUT_KEY_UP:
+		scene->getActiveCamera()->translate(0, 0.1, 0, scene->getWorldControl());
+		break;
+	case GLUT_KEY_DOWN:
+		scene->getActiveCamera()->translate(0, -0.1, 0, scene->getWorldControl());
+		break;
+	default:
+		// fail
+		return;
 	}
-	
-	//if key was accepted
+
+	// if key was accepted
 	renderer->setCameraMatrixes(scene->getActiveCamera());
 	glutPostRedisplay();
 }
 
-void keyboard( unsigned char key, int x, int y )
+void keyboard(unsigned char key, int x, int y)
 {
-	switch ( key ) {
+	switch (key)
+	{
 	case 033:
-		exit( EXIT_SUCCESS );
+		exit(EXIT_SUCCESS);
 		break;
 	case 9:
 		scene->cycleSelectedObject();
@@ -289,7 +323,7 @@ void keyboard( unsigned char key, int x, int y )
 		scene->getActiveCamera()->translate(0, 0, -0.1, scene->getWorldControl());
 		renderer->setCameraMatrixes(scene->getActiveCamera());
 		break;
-	case 'z': //return model to center
+	case 'z': // return model to center
 		scene->returnModelToCenter();
 		break;
 	case '.':
@@ -365,7 +399,7 @@ void keyboard( unsigned char key, int x, int y )
 	case '6':
 		scene->changeCurrsMaterial();
 		break;
-		
+
 	/* TODO
 	case '3':
 		scene->changeShadingMethod();
@@ -384,28 +418,28 @@ void keyboard( unsigned char key, int x, int y )
 	default:
 		return;
 	}
-	
 
-	//if key was accepted
+	// if key was accepted
 	glutPostRedisplay();
 }
 
 void mouse(int button, int state, int x, int y)
 {
-	//button = {GLUT_LEFT_BUTTON, GLUT_MIDDLE_BUTTON, GLUT_RIGHT_BUTTON}
-	//state = {GLUT_DOWN,GLUT_UP}
-	
-	//set down flags
-	switch(button) {
-		case GLUT_LEFT_BUTTON:
-			lb_down = (state==GLUT_UP)?0:1;
-			break;
-		case GLUT_RIGHT_BUTTON:
-			rb_down = (state==GLUT_UP)?0:1;
-			break;
-		case GLUT_MIDDLE_BUTTON:
-			mb_down = (state==GLUT_UP)?0:1;	
-			break;
+	// button = {GLUT_LEFT_BUTTON, GLUT_MIDDLE_BUTTON, GLUT_RIGHT_BUTTON}
+	// state = {GLUT_DOWN,GLUT_UP}
+
+	// set down flags
+	switch (button)
+	{
+	case GLUT_LEFT_BUTTON:
+		lb_down = (state == GLUT_UP) ? 0 : 1;
+		break;
+	case GLUT_RIGHT_BUTTON:
+		rb_down = (state == GLUT_UP) ? 0 : 1;
+		break;
+	case GLUT_MIDDLE_BUTTON:
+		mb_down = (state == GLUT_UP) ? 0 : 1;
+		break;
 	}
 
 	// add your code
@@ -414,34 +448,37 @@ void mouse(int button, int state, int x, int y)
 void motion(int x, int y)
 {
 	// calc difference in mouse movement
-	int dx=x-last_x;
-	int dy=y-last_y;
+	int dx = x - last_x;
+	int dy = y - last_y;
 	// update last x,y
-	last_x=x;
-	last_y=y;
+	last_x = x;
+	last_y = y;
 }
 
 //----------------------------------------------------------------------------
 // Menus
 //----------------------------------------------------------------------------
 
-void deleteMenu(int id){
-	switch(id){
-		case DELETE_MESH:
-			scene->removeSelectedObject();
-			break;
-		case DELETE_CAMERA:
-			scene->removeSelectedCamera();
-			renderer->setCameraMatrixes(scene->getActiveCamera());
-			break;
-		case DELETE_LIGHT:
-			// TODO implement scene->removeSelectedLight();
-			break;
+void deleteMenu(int id)
+{
+	switch (id)
+	{
+	case DELETE_MESH:
+		scene->removeSelectedObject();
+		break;
+	case DELETE_CAMERA:
+		scene->removeSelectedCamera();
+		renderer->setCameraMatrixes(scene->getActiveCamera());
+		break;
+	case DELETE_LIGHT:
+		// TODO implement scene->removeSelectedLight();
+		break;
 	}
 	glutPostRedisplay();
 }
 
-void lightMenu(int id){
+void lightMenu(int id)
+{
 	/* TODO implement
 	Light* light;
 	vec3 color;
@@ -449,7 +486,7 @@ void lightMenu(int id){
 	switch(id){
 		case ADD_LIGHT_POINT:
 			light = new PointLight(1,vec3(0.5,0,0.5),vec3(0,0,1));
-			
+
 			queryLight(color,intensity, light);
 			if(intensity>=0){
 				light->setColor(color);
@@ -471,18 +508,20 @@ void lightMenu(int id){
 	}
 	*/
 }
-void primMenu(int id) {
+void primMenu(int id)
+{
 	std::cout << "start prim" << std::endl;
-	PrimMeshModel* model;
-	switch(id){
-		case ADD_CUBE:
-			model = new PrimMeshModel(PRIM_CUBE);
-			break;
-		case ADD_TETRAHEDRON:
-			model = new PrimMeshModel(PRIM_TETRAHEDRON);
-			break;
-		default:
-			return;
+	PrimMeshModel *model;
+	switch (id)
+	{
+	case ADD_CUBE:
+		model = new PrimMeshModel(PRIM_CUBE);
+		break;
+	case ADD_TETRAHEDRON:
+		model = new PrimMeshModel(PRIM_TETRAHEDRON);
+		break;
+	default:
+		return;
 	}
 	scene->addMeshModel(model);
 	glutPostRedisplay();
@@ -506,7 +545,8 @@ void fileMenu(int id)
 
 void optionMenu(int id)
 {
-	if (scene) {
+	if (scene)
+	{
 		switch (id)
 		{
 		case DRAW_NORMALS:
@@ -555,30 +595,34 @@ void rescaleWindow(bool up_or_down)
 {
 	// Your code to rescale the window goes here
 	// For example, you might use GLUT functions to reshape the window
-	
+
 	int newWidth, newHeight;
 
-	if (up_or_down) {
+	if (up_or_down)
+	{
 		newWidth = 2048;
 		newHeight = 2048;
 	}
-	else {
+	else
+	{
 		newWidth = 512;
 		newHeight = 512;
 	}
 
-	if (newWidth == glutGet(GLUT_WINDOW_WIDTH) && newHeight == glutGet(GLUT_WINDOW_HEIGHT)) {
+	if (newWidth == glutGet(GLUT_WINDOW_WIDTH) && newHeight == glutGet(GLUT_WINDOW_HEIGHT))
+	{
 		return;
 	}
-	//scene->translateObject((newWidth - glutGet(GLUT_WINDOW_WIDTH)) / 2, (newHeight - glutGet(GLUT_WINDOW_HEIGHT)) / 2, 0);
+	// scene->translateObject((newWidth - glutGet(GLUT_WINDOW_WIDTH)) / 2, (newHeight - glutGet(GLUT_WINDOW_HEIGHT)) / 2, 0);
 
 	glutReshapeWindow(newWidth, newHeight);
 	glutPostRedisplay();
 }
 
-void menuCallback(int menuItem) 
+void menuCallback(int menuItem)
 {
-	switch (menuItem) {
+	switch (menuItem)
+	{
 	case RESCALE_WINDOW_MENU_ITEM_UP:
 		// Call a function to rescale the window
 		rescaleWindow(true);
@@ -591,7 +635,6 @@ void menuCallback(int menuItem)
 		changeIncrement();
 		break;
 	}
-
 }
 
 void initMenu()
@@ -604,14 +647,13 @@ void initMenu()
 	glutAddMenuEntry("Point", ADD_LIGHT_POINT);
 	glutAddMenuEntry("Directional", ADD_LIGHT_DIRECTIONAL);
 
-
 	int menuFile = glutCreateMenu(fileMenu);
 	glutAddMenuEntry("Orthographic Camera", ADD_CAMERA_ORTHO);
 	glutAddMenuEntry("Perspective Camera", ADD_CAMERA_PROJECTION);
 	glutAddMenuEntry(".OBJ Mesh...", OPEN_FILE_OBJ);
 	glutAddSubMenu("light", lightsMenu);
 	glutAddSubMenu("Primitives", primitivesMenu);
-	
+
 	// Create the "Normal" submenu
 	int optionsSubMenu = glutCreateMenu(optionMenu);
 	// Attach the "Normal" submenu to the main menu
@@ -621,20 +663,19 @@ void initMenu()
 	glutAddMenuEntry("Hide Normals To Vertices", HIDE_VERTEX_NORMALS);
 	glutAddMenuEntry("Draw Bounding Box", DRAW_BOUNDING_BOX);
 	glutAddMenuEntry("Hide Bounding Box", HIDE_BOUNDING_BOX);
-	//Draw Hide cameras
-	//Draw hide vertex normals
+	// Draw Hide cameras
+	// Draw hide vertex normals
 
 	int rescaleMenu = glutCreateMenu(menuCallback);
 	glutAddMenuEntry("Rescale Window Up", RESCALE_WINDOW_MENU_ITEM_UP);
 	glutAddMenuEntry("Rescale Window Down", RESCALE_WINDOW_MENU_ITEM_DOWN);
-	
+
 	glutAddMenuEntry("Change increment", CHANGE_INCREMENT);
 
 	int deleteSubMenu = glutCreateMenu(deleteMenu);
 	glutAddMenuEntry("Delete Sel. Mesh", DELETE_MESH);
 	glutAddMenuEntry("Delete Sel. Camera", DELETE_CAMERA);
 	glutAddMenuEntry("Delete Sel. Light", DELETE_LIGHT);
-
 
 	glutCreateMenu(mainMenu);
 	glutAddSubMenu("New", menuFile);
@@ -643,7 +684,7 @@ void initMenu()
 	glutAddSubMenu("Window", rescaleMenu);
 	glutAddMenuEntry("Demo", MAIN_DEMO);
 	glutAddMenuEntry("Help", MAIN_ABOUT);
-	
+
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 
 	// Attach the menu to a mouse button
@@ -655,7 +696,7 @@ void initMenu()
 // Main
 //----------------------------------------------------------------------------
 
-int my_main(int argc, char** argv)
+int my_main(int argc, char **argv)
 {
 	//----------------------------------------------------------------------------
 	// Initialize window
@@ -676,18 +717,18 @@ int my_main(int argc, char** argv)
 	}
 	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
-	renderer = new Renderer(1024, 1024,"minimal_vshader.glsl","minimal_fshader.glsl");
+	renderer = new Renderer(1024, 1024, "minimal_vshader.glsl", "minimal_fshader.glsl");
 	scene = new Scene(renderer);
-	Camera* camera = new Camera();
-	Light* light = new PointLight(1,vec3(1,1,1),vec3(-2,0,1));
-	Light* light2 = new DirectionalLight(1,vec3(1,0,1),vec3(0,1,0));
-	//renderer->setAmbientLight(AmbientLight(1,vec3(0.3,0.3,0.3)));
+	Camera *camera = new Camera();
+	Light *light = new PointLight(1, vec3(1, 1, 1), vec3(-2, 0, 1));
+	Light *light2 = new DirectionalLight(1, vec3(1, 0, 1), vec3(0, 1, 0));
+	// renderer->setAmbientLight(AmbientLight(1,vec3(0.3,0.3,0.3)));
 
 	std::cout << "[ ] Camera transform: " << std::endl;
-	camera->LookAt(vec3(0,0,1),vec3(0,0,-1),vec3(0,1,0));
-	camera->Ortho(-1,1,-1,1,0,5);
+	camera->LookAt(vec3(0, 0, 1), vec3(0, 0, -1), vec3(0, 1, 0));
+	camera->Ortho(-1, 1, -1, 1, 0, 5);
 	scene->addCamera(camera);
-	std::cout <<"!"<< camera->getProjection();
+	std::cout << "!" << camera->getProjection();
 	renderer->setCameraMatrixes(scene->getActiveCamera());
 
 	/* TODO implement
@@ -697,28 +738,28 @@ int my_main(int argc, char** argv)
 	*/
 
 	std::cout << "[ ] Reading mesh files... ";
-	MeshModel* demo_object = new MeshModel("meshes/bunny.obj");
+	MeshModel *demo_object = new MeshModel("meshes/bunny.obj");
 	scene->addMeshModel(demo_object);
 	std::cout << " Done!" << std::endl;
 	//----------------------------------------------------------------------------
 
 	// Initialize Callbacks
 
-	glutDisplayFunc( display );
-	glutSpecialFunc( keyboard_special );
-	glutKeyboardFunc( keyboard );
-	glutMouseFunc( mouse );
-	glutMotionFunc ( motion );
-	glutReshapeFunc( reshape );
+	glutDisplayFunc(display);
+	glutSpecialFunc(keyboard_special);
+	glutKeyboardFunc(keyboard);
+	glutMouseFunc(mouse);
+	glutMotionFunc(motion);
+	glutReshapeFunc(reshape);
 	initMenu();
-	
-	//Init the renderer
+
+	// Init the renderer
 	renderer->Init();
-	PrimMeshModel* model = new PrimMeshModel(PRIM_CUBE);
+	PrimMeshModel *model = new PrimMeshModel(PRIM_CUBE);
 	scene->addMeshModel(model);
 	std::cout << scene->getWorldControl() << " : (#)" << std::endl;
-	
-	//Set the camera projection we want and send it to renderer (vec3 cast to vec4)
+
+	// Set the camera projection we want and send it to renderer (vec3 cast to vec4)
 
 	std::cout << "[V] Done with the initialization! " << std::endl;
 	glutMainLoop();
@@ -731,10 +772,10 @@ CWinApp theApp;
 
 using namespace std;
 
-int main( int argc, char **argv )
+int main(int argc, char **argv)
 {
 	int nRetCode = 0;
-	
+
 	// initialize MFC and print and error on failure
 	if (!AfxWinInit(::GetModuleHandle(NULL), NULL, ::GetCommandLine(), 0))
 	{
@@ -744,8 +785,8 @@ int main( int argc, char **argv )
 	}
 	else
 	{
-		my_main(argc, argv );
+		my_main(argc, argv);
 	}
-	
+
 	return nRetCode;
 }

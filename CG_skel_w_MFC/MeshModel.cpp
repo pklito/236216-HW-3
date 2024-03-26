@@ -333,20 +333,25 @@ void MeshModel::draw(Renderer *renderer)
 {
 	mat4 full_trans = _world_transform * _model_transform;
 	mat4 full_norm_trans = _world_normal_transform * _model_normal_transform;
-	if(!draw_wireframe){
-		renderer->DrawMesh(vao, face_num, full_trans, full_norm_trans);	//TODO: calculate this transform on change
+	if (!draw_wireframe)
+	{
+		renderer->DrawMesh(vao, face_num, full_trans, full_norm_trans); // TODO: calculate this transform on change
 	}
-	else{
+	else
+	{
 		renderer->DrawWireframe(vao, face_num, full_trans);
 	}
-	if(draw_vertex_normals){
+	if (draw_vertex_normals)
+	{
 		renderer->DrawLines(vert_vao, 2 * 3 * face_num, full_trans, vec3(0.1, 0.1, 0.9));
 	}
-	if(draw_face_normals){
+	if (draw_face_normals)
+	{
 		renderer->DrawLines(face_vao, 2 * face_num, full_trans, vec3(0, 1, 0.2));
 	}
-	//TODO: implement bounding box
-	if(draw_bounding_box){
+	// TODO: implement bounding box
+	if (draw_bounding_box)
+	{
 		renderer->DrawLines(box_vao, 24, full_trans);
 	}
 }
