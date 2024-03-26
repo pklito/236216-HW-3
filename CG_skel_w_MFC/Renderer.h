@@ -5,22 +5,40 @@
 #include "mat.h"
 #include "GL/glew.h"
 #include "InitShader.h"
+#include <map>
 
 class Camera;
 
 class Program {
+	private:
+		
+		std::map<const char*, GLuint> uniform_locs;
+		
+		GLuint try_add(const char* uniform){
+			GLuint loc = glGetUniformLocation(program, uniform);
+			if(loc == (GLuint)(-1)){
+				std::cout << "[X] " << program << " failed to find uniform: " << uniform << std::endl;
+			}
+			uniform_locs[uniform] = loc;
+			return loc;
+		}
 	public:
 		GLuint program;
-		std::vector<GLuint> uniform_locs;
 	template<typename... Args>
 	Program(const char* vshader, const char* fshader, Args ... args){
 		program = InitShader(vshader,fshader);
+		std::cout << "Created program " << program << " : " << vshader << ", " << fshader << std::endl;
 		for(const char* uniform : {args...}){
-			GLuint loc = glGetUniformLocation(program, uniform);
-			if(loc == (GLuint)(-1)){
-				std::cout << "[X] " << vshader << " failed to find uniform: " << uniform << std::endl;
-			}
-			uniform_locs.push_back(loc);
+			try_add(uniform);
+		}
+	}
+	GLuint find(const char* uniform){
+		auto it = uniform_locs.find(uniform);
+
+		if (it != uniform_locs.end()) {
+			return it->second;
+		} else {
+			return try_add(uniform);
 		}
 	}
 	void Delete(){
