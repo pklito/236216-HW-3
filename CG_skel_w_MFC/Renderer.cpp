@@ -85,6 +85,12 @@ void Renderer::SetDemoBuffer()
 	}
 }
 
+/// @brief Render a mesh with a certain program
+/// @param program Program class
+/// @param vao vao of the vertices
+/// @param face_count amount of vertices/3
+/// @param wm_transform world*model transform of the model
+/// @param wm_normal_transform world*model transform of the model normals
 void Renderer::_DrawTris(Program& program, GLuint vao, GLuint face_count, const mat4& wm_transform, const mat4& wm_normal_transform){
 	//Bind the models settings
 	glUseProgram(program.program);
@@ -107,21 +113,38 @@ void Renderer::_DrawTris(Program& program, GLuint vao, GLuint face_count, const 
     glBindVertexArray(0);
 }
 
+/// @brief Render a mesh with the current selected program
+/// @param program Program class
+/// @param vao vao of the vertices
+/// @param face_count amount of vertices/3
+/// @param wm_transform world*model transform of the model
+/// @param wm_normal_transform world*model transform of the model normals
 void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4& wm_transform, const mat4& wm_normal_transform){
 
 	_DrawTris(programs[current_program], vao, face_count, wm_transform, wm_normal_transform);
 
 }
 
-// Identical to DrawMesh, ut GL_LINE_STRIP, and a hardcoded program.
+/// @brief Identical to DrawMesh, ut GL_LINE_STRIP, and a hardcoded program.
+/// @param program Program class
+/// @param vao vao of the vertices
+/// @param face_count amount of vertices/3
+/// @param wm_transform world*model transform of the model
+/// @param wm_normal_transform world*model transform of the model normals
 void Renderer::DrawWireframe(GLuint vao, GLuint face_count, const mat4& wm_transform){
 
 	glUseProgram(program_wireframe.program);
 	GLfloat color_arr[3] = {0.8, 0.8, 0.8};
 	glUniform3fv(program_wireframe.find("color"), 1, color_arr);
-
+	
+	//set the polygons to draw as lines
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glLineWidth(1.3f);
+	glEnable(GL_LINE_SMOOTH);
 	_DrawTris(program_wireframe, vao, face_count, wm_transform,mat4());
+	
+	glLineWidth(1.0f);
+	//revert to default
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 }
