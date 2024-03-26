@@ -5,7 +5,7 @@
 #include "GL\freeglut.h"
 #include "scene.h"
 
-#define INDEX(width,x,y,c) (x+y*width)*3+c
+#define INDEX(width,x,y,c) ((x)+(y)*(width))*3+c
 
 Renderer::Renderer() : Renderer(512,512,"vshader.glsl","fshader.glsl")
 {}
