@@ -66,6 +66,8 @@ class Renderer
 	void CreateBuffers(int width, int height);
 	void CreateLocalBuffer();
 
+
+	void _DrawTris(Program& program, GLuint vao, GLuint face_count, const mat4& wm_transform, const mat4& wm_normal_transform);
 	//////////////////////////////
 	// openGL stuff. Don't touch.
 

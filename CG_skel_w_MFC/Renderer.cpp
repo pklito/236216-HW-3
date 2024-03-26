@@ -85,43 +85,45 @@ void Renderer::SetDemoBuffer()
 	}
 }
 
-void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4& wm_transform, const mat4& wm_normal_transform){
+void Renderer::_DrawTris(Program& program, GLuint vao, GLuint face_count, const mat4& wm_transform, const mat4& wm_normal_transform){
 	//Bind the models settings
+	glUseProgram(program.program);
     glBindVertexArray(vao);
 
 	GLfloat full_transform_array[16];
 	toFloatArray(full_transform_array, wm_transform);
-	glUniformMatrix4fv(programs[current_program].find("world_transform"), 1, GL_FALSE,full_transform_array);
+	glUniformMatrix4fv(program.find("world_transform"), 1, GL_FALSE,full_transform_array);
 	
 	GLfloat proj_array[16];
 	toFloatArray(proj_array, mat_project * mat_transform_inverse);
-	glUniformMatrix4fv(programs[current_program].find("camera_transform"), 1, GL_FALSE,proj_array);
+	glUniformMatrix4fv(program.find("camera_transform"), 1, GL_FALSE,proj_array);
 
 	GLfloat normal_trans_array[16];
 	toFloatArray(normal_trans_array, wm_normal_transform);
-	glUniformMatrix4fv(programs[current_program].find("normal_transform"), 1, GL_FALSE,normal_trans_array);
+	glUniformMatrix4fv(program.find("normal_transform"), 1, GL_FALSE,normal_trans_array);
 
 	//Draw
     glDrawArrays(GL_TRIANGLES, 0, face_count*3);
     glBindVertexArray(0);
 }
 
+void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4& wm_transform, const mat4& wm_normal_transform){
+
+	_DrawTris(programs[current_program], vao, face_count, wm_transform, wm_normal_transform);
+
+}
+
 // Identical to DrawMesh, ut GL_LINE_STRIP, and a hardcoded program.
 void Renderer::DrawWireframe(GLuint vao, GLuint face_count, const mat4& wm_transform){
-	//TODO this is not efficient
-	GLint prog = 0;
-	glGetIntegerv(GL_CURRENT_PROGRAM, &prog);
 
 	glUseProgram(program_wireframe.program);
 	GLfloat color_arr[3] = {0.8, 0.8, 0.8};
 	glUniform3fv(program_wireframe.find("color"), 1, color_arr);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	DrawMesh(vao,face_count,wm_transform);
+	_DrawTris(program_wireframe, vao, face_count, wm_transform,mat4());
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	// Restore previous program
-	glUseProgram(prog);
 }
 
 void Renderer:: DrawLines(GLuint lines_vao, GLuint lines_count, const mat4& wm_transform, vec3 color){
