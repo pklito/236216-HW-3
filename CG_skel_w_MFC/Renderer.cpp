@@ -86,6 +86,8 @@ void Renderer::SetDemoBuffer()
 }
 
 void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4& wm_transform, const mat4& wm_normal_transform){
+	glUseProgram(programs[current_program].program);
+
 	//Bind the models settings
     glBindVertexArray(vao);
 
@@ -104,6 +106,8 @@ void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4& wm_transform,
 	//Draw
     glDrawArrays(GL_TRIANGLES, 0, face_count*3);
     glBindVertexArray(0);
+
+	glUseProgram(0);
 }
 
 void Renderer::DrawWireframe(GLuint vao, GLuint face_count, const mat4& wm_transform){
@@ -127,6 +131,7 @@ void Renderer::DrawWireframe(GLuint vao, GLuint face_count, const mat4& wm_trans
     glDrawArrays(GL_LINE_STRIP, 0, face_count*3);
     glBindVertexArray(0);
 
+	glUseProgram(0);
 }
 
 // Camera
