@@ -12,7 +12,7 @@ void main()
 {
     //world position for lights
     vec4 world_pos = world_transform * vec4(vPosition,1.0);
-    fNormal = normal_transform * vNormal;
+    fNormal = (normal_transform * vec4(vNormal,1.0)).xyz;
 
     //screen position
     gl_Position = camera_transform * world_pos;

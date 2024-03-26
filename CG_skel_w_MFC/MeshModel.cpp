@@ -307,12 +307,6 @@ void MeshModel::resetToCenter() {
 	_world_transform = mat4();
 }
 
-// TODO: Implement this function
-vec3 MeshModel::calculateBoundingBoxCenter() {
-	// Placeholder implementation
-	return vec3(); // Return default vec3 for now
-}
-
 
 //------------
 // PRIM

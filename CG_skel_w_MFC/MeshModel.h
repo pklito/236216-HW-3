@@ -82,7 +82,6 @@ class PrimMeshModel : public MeshModel
 				Tetrahedron();
 				break;
 		}
-		calculateBoundingBox();
 	}
 
 };
