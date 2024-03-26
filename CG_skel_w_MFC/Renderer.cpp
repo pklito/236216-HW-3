@@ -50,7 +50,7 @@ void Renderer::CreateBuffers(int width, int height)
 }
 
 void Renderer::CreateProgram(const char* vshader, const char* fshader){
-	programs.push_back(Program(InitShader(vshader, fshader),"world_transform","camera_transform",""));
+	programs.push_back(Program(InitShader(vshader, fshader),"world_transform","camera_transform","normal_transform"));
 }
 
 void Renderer::RemoveProgram(int index){
@@ -84,17 +84,21 @@ void Renderer::SetDemoBuffer()
 	}
 }
 
-void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4& wm_transform){
+void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4& wm_transform, const mat4& wm_normal_transform){
 	//Bind the models settings
     glBindVertexArray(vao);
 
 	GLfloat full_transform_array[16];
 	toFloatArray(full_transform_array, wm_transform);
-	glUniformMatrix4fv(programs[current_program].uniform_loc1, 1, GL_FALSE,full_transform_array);		//TODO get position of "full_transform" uniform
+	glUniformMatrix4fv(programs[current_program].uniform_loc1, 1, GL_FALSE,full_transform_array);
 
 	GLfloat proj_array[16];
 	toFloatArray(proj_array, mat_project * mat_transform_inverse);
-	glUniformMatrix4fv(programs[current_program].uniform_loc2, 1, GL_FALSE,proj_array);		//TODO get position of "full_transform" uniform
+	glUniformMatrix4fv(programs[current_program].uniform_loc2, 1, GL_FALSE,proj_array);
+
+	GLfloat normal_trans_array[16];
+	toFloatArray(normal_trans_array, wm_normal_transform);
+	glUniformMatrix4fv(programs[current_program].uniform_loc3, 1, GL_FALSE,normal_trans_array);
 
 	//Draw
     glDrawArrays(GL_TRIANGLES, 0, face_count*3);

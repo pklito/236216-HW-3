@@ -213,7 +213,7 @@ void MeshModel::generateBuffers(const GLfloat* vertices_array, const GLfloat* ve
 
 void MeshModel::draw(Renderer* renderer)
 {
-	renderer->DrawMesh(vao, face_num, _world_transform * _model_transform);	//TODO: calculate this transform on change
+	renderer->DrawMesh(vao, face_num, _world_transform * _model_transform, _world_normal_transform * _model_normal_transform);	//TODO: calculate this transform on change
 }
 
 mat4 MeshModel::getFullTransformation() {

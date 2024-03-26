@@ -55,7 +55,6 @@ public:
 	*/
 	void toggleSpecialMaterial() override;
 	void resetToCenter();
-	vec3 calculateBoundingBoxCenter();
 
 
 	

@@ -67,7 +67,7 @@ public:
 	void CreateProgram(const char* vshader, const char* fshader);
 	void RemoveProgram(int index);
 
-	void DrawMesh(GLuint vao,GLuint face_count, const mat4& transform);
+	void DrawMesh(GLuint vao,GLuint face_count, const mat4& transform = mat4(), const mat4& normal_transform = mat4());
 	void SetCameraTransformInverse(const mat4& cTransform);
 	void SetProjection(const mat4& projection);
 	void setCameraMatrixes(const mat4& cTransform, const mat4& Projection);
