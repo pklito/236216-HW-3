@@ -86,8 +86,6 @@ void Renderer::SetDemoBuffer()
 }
 
 void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4& wm_transform, const mat4& wm_normal_transform){
-	glUseProgram(programs[current_program].program);
-
 	//Bind the models settings
     glBindVertexArray(vao);
 
@@ -106,33 +104,24 @@ void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4& wm_transform,
 	//Draw
     glDrawArrays(GL_TRIANGLES, 0, face_count*3);
     glBindVertexArray(0);
-
-	glUseProgram(0);
 }
 
 // Identical to DrawMesh, ut GL_LINE_STRIP, and a hardcoded program.
 void Renderer::DrawWireframe(GLuint vao, GLuint face_count, const mat4& wm_transform){
+	//TODO this is not efficient
+	GLint prog = 0;
+	glGetIntegerv(GL_CURRENT_PROGRAM, &prog);
+
 	glUseProgram(program_wireframe.program);
+	GLfloat color_arr[3] = {0.8, 0.8, 0.8};
+	glUniform3fv(program_wireframe.find("color"), 1, color_arr);
 
-	//Bind the models settings
-    glBindVertexArray(vao);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	DrawMesh(vao,face_count,wm_transform);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	GLfloat full_transform_array[16];
-	toFloatArray(full_transform_array, wm_transform);
-	glUniformMatrix4fv(program_wireframe.find("world_transform"), 1, GL_FALSE,full_transform_array);
-	
-	GLfloat proj_array[16];
-	toFloatArray(proj_array, mat_project * mat_transform_inverse);
-	glUniformMatrix4fv(program_wireframe.find("camera_transform"), 1, GL_FALSE,proj_array);
-
-	GLfloat color[3] = {0.8,0.8,0.8};
-	glUniform3fv(program_wireframe.find("color"), 1, color);
-
-	//Draw
-    glDrawArrays(GL_LINE_STRIP, 0, face_count*3);
-    glBindVertexArray(0);
-
-	glUseProgram(0);
+	// Restore previous program
+	glUseProgram(prog);
 }
 
 void Renderer:: DrawLines(GLuint lines_vao, GLuint lines_count, const mat4& wm_transform, vec3 color){

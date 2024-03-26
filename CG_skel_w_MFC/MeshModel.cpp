@@ -254,6 +254,7 @@ void MeshModel::generateBuffers(const GLfloat* vertices_array, const GLfloat* ve
 
 		for(int coord = 0; coord < 3; coord ++){
 			norm_points[2 * 3 * face + coord] = center[coord];
+			norm_points[2 * 3 * face + 3 + coord] = end[coord];
 		}
 	}
 
@@ -298,8 +299,8 @@ void MeshModel::draw(Renderer* renderer)
 	mat4 full_norm_trans = _world_normal_transform * _model_normal_transform;
 	//renderer->DrawMesh(vao, face_num, full_trans, full_norm_trans);	//TODO: calculate this transform on change
 	renderer->DrawWireframe(vao,face_num,full_trans);
-	renderer->DrawLines(vert_vao, 2 * 3 * face_num, full_trans);
-	//renderer->DrawLines(face_vao, 2 * face_num, full_trans);
+	renderer->DrawLines(vert_vao, 2 * 3 * face_num, full_trans,vec3(0.1,0.1,0.9));
+	renderer->DrawLines(face_vao, 2 * face_num, full_trans,vec3(0,1,0.2));
 	//renderer->DrawLines(box_vao, 24, full_trans);
 		
 }
