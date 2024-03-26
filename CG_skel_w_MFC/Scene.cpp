@@ -132,7 +132,6 @@ void Scene::setShowBoxForMeshModels(bool change) {
 
 void Scene::translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
 {
-	std::cout << moving_model << std::endl;
 	if(!moving_model){
 		/* TODO implement
 		if(lights.size() >= 1){

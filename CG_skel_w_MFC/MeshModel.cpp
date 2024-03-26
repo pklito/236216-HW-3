@@ -231,12 +231,22 @@ void MeshModel::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, boo
 
 // TODO: Implement this function
 void MeshModel::rotate(GLfloat theta_angle, int mode, bool isWorld) {
-	// Placeholder implementation
+	if(isWorld){
+		applyWorldTransformation(RotateAxis(theta_angle,mode));
+	}
+	else{
+		applyModelTransformation(RotateAxis(theta_angle,mode));
+	}
 }
 
 // TODO: Implement this function
 void MeshModel::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale, bool isWorld) {
-	// Placeholder implementation
+	if(isWorld){
+		applyWorldTransformation(Scale(x_scale,y_scale,z_scale));
+	}
+	else{
+		applyModelTransformation(Scale(x_scale,y_scale,z_scale));
+	}
 }
 
 // TODO: Implement this function
@@ -295,7 +305,8 @@ void MeshModel::toggleSpecialMaterial() {
 
 // TODO: Implement this function
 void MeshModel::resetToCenter() {
-	// Placeholder implementation
+	_model_transform = mat4();
+	_world_transform = mat4();
 }
 
 // TODO: Implement this function
