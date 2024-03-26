@@ -5,7 +5,7 @@
 #include "GL\freeglut.h"
 #include "scene.h"
 
-#define INDEX(width,x,y,c) (x+y*width)*3+c
+#define INDEX(width,x,y,c) ((x)+(y)*(width))*3+c
 
 Renderer::Renderer() : Renderer(512,512,"vshader.glsl","fshader.glsl")
 {}
@@ -15,12 +15,13 @@ Renderer::Renderer(int width, int height, const char* vshader, const char* fshad
 	InitOpenGLRendering();
 	CreateBuffers(width,height);
 	CreateProgram(vshader,fshader);
+	program_wireframe = Program("lines_vshader.glsl","lines_fshader.glsl","world_transform","camera_transform","color");
 }
 
 Renderer::~Renderer(void)
 {
 	for(Program p : programs){
-		glDeleteProgram(p.program);
+		p.Delete();
 	}
 }
 
@@ -50,7 +51,7 @@ void Renderer::CreateBuffers(int width, int height)
 }
 
 void Renderer::CreateProgram(const char* vshader, const char* fshader){
-	programs.push_back(Program(InitShader(vshader, fshader),"world_transform","camera_transform",""));
+	programs.push_back(Program(vshader,fshader,"world_transform","camera_transform","normal_transform"));
 }
 
 void Renderer::RemoveProgram(int index){
@@ -84,21 +85,92 @@ void Renderer::SetDemoBuffer()
 	}
 }
 
-void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4& wm_transform){
+/// @brief Render a mesh with a certain program
+/// @param program Program class
+/// @param vao vao of the vertices
+/// @param face_count amount of vertices/3
+/// @param wm_transform world*model transform of the model
+/// @param wm_normal_transform world*model transform of the model normals
+void Renderer::_DrawTris(Program& program, GLuint vao, GLuint face_count, const mat4& wm_transform, const mat4& wm_normal_transform){
 	//Bind the models settings
+	glUseProgram(program.program);
     glBindVertexArray(vao);
 
 	GLfloat full_transform_array[16];
 	toFloatArray(full_transform_array, wm_transform);
-	glUniformMatrix4fv(programs[current_program].uniform_loc1, 1, GL_FALSE,full_transform_array);		//TODO get position of "full_transform" uniform
-
+	glUniformMatrix4fv(program.find("world_transform"), 1, GL_FALSE,full_transform_array);
+	
 	GLfloat proj_array[16];
 	toFloatArray(proj_array, mat_project * mat_transform_inverse);
-	glUniformMatrix4fv(programs[current_program].uniform_loc2, 1, GL_FALSE,proj_array);		//TODO get position of "full_transform" uniform
+	glUniformMatrix4fv(program.find("camera_transform"), 1, GL_FALSE,proj_array);
+
+	GLfloat normal_trans_array[16];
+	toFloatArray(normal_trans_array, wm_normal_transform);
+	glUniformMatrix4fv(program.find("normal_transform"), 1, GL_FALSE,normal_trans_array);
 
 	//Draw
     glDrawArrays(GL_TRIANGLES, 0, face_count*3);
     glBindVertexArray(0);
+}
+
+/// @brief Render a mesh with the current selected program
+/// @param program Program class
+/// @param vao vao of the vertices
+/// @param face_count amount of vertices/3
+/// @param wm_transform world*model transform of the model
+/// @param wm_normal_transform world*model transform of the model normals
+void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4& wm_transform, const mat4& wm_normal_transform){
+
+	_DrawTris(programs[current_program], vao, face_count, wm_transform, wm_normal_transform);
+
+}
+
+/// @brief Identical to DrawMesh, ut GL_LINE_STRIP, and a hardcoded program.
+/// @param program Program class
+/// @param vao vao of the vertices
+/// @param face_count amount of vertices/3
+/// @param wm_transform world*model transform of the model
+/// @param wm_normal_transform world*model transform of the model normals
+void Renderer::DrawWireframe(GLuint vao, GLuint face_count, const mat4& wm_transform){
+
+	glUseProgram(program_wireframe.program);
+	GLfloat color_arr[3] = {0.8, 0.8, 0.8};
+	glUniform3fv(program_wireframe.find("color"), 1, color_arr);
+	
+	//set the polygons to draw as lines
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glLineWidth(1.3f);
+	glEnable(GL_LINE_SMOOTH);
+	_DrawTris(program_wireframe, vao, face_count, wm_transform,mat4());
+	
+	glLineWidth(1.0f);
+	//revert to default
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+}
+
+void Renderer:: DrawLines(GLuint lines_vao, GLuint lines_count, const mat4& wm_transform, vec3 color){
+	glUseProgram(program_wireframe.program);
+
+	//Bind the models settings
+    glBindVertexArray(lines_vao);
+
+	GLfloat color_arr[3] = {color.x,color.y,color.z};
+	glUniform3fv(program_wireframe.find("color"), 1, color_arr);
+
+	GLfloat full_transform_array[16];
+	toFloatArray(full_transform_array, wm_transform);
+	glUniformMatrix4fv(program_wireframe.find("world_transform"), 1, GL_FALSE,full_transform_array);
+	
+	GLfloat proj_array[16];
+	toFloatArray(proj_array, mat_project * mat_transform_inverse);
+	glUniformMatrix4fv(program_wireframe.find("camera_transform"), 1, GL_FALSE,proj_array);
+
+	//Draw
+    glDrawArrays(GL_LINES, 0, lines_count);
+    glBindVertexArray(0);
+
+	glUseProgram(0);
 }
 
 // Camera

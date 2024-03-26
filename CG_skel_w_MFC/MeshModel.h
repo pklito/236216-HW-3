@@ -17,15 +17,31 @@ protected :
 	GLuint vbo_vertices;
 	GLuint vbo_normals;
 	GLuint vbo_textures;
+
+	GLuint vert_vao;
+	GLuint vert_vbo;
+
+	GLuint face_vao;
+	GLuint face_vbo;
+
+	GLuint box_vao;
+	GLuint box_vbo;
+
 	//add more attributes
 	mat4 _world_transform;
 	mat4 _model_transform;
 	mat4 _world_normal_transform;
 	mat4 _model_normal_transform;
-	
+
+	bool draw_wireframe;
+	bool draw_vertex_normals;
+	bool draw_face_normals;
+	bool draw_bounding_box;
 
 	void applyWorldTransformation(const mat4& transformation);
 	void applyModelTransformation(const mat4& transformation);
+	void applyWorldNormalTransformation(const mat4& transformation_inv);
+	void applyModelNormalTransformation(const mat4& transformation_inv);
 
 public:
 
@@ -40,10 +56,6 @@ public:
 	void rotate(GLfloat theta_angle, int mode, bool isWorld = false) override;
 	void scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale, bool isWorld = false) override;
 
-	void calculateBoundingBox();
-	void normalToFace();
-	void CalculateVertexNormals();
-
 	void setShowNormals(bool change) override;
 	void setShowNormalsToVertices(bool change) override;
 	void setShowBox(bool change) override;
@@ -57,7 +69,6 @@ public:
 	*/
 	void toggleSpecialMaterial() override;
 	void resetToCenter();
-	vec3 calculateBoundingBoxCenter();
 
 
 	
@@ -85,7 +96,6 @@ class PrimMeshModel : public MeshModel
 				Tetrahedron();
 				break;
 		}
-		calculateBoundingBox();
 	}
 
 };

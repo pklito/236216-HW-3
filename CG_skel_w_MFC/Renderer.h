@@ -4,29 +4,47 @@
 #include "vec.h"
 #include "mat.h"
 #include "GL/glew.h"
+#include "InitShader.h"
+#include <map>
 
 class Camera;
 
 class Program {
 	private:
-		GLuint get_uniform(GLuint program, const char* name){
-			return glGetUniformLocation(program, name);
+		
+		std::map<const char*, GLuint> uniform_locs;
+		
+		GLuint try_add(const char* uniform){
+			GLuint loc = glGetUniformLocation(program, uniform);
+			if(loc == (GLuint)(-1)){
+				std::cout << "[X] " << program << " failed to find uniform: " << uniform << std::endl;
+			}
+			uniform_locs[uniform] = loc;
+			return loc;
 		}
-		
-		
 	public:
 		GLuint program;
-		GLuint uniform_loc1;
-		GLuint uniform_loc2;
-		GLuint uniform_loc3;
-	Program() : program(0), uniform_loc1(-1), uniform_loc2(-1), uniform_loc3(-1) {};
-	Program(GLuint programID, GLuint uniformLocation1, GLuint uniformLocation2, GLuint uniformLocation3)
-        : program(programID), uniform_loc1(uniformLocation1), uniform_loc2(uniformLocation2), uniform_loc3(uniformLocation3) {};
-	Program(GLuint programID,const char* name1,const char* name2,const char* name3) : program(programID){
-		uniform_loc1=get_uniform(program,name1);
-		uniform_loc2=get_uniform(program,name2);
-		uniform_loc3=get_uniform(program,name3);
-	};
+	Program() : uniform_locs(), program() {};
+	template<typename... Args>
+	Program(const char* vshader, const char* fshader, Args ... args){
+		program = InitShader(vshader,fshader);
+		std::cout << "Created program " << program << " : " << vshader << ", " << fshader << std::endl;
+		for(const char* uniform : {args...}){
+			try_add(uniform);
+		}
+	}
+	GLuint find(const char* uniform){
+		auto it = uniform_locs.find(uniform);
+
+		if (it != uniform_locs.end()) {
+			return it->second;
+		} else {
+			return try_add(uniform);
+		}
+	}
+	void Delete(){
+		glDeleteProgram(program);
+	}	
 };
 
 class Renderer
@@ -36,6 +54,7 @@ class Renderer
 	int m_width, m_height;
 
 	//vertex/fragment shader
+	Program program_wireframe;
 	std::vector<Program> programs;
 	int current_program;
 
@@ -47,6 +66,8 @@ class Renderer
 	void CreateBuffers(int width, int height);
 	void CreateLocalBuffer();
 
+
+	void _DrawTris(Program& program, GLuint vao, GLuint face_count, const mat4& wm_transform, const mat4& wm_normal_transform);
 	//////////////////////////////
 	// openGL stuff. Don't touch.
 
@@ -67,7 +88,10 @@ public:
 	void CreateProgram(const char* vshader, const char* fshader);
 	void RemoveProgram(int index);
 
-	void DrawMesh(GLuint vao,GLuint face_count, const mat4& transform);
+	void DrawMesh(GLuint vao,GLuint face_count, const mat4& transform = mat4(), const mat4& normal_transform = mat4());
+	void DrawWireframe(GLuint vao, GLuint face_count, const mat4& wm_transform);
+	void DrawLines(GLuint lines_vao, GLuint lines_count, const mat4& wm_transform, vec3 color = vec3(1,0,1));
+
 	void SetCameraTransformInverse(const mat4& cTransform);
 	void SetProjection(const mat4& projection);
 	void setCameraMatrixes(const mat4& cTransform, const mat4& Projection);
