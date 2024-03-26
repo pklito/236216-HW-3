@@ -206,6 +206,87 @@ void MeshModel::generateBuffers(const GLfloat* vertices_array, const GLfloat* ve
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(2);
 
+
+	//
+	// VERTEX NORMAL drawing vao
+	//
+	float NORMAL_LENGTH = 0.2;
+
+	glGenVertexArrays(1, &vert_vao);
+	glBindVertexArray(vert_vao);
+
+	glGenBuffers(1, &vert_vbo);
+	GLfloat* vert_points = new GLfloat[2 * 3 * 3 * face_num];
+	for(int i = 0; i < 3 * face_num; i ++){
+		for(int coord = 0; coord < 3; coord ++){
+			vert_points[3*2*i + coord] = vertices_array[3*i + coord];
+			if(vertex_normals_array)
+				vert_points[3 * (2*i + 1) + coord] = vertices_array[3*i + coord] + NORMAL_LENGTH * vertex_normals_array[3*i + coord];
+			else
+				vert_points[3 * (2*i + 1) + coord] = vertices_array[3*i + coord] + NORMAL_LENGTH * vn_arr[3*i + coord];
+		}
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, face_vbo);
+	glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float)*3*3 * 2,
+		vert_points, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	delete[] vert_points;
+
+	//
+	// FACE NORMAL drawing vao
+	//
+
+	//Generate the vertex draw vao
+	glGenVertexArrays(1, &face_vao);
+	glBindVertexArray(face_vao);
+
+	glGenBuffers(1, &face_vbo);
+	GLfloat* norm_points = new GLfloat[2 * 3 * face_num];
+	for(int face = 0; face < face_num; face ++){
+		vec3 p1 = vec3(vertices_array[9*face + 0],vertices_array[9*face + 1],vertices_array[9*face + 2]);
+		vec3 p2 = vec3(vertices_array[9*face + 3],vertices_array[9*face + 4],vertices_array[9*face + 5]);
+		vec3 p3 = vec3(vertices_array[9*face + 6],vertices_array[9*face + 7],vertices_array[9*face + 8]);
+		vec3 norm = calculateNormal(p1, p2, p3);
+
+		vec3 center = (p1 + p2 + p3) / 3;
+		vec3 end = center + NORMAL_LENGTH * norm;
+
+		for(int coord = 0; coord < 3; coord ++){
+			norm_points[2 * 3 * face + coord] = center[coord];
+		}
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, face_vbo);
+	glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float)* 3 * 2,
+		norm_points, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	delete[] norm_points;
+
+	//
+	// BOUNDING BOX drawing vao
+	//
+	/*
+	glGenVertexArrays(1, &vert_vao);
+	glBindVertexArray(vert_vao);
+
+	glGenBuffers(1, &vert_vbo);
+	GLfloat* vert_points = new GLfloat[2 * 3 * 3 * face_num];
+	for(int i = 0; i < 3 * face_num; i ++){
+		for(int coord = 0; coord < 3; coord ++){
+			vert_points[3*2*i + coord] = vertices_array[3*i + coord];
+			
+		}
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_textures);
+	glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float)*3*3 * 2,
+		vert_points, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	delete[] vert_points;
+	*/
+
 	delete[] vt_arr;
 	delete[] vn_arr;
 	glBindVertexArray(0);

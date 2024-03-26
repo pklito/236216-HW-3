@@ -134,6 +134,30 @@ void Renderer::DrawWireframe(GLuint vao, GLuint face_count, const mat4& wm_trans
 	glUseProgram(0);
 }
 
+void Renderer:: DrawLines(GLuint lines_vao, GLuint lines_count, const mat4& wm_transform, vec3 color){
+	glUseProgram(program_wireframe.program);
+
+	//Bind the models settings
+    glBindVertexArray(lines_vao);
+
+	GLfloat color_arr[3] = {color.x,color.y,color.z};
+	glUniform3fv(program_wireframe.find("color"), 1, color_arr);
+
+	GLfloat full_transform_array[16];
+	toFloatArray(full_transform_array, wm_transform);
+	glUniformMatrix4fv(program_wireframe.find("world_transform"), 1, GL_FALSE,full_transform_array);
+	
+	GLfloat proj_array[16];
+	toFloatArray(proj_array, mat_project * mat_transform_inverse);
+	glUniformMatrix4fv(program_wireframe.find("camera_transform"), 1, GL_FALSE,proj_array);
+
+	//Draw
+    glDrawArrays(GL_LINES, 0, lines_count);
+    glBindVertexArray(0);
+
+	glUseProgram(0);
+}
+
 // Camera
 void Renderer::SetCameraTransformInverse(const mat4& cTransform){
 	mat_transform_inverse = cTransform;

@@ -17,6 +17,16 @@ protected :
 	GLuint vbo_vertices;
 	GLuint vbo_normals;
 	GLuint vbo_textures;
+
+	GLuint vert_vao;
+	GLuint vert_vbo;
+
+	GLuint face_vao;
+	GLuint face_vbo;
+
+	GLuint box_vao;
+	GLuint box_vbo;
+
 	//add more attributes
 	mat4 _world_transform;
 	mat4 _model_transform;
