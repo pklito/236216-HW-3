@@ -110,6 +110,7 @@ void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4& wm_transform,
 	glUseProgram(0);
 }
 
+// Identical to DrawMesh, ut GL_LINE_STRIP, and a hardcoded program.
 void Renderer::DrawWireframe(GLuint vao, GLuint face_count, const mat4& wm_transform){
 	glUseProgram(program_wireframe.program);
 

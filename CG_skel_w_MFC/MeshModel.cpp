@@ -210,7 +210,7 @@ void MeshModel::generateBuffers(const GLfloat* vertices_array, const GLfloat* ve
 	//
 	// VERTEX NORMAL drawing vao
 	//
-	float NORMAL_LENGTH = 0.2;
+	float NORMAL_LENGTH = 0.1;
 
 	glGenVertexArrays(1, &vert_vao);
 	glBindVertexArray(vert_vao);
@@ -294,7 +294,14 @@ void MeshModel::generateBuffers(const GLfloat* vertices_array, const GLfloat* ve
 
 void MeshModel::draw(Renderer* renderer)
 {
-	renderer->DrawMesh(vao, face_num, _world_transform * _model_transform, _world_normal_transform * _model_normal_transform);	//TODO: calculate this transform on change
+	mat4 full_trans = _world_transform * _model_transform;
+	mat4 full_norm_trans = _world_normal_transform * _model_normal_transform;
+	//renderer->DrawMesh(vao, face_num, full_trans, full_norm_trans);	//TODO: calculate this transform on change
+	renderer->DrawWireframe(vao,face_num,full_trans);
+	renderer->DrawLines(vert_vao, 2 * 3 * face_num, full_trans);
+	//renderer->DrawLines(face_vao, 2 * face_num, full_trans);
+	//renderer->DrawLines(box_vao, 24, full_trans);
+		
 }
 
 mat4 MeshModel::getFullTransformation() {
