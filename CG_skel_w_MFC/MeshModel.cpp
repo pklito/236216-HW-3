@@ -223,9 +223,11 @@ mat4 MeshModel::getFullTransformation() {
 void MeshModel::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, bool isWorld) {
 	if(isWorld){
 		applyWorldTransformation(Translate(x_trans,y_trans,z_trans));
+		applyWorldNormalTransformation(Translate(-x_trans,-y_trans,-z_trans));
 	}
 	else{
 		applyModelTransformation(Translate(x_trans,y_trans,z_trans));
+		applyModelNormalTransformation(Translate(-x_trans,-y_trans,-z_trans));
 	}
 }
 
@@ -233,9 +235,11 @@ void MeshModel::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, boo
 void MeshModel::rotate(GLfloat theta_angle, int mode, bool isWorld) {
 	if(isWorld){
 		applyWorldTransformation(RotateAxis(theta_angle,mode));
+		applyWorldNormalTransformation(RotateAxis(-theta_angle,mode));
 	}
 	else{
 		applyModelTransformation(RotateAxis(theta_angle,mode));
+		applyModelNormalTransformation(RotateAxis(-theta_angle,mode));
 	}
 }
 
@@ -243,9 +247,11 @@ void MeshModel::rotate(GLfloat theta_angle, int mode, bool isWorld) {
 void MeshModel::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale, bool isWorld) {
 	if(isWorld){
 		applyWorldTransformation(Scale(x_scale,y_scale,z_scale));
+		applyWorldNormalTransformation(Scale(1/x_scale,1/y_scale,1/z_scale));
 	}
 	else{
 		applyModelTransformation(Scale(x_scale,y_scale,z_scale));
+		applyModelNormalTransformation(Scale(1/x_scale,1/y_scale,1/z_scale));
 	}
 }
 
@@ -272,6 +278,13 @@ void MeshModel::applyModelTransformation(const mat4& transformation) {
 	_model_transform = transformation * _model_transform;
 }
 
+void MeshModel::applyWorldNormalTransformation(const mat4& transformation_inv){
+	_world_normal_transform = transpose(transformation_inv) * _world_normal_transform;
+}
+void MeshModel::applyModelNormalTransformation(const mat4& transformation_inv){
+	_model_normal_transform = transpose(transformation_inv) * _model_normal_transform;
+
+}
 
 // TODO: Implement this function
 void MeshModel::setShowNormals(bool change) {

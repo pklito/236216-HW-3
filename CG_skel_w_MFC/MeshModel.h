@@ -26,6 +26,8 @@ protected :
 
 	void applyWorldTransformation(const mat4& transformation);
 	void applyModelTransformation(const mat4& transformation);
+	void applyWorldNormalTransformation(const mat4& transformation_inv);
+	void applyModelNormalTransformation(const mat4& transformation_inv);
 
 public:
 
