@@ -24,6 +24,7 @@ class Program {
 		}
 	public:
 		GLuint program;
+	Program() : uniform_locs(), program() {};
 	template<typename... Args>
 	Program(const char* vshader, const char* fshader, Args ... args){
 		program = InitShader(vshader,fshader);
@@ -53,6 +54,7 @@ class Renderer
 	int m_width, m_height;
 
 	//vertex/fragment shader
+	Program program_wireframe;
 	std::vector<Program> programs;
 	int current_program;
 
@@ -85,6 +87,9 @@ public:
 	void RemoveProgram(int index);
 
 	void DrawMesh(GLuint vao,GLuint face_count, const mat4& transform = mat4(), const mat4& normal_transform = mat4());
+	void DrawWireframe(GLuint vao, GLuint face_count, const mat4& wm_transform);
+	void DrawLines(GLuint lines_vao, GLuint lines_count, const mat4& wm_transform, vec3 color = vec3(1,0,1));
+
 	void SetCameraTransformInverse(const mat4& cTransform);
 	void SetProjection(const mat4& projection);
 	void setCameraMatrixes(const mat4& cTransform, const mat4& Projection);
