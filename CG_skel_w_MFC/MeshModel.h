@@ -42,10 +42,6 @@ public:
 	void rotate(GLfloat theta_angle, int mode, bool isWorld = false) override;
 	void scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale, bool isWorld = false) override;
 
-	void calculateBoundingBox();
-	void normalToFace();
-	void CalculateVertexNormals();
-
 	void setShowNormals(bool change) override;
 	void setShowNormalsToVertices(bool change) override;
 	void setShowBox(bool change) override;

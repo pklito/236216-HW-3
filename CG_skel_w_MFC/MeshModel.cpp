@@ -255,21 +255,6 @@ void MeshModel::scale(GLfloat x_scale, GLfloat y_scale, GLfloat z_scale, bool is
 	}
 }
 
-// TODO: Implement this function
-void MeshModel::calculateBoundingBox() {
-	// Placeholder implementation
-}
-
-// TODO: Implement this function
-void MeshModel::normalToFace() {
-	// Placeholder implementation
-}
-
-// TODO: Implement this function
-void MeshModel::CalculateVertexNormals() {
-	// Placeholder implementation
-}
-
 void MeshModel::applyWorldTransformation(const mat4& transformation) {
 	_world_transform = transformation * _world_transform;
 }
