@@ -4,29 +4,28 @@
 #include "vec.h"
 #include "mat.h"
 #include "GL/glew.h"
+#include "InitShader.h"
 
 class Camera;
 
 class Program {
-	private:
-		GLuint get_uniform(GLuint program, const char* name){
-			return glGetUniformLocation(program, name);
-		}
-		
-		
 	public:
 		GLuint program;
-		GLuint uniform_loc1;
-		GLuint uniform_loc2;
-		GLuint uniform_loc3;
-	Program() : program(0), uniform_loc1(-1), uniform_loc2(-1), uniform_loc3(-1) {};
-	Program(GLuint programID, GLuint uniformLocation1, GLuint uniformLocation2, GLuint uniformLocation3)
-        : program(programID), uniform_loc1(uniformLocation1), uniform_loc2(uniformLocation2), uniform_loc3(uniformLocation3) {};
-	Program(GLuint programID,const char* name1,const char* name2,const char* name3) : program(programID){
-		uniform_loc1=get_uniform(program,name1);
-		uniform_loc2=get_uniform(program,name2);
-		uniform_loc3=get_uniform(program,name3);
-	};
+		std::vector<GLuint> uniform_locs;
+	template<typename... Args>
+	Program(const char* vshader, const char* fshader, Args ... args){
+		program = InitShader(vshader,fshader);
+		for(const char* uniform : {args...}){
+			GLuint loc = glGetUniformLocation(program, uniform);
+			if(loc == (GLuint)(-1)){
+				std::cout << "[X] " << vshader << " failed to find uniform: " << uniform << std::endl;
+			}
+			uniform_locs.push_back(loc);
+		}
+	}
+	void Delete(){
+		glDeleteProgram(program);
+	}	
 };
 
 class Renderer

@@ -20,7 +20,7 @@ Renderer::Renderer(int width, int height, const char* vshader, const char* fshad
 Renderer::~Renderer(void)
 {
 	for(Program p : programs){
-		glDeleteProgram(p.program);
+		p.Delete();
 	}
 }
 
@@ -50,7 +50,7 @@ void Renderer::CreateBuffers(int width, int height)
 }
 
 void Renderer::CreateProgram(const char* vshader, const char* fshader){
-	programs.push_back(Program(InitShader(vshader, fshader),"world_transform","camera_transform","normal_transform"));
+	programs.push_back(Program(vshader,fshader,"world_transform","camera_transform","normal_transform"));
 }
 
 void Renderer::RemoveProgram(int index){
@@ -90,15 +90,15 @@ void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4& wm_transform,
 
 	GLfloat full_transform_array[16];
 	toFloatArray(full_transform_array, wm_transform);
-	glUniformMatrix4fv(programs[current_program].uniform_loc1, 1, GL_FALSE,full_transform_array);
+	glUniformMatrix4fv(programs[current_program].uniform_locs[0], 1, GL_FALSE,full_transform_array);
 
 	GLfloat proj_array[16];
 	toFloatArray(proj_array, mat_project * mat_transform_inverse);
-	glUniformMatrix4fv(programs[current_program].uniform_loc2, 1, GL_FALSE,proj_array);
+	glUniformMatrix4fv(programs[current_program].uniform_locs[1], 1, GL_FALSE,proj_array);
 
 	GLfloat normal_trans_array[16];
 	toFloatArray(normal_trans_array, wm_normal_transform);
-	glUniformMatrix4fv(programs[current_program].uniform_loc3, 1, GL_FALSE,normal_trans_array);
+	glUniformMatrix4fv(programs[current_program].uniform_locs[2], 1, GL_FALSE,normal_trans_array);
 
 	//Draw
     glDrawArrays(GL_TRIANGLES, 0, face_count*3);
