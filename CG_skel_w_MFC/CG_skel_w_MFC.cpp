@@ -22,24 +22,228 @@
 #include "Renderer.h"
 #include "MeshModel.h"
 #include <string>
+#include "CPopup.h"
+#include "CColorPicker.h"
+#include "CPopNumber.h"
 
 #define BUFFER_OFFSET( offset )   ((GLvoid*) (offset))
 
-#define FILE_OPEN 1
-#define MAIN_DEMO 1
-#define MAIN_ABOUT 2
 
-Scene *scene;
-Renderer *renderer;
+enum MENU_STATES {
+	OPEN_FILE_OBJ,
+	ADD_CAMERA_ORTHO,
+	ADD_CAMERA_PROJECTION,
+	MAIN_DEMO,
+	MAIN_ABOUT,
+
+	DELETE_MESH,
+	DELETE_CAMERA,
+	DELETE_LIGHT,
+
+	RESCALE_WINDOW_MENU_ITEM_UP,
+	RESCALE_WINDOW_MENU_ITEM_DOWN,
+
+	CHANGE_INCREMENT,
+
+	DRAW_NORMALS,
+	HIDE_NORMALS,
+	DRAW_VERTEX_NORMALS,
+	HIDE_VERTEX_NORMALS,
+	DRAW_BOUNDING_BOX,
+	HIDE_BOUNDING_BOX,
+
+	ADD_TETRAHEDRON,
+	ADD_CUBE,
+
+	ADD_LIGHT_POINT,
+	ADD_LIGHT_DIRECTIONAL
+};
+
+Scene* scene;
+Renderer* renderer;
+float m_time;
 
 int last_x,last_y;
 bool lb_down,rb_down,mb_down;
 
+float increment = 0.2;
+
+//----------------------------------------------------------------------------
+// Camera + Scene modiications
+//----------------------------------------------------------------------------
+void queryLight(vec3& color_out, float& intensity_out, Light* light_default=nullptr){
+	CColorPicker colordialog(nullptr, light_default);
+	if(colordialog.DoModal() != IDOK){
+		return;
+	}
+	intensity_out = colordialog.m_sliderval/100.f;
+	COLORREF color = colordialog.m_color.GetColor();
+	
+	color_out = vec3((float)GetRValue(color)/255.f,
+	(float)GetGValue(color)/255.f,
+	(float)GetBValue(color)/255.f);
+}
+void swapCameras(){
+	scene->cycleActiveCamera();
+	renderer->setCameraMatrixes(scene->getActiveCamera());
+	glutPostRedisplay();
+}
+
+#define TRY_FLOAT(var, text) try { var = std::stof(text); } catch (const std::invalid_argument& e) {std::cout<<"BAD_INPUT"<<std::endl;return;} catch (const std::out_of_range& e) {return;}
+
+void changeIncrement(){
+	CString floatString;
+	floatString.Format(_T("%f"),increment);
+	CPopNumber c(_T("Choose the new increment"),floatString);
+	if(c.DoModal() == IDCANCEL){
+		return;
+	}
+	try{
+		increment = _ttof(c.m_inputval);
+	}
+	catch(exception e){
+	}
+}
+
+void addProjCamera(){
+	
+	CPopup c;
+	int result = c.DoModal();
+	if(result == IDCANCEL){
+		return;
+	}
+	
+	Camera* camera = new Camera();
+	float fov_degrees = 70;
+	float aspect_ratio = 1;
+	float zNear = 0.5;
+	float zFar = 5;
+	if(result == IDOK){
+		fov_degrees = c.m_sliderval;
+		try{
+			aspect_ratio = _ttof(c.m_msg1);
+			zNear = _ttof(c.m_msg2);
+			zFar = _ttof(c.m_msg3);
+		}
+		catch(exception e){
+			aspect_ratio = 1;
+			zNear = 0.5;
+			zFar = 5;
+		}
+	}
+	
+	fov_degrees = Radians(fov_degrees);
+	camera->LookAt(vec3(1,1,1),vec3(-1,0,0),vec3(0,1,0));
+	//TEMP ORTHOGRAPHIC
+	camera->Perspective(fov_degrees,aspect_ratio,zNear,zFar);
+	scene->addCamera(camera);
+	glutPostRedisplay();
+}
+int selected_type = 0;
+void changeMaterialColor(){
+	/*
+	vec3 color_out;
+	float intensity = -1;
+	
+	queryLight(color_out, intensity);
+	if(intensity < 0){
+		return;
+	}
+	Material mat = scene->getSelectedMaterial();
+	if(selected_type == 1){
+		mat.color_diffuse = color_out;
+	}
+	if(selected_type == 0){
+		mat.color_ambient = color_out;
+	}
+	if(selected_type == 2){
+		mat.color_specular = color_out;
+		mat.k_shiny = (int)(intensity*2);
+	}
+	scene->setSelectedMaterial(mat);
+	
+	selected_type = (selected_type += 1)%3;*/
+}
+
+void addOrthoCamera(){
+	CPopupOrtho c;
+	int result = c.DoModal();
+	if(result == IDCANCEL){
+		return;
+	}
+	float width = 2;
+	float height = 2;
+	float zNear = 0.5;
+	float zFar = 5;
+	if(result == IDOK){
+		try{
+			width = _ttof(c.m_msg1);
+			height = _ttof(c.m_msg2);
+			zNear = _ttof(c.m_msg3);
+			zFar = _ttof(c.m_msg4);
+		}
+		catch(exception e){
+
+		}
+	}
+	Camera* camera = new Camera();
+
+	camera->LookAt(vec3(1,0,1),vec3(-1,0,0),vec3(0,1,0));
+	camera->Ortho(-width/2,width/2,-height/2,height/2,zNear,zFar);
+	scene->addCamera(camera);
+	glutPostRedisplay();
+}
+
+void readFromFile(){
+	CFileDialog dlg(TRUE, _T(".obj"), NULL, NULL, _T("*.obj|*.*"));
+	if (dlg.DoModal() == IDOK)
+	{
+		std::string s((LPCTSTR)dlg.GetPathName());
+		scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
+		glutPostRedisplay();
+	}
+}
+
+void changeLight(){
+
+	/* TODO
+	if(scene->getMovingModel()){
+		vec3 colorvec;
+		float intensity = -1;
+		queryLight(colorvec,intensity,&renderer->getAmbientLight());
+		if(intensity < 0)
+			return;
+
+		renderer->setAmbientLight(AmbientLight(intensity,colorvec));
+	}
+	else{
+		Light* light = scene->getSelectedLight();
+		vec3 colorvec;
+		float intensity = -1;
+		queryLight(colorvec,intensity,light);
+		if(intensity < 0)
+			return;
+		
+		light->setColor(colorvec);
+		light->setIntensity(intensity);
+	}*/
+}
 //----------------------------------------------------------------------------
 // Callbacks
+//----------------------------------------------------------------------------
 
-void display( void )
-{
+void display( void ){
+	//if false, moving lights
+
+	/* TODO
+	if(!scene->getMovingModel()){
+		renderer->FillEdges(0.05, vec3(0.5,0.5,0.2));
+	}
+	if(scene->getWorldControl()){
+		renderer->FillEdges(0.02, vec3(0.1, 0.1, 0.5));
+	}
+	*/
+
 	scene->draw();
 }
 
@@ -48,13 +252,142 @@ void reshape( int width, int height )
 //update the renderer's buffers
 }
 
+void keyboard_special( int key, int x, int y ){
+	switch (key) {
+		case GLUT_KEY_LEFT:
+			scene->getActiveCamera()->translate(-0.1, 0, 0, scene->getWorldControl());
+			break;
+		case GLUT_KEY_RIGHT:
+			scene->getActiveCamera()->translate(0.1, 0, 0, scene->getWorldControl());
+			break;
+		case GLUT_KEY_UP:
+			scene->getActiveCamera()->translate(0, 0.1, 0, scene->getWorldControl());
+			break;
+		case GLUT_KEY_DOWN:
+			scene->getActiveCamera()->translate(0, -0.1, 0, scene->getWorldControl());
+			break;
+		default:
+			//fail
+			return;
+	}
+	
+	//if key was accepted
+	renderer->setCameraMatrixes(scene->getActiveCamera());
+	glutPostRedisplay();
+}
+
 void keyboard( unsigned char key, int x, int y )
 {
 	switch ( key ) {
 	case 033:
 		exit( EXIT_SUCCESS );
 		break;
+	case 9:
+		scene->cycleSelectedObject();
+		break;
+	case ',':
+		scene->getActiveCamera()->translate(0, 0, -0.1, scene->getWorldControl());
+		renderer->setCameraMatrixes(scene->getActiveCamera());
+		break;
+	case 'z': //return model to center
+		scene->returnModelToCenter();
+		break;
+	case '.':
+		scene->getActiveCamera()->translate(0, 0, 0.1, scene->getWorldControl());
+		renderer->setCameraMatrixes(scene->getActiveCamera());
+		break;
+	case 'v':
+		scene->rotateCameraToSelectedObject();
+		renderer->setCameraMatrixes(scene->getActiveCamera());
+		break;
+	case 'm':
+		scene->getActiveCamera()->rotate(-15, 1, scene->getWorldControl());
+		renderer->setCameraMatrixes(scene->getActiveCamera());
+		break;
+	case 'n':
+		scene->getActiveCamera()->rotate(15, 1, scene->getWorldControl());
+		renderer->setCameraMatrixes(scene->getActiveCamera());
+		break;
+	case 't':
+		scene->scaleObject(1.3f); // Increase scale by 30%
+		break;
+	case 'r':
+		scene->scaleObject(0.77f); // Decrease scale by 30%
+		break;
+	case 'a':
+		scene->translateObject(-increment, 0, 0);
+		break;
+	case 'd':
+		scene->translateObject(increment, 0, 0);
+		break;
+	case 'w':
+		scene->translateObject(0, 0, -increment);
+		break;
+	case 's':
+		scene->translateObject(0, 0, increment);
+		break;
+	case 'e':
+		scene->translateObject(0, increment, 0);
+		break;
+	case 'q':
+		scene->translateObject(0, -increment, 0);
+		break;
+	case 'j':
+		scene->rotateObject(-30, 1);
+		break;
+	case 'l':
+		scene->rotateObject(30, 1);
+		break;
+	case 'k':
+		scene->rotateObject(30, 0);
+		break;
+	case 'i':
+		scene->rotateObject(-30, 0);
+		break;
+	case 'f':
+		scene->setWorldControl(!scene->getWorldControl());
+		break;
+	case 'g':
+		scene->toggleMovingModel();
+		break;
+	case ' ':
+		swapCameras();
+		break;
+	case '1':
+		scene->setFillObj(!(scene->getFillObj()));
+		break;
+	case '2':
+		scene->changeCurrsColor();
+		break;
+	case '7':
+		changeMaterialColor();
+		break;
+	case '6':
+		scene->changeCurrsMaterial();
+		break;
+		
+	/* TODO
+	case '3':
+		scene->changeShadingMethod();
+		break;
+	case 'h':
+		changeLight();
+		break;
+	case '8':
+		renderer->setAntiAliasing(!(renderer->getAntiAliasingFlag()));
+		display();
+		break;
+	case '9':
+		renderer->setBloomFlag(!renderer->getBloomFlag());
+		display();
+		break;*/
+	default:
+		return;
 	}
+	
+
+	//if key was accepted
+	glutPostRedisplay();
 }
 
 void mouse(int button, int state, int x, int y)
@@ -88,19 +421,121 @@ void motion(int x, int y)
 	last_y=y;
 }
 
+//----------------------------------------------------------------------------
+// Menus
+//----------------------------------------------------------------------------
+
+void deleteMenu(int id){
+	switch(id){
+		case DELETE_MESH:
+			scene->removeSelectedObject();
+			break;
+		case DELETE_CAMERA:
+			scene->removeSelectedCamera();
+			renderer->setCameraMatrixes(scene->getActiveCamera());
+			break;
+		case DELETE_LIGHT:
+			// TODO implement scene->removeSelectedLight();
+			break;
+	}
+	glutPostRedisplay();
+}
+
+void lightMenu(int id){
+	/* TODO implement
+	Light* light;
+	vec3 color;
+	float intensity = -1;
+	switch(id){
+		case ADD_LIGHT_POINT:
+			light = new PointLight(1,vec3(0.5,0,0.5),vec3(0,0,1));
+			
+			queryLight(color,intensity, light);
+			if(intensity>=0){
+				light->setColor(color);
+				light->setIntensity(intensity);
+				scene->addLightSource(light);
+			}
+			break;
+		case ADD_LIGHT_DIRECTIONAL:
+			light = new DirectionalLight(1,vec3(0.5,0,0.5),vec3(0,0,1));
+			color;
+			intensity = -1;
+			queryLight(color,intensity, light);
+			if(intensity>=0){
+				light->setColor(color);
+				light->setIntensity(intensity);
+				scene->addLightSource(light);
+			}
+			break;
+	}
+	*/
+}
+void primMenu(int id) {
+	std::cout << "start prim" << std::endl;
+	PrimMeshModel* model;
+	switch(id){
+		case ADD_CUBE:
+			model = new PrimMeshModel(PRIM_CUBE);
+			break;
+		case ADD_TETRAHEDRON:
+			model = new PrimMeshModel(PRIM_TETRAHEDRON);
+			break;
+		default:
+			return;
+	}
+	scene->addMeshModel(model);
+	glutPostRedisplay();
+}
+
 void fileMenu(int id)
 {
 	switch (id)
 	{
-		case FILE_OPEN:
-			CFileDialog dlg(TRUE,_T(".obj"),NULL,NULL,_T("*.obj|*.*"));
-			if(dlg.DoModal()==IDOK)
-			{
-				std::string s((LPCTSTR)dlg.GetPathName());
-				scene->loadOBJModel((LPCTSTR)dlg.GetPathName());
-			}
-			break;
+	case OPEN_FILE_OBJ:
+		readFromFile();
+		break;
+	case ADD_CAMERA_ORTHO:
+		addOrthoCamera();
+		break;
+	case ADD_CAMERA_PROJECTION:
+		addProjCamera();
+		break;
 	}
+}
+
+void optionMenu(int id)
+{
+	if (scene) {
+		switch (id)
+		{
+		case DRAW_NORMALS:
+			// Logic to draw normals (turn on)
+			scene->setShowNormalsForMeshModels(true);
+			break;
+		case HIDE_NORMALS:
+			// Logic to hide normals (turn off)
+			scene->setShowNormalsForMeshModels(false);
+			break;
+		case DRAW_BOUNDING_BOX:
+			// Logic to draw bounding box (turn on)
+			scene->setShowBoxForMeshModels(true);
+			break;
+		case HIDE_BOUNDING_BOX:
+			// Logic to hide bounding box (turn off)
+			scene->setShowBoxForMeshModels(false);
+			break;
+		case DRAW_VERTEX_NORMALS:
+			// Logic to draw normals to vertices (turn on)
+			scene->setShowNormalsToVerticesForMeshModels(true);
+			break;
+		case HIDE_VERTEX_NORMALS:
+			// Logic to draw normals to vertices (turn off)
+			scene->setShowNormalsToVerticesForMeshModels(false);
+			break;
+		}
+	}
+	glutPostRedisplay();
 }
 
 void mainMenu(int id)
@@ -111,36 +546,125 @@ void mainMenu(int id)
 		scene->drawDemo();
 		break;
 	case MAIN_ABOUT:
-		AfxMessageBox(_T("Computer Graphics"));
+		AfxMessageBox(_T("Controls:\n\nTab - Cycle selected Mesh\nWASDQE - Move the selected mesh.\nJKLI - Rotate selected mesh\nF - Toggle world/model space controls\n\nSpace - Cycle active camera\n[Arrows , .] - Move camera\n\nBlue outline means World space\nRed outline means an input needs to be put"));
 		break;
 	}
 }
 
+void rescaleWindow(bool up_or_down)
+{
+	// Your code to rescale the window goes here
+	// For example, you might use GLUT functions to reshape the window
+	
+	int newWidth, newHeight;
+
+	if (up_or_down) {
+		newWidth = 2048;
+		newHeight = 2048;
+	}
+	else {
+		newWidth = 512;
+		newHeight = 512;
+	}
+
+	if (newWidth == glutGet(GLUT_WINDOW_WIDTH) && newHeight == glutGet(GLUT_WINDOW_HEIGHT)) {
+		return;
+	}
+	//scene->translateObject((newWidth - glutGet(GLUT_WINDOW_WIDTH)) / 2, (newHeight - glutGet(GLUT_WINDOW_HEIGHT)) / 2, 0);
+
+	glutReshapeWindow(newWidth, newHeight);
+	glutPostRedisplay();
+}
+
+void menuCallback(int menuItem) 
+{
+	switch (menuItem) {
+	case RESCALE_WINDOW_MENU_ITEM_UP:
+		// Call a function to rescale the window
+		rescaleWindow(true);
+		break;
+		// Add more cases for additional menu items if needed
+	case RESCALE_WINDOW_MENU_ITEM_DOWN:
+		rescaleWindow(false);
+		break;
+	case CHANGE_INCREMENT:
+		changeIncrement();
+		break;
+	}
+
+}
+
 void initMenu()
 {
+	int primitivesMenu = glutCreateMenu(primMenu);
+	glutAddMenuEntry("Tetrahedron", ADD_TETRAHEDRON);
+	glutAddMenuEntry("Cube", ADD_CUBE);
+
+	int lightsMenu = glutCreateMenu(lightMenu);
+	glutAddMenuEntry("Point", ADD_LIGHT_POINT);
+	glutAddMenuEntry("Directional", ADD_LIGHT_DIRECTIONAL);
+
 
 	int menuFile = glutCreateMenu(fileMenu);
-	glutAddMenuEntry("Open..",FILE_OPEN);
+	glutAddMenuEntry("Orthographic Camera", ADD_CAMERA_ORTHO);
+	glutAddMenuEntry("Perspective Camera", ADD_CAMERA_PROJECTION);
+	glutAddMenuEntry(".OBJ Mesh...", OPEN_FILE_OBJ);
+	glutAddSubMenu("light", lightsMenu);
+	glutAddSubMenu("Primitives", primitivesMenu);
+	
+	// Create the "Normal" submenu
+	int optionsSubMenu = glutCreateMenu(optionMenu);
+	// Attach the "Normal" submenu to the main menu
+	glutAddMenuEntry("Draw Normals", DRAW_NORMALS);
+	glutAddMenuEntry("Hide Normals", HIDE_NORMALS);
+	glutAddMenuEntry("Draw Normals To Vertices", DRAW_VERTEX_NORMALS);
+	glutAddMenuEntry("Hide Normals To Vertices", HIDE_VERTEX_NORMALS);
+	glutAddMenuEntry("Draw Bounding Box", DRAW_BOUNDING_BOX);
+	glutAddMenuEntry("Hide Bounding Box", HIDE_BOUNDING_BOX);
+	//Draw Hide cameras
+	//Draw hide vertex normals
+
+	int rescaleMenu = glutCreateMenu(menuCallback);
+	glutAddMenuEntry("Rescale Window Up", RESCALE_WINDOW_MENU_ITEM_UP);
+	glutAddMenuEntry("Rescale Window Down", RESCALE_WINDOW_MENU_ITEM_DOWN);
+	
+	glutAddMenuEntry("Change increment", CHANGE_INCREMENT);
+
+	int deleteSubMenu = glutCreateMenu(deleteMenu);
+	glutAddMenuEntry("Delete Sel. Mesh", DELETE_MESH);
+	glutAddMenuEntry("Delete Sel. Camera", DELETE_CAMERA);
+	glutAddMenuEntry("Delete Sel. Light", DELETE_LIGHT);
+
+
 	glutCreateMenu(mainMenu);
-	glutAddSubMenu("File",menuFile);
-	glutAddMenuEntry("Demo",MAIN_DEMO);
-	glutAddMenuEntry("About",MAIN_ABOUT);
+	glutAddSubMenu("New", menuFile);
+	glutAddSubMenu("Delete", deleteSubMenu);
+	glutAddSubMenu("View", optionsSubMenu);
+	glutAddSubMenu("Window", rescaleMenu);
+	glutAddMenuEntry("Demo", MAIN_DEMO);
+	glutAddMenuEntry("Help", MAIN_ABOUT);
+	
+	glutAttachMenu(GLUT_RIGHT_BUTTON);
+
+	// Attach the menu to a mouse button
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 //----------------------------------------------------------------------------
 
+//----------------------------------------------------------------------------
+// Main
+//----------------------------------------------------------------------------
 
-
-int my_main( int argc, char **argv )
+int my_main(int argc, char** argv)
 {
 	//----------------------------------------------------------------------------
 	// Initialize window
-	glutInit( &argc, argv );
-	glutInitDisplayMode( GLUT_RGBA| GLUT_DOUBLE);
-	glutInitWindowSize( 512, 512 );
-	glutInitContextVersion( 3, 2 );
-	glutInitContextProfile( GLUT_CORE_PROFILE );
-	glutCreateWindow( "CG" );
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
+	glutInitWindowSize(1024, 1024);
+	glutInitContextVersion(3, 2);
+	glutInitContextProfile(GLUT_CORE_PROFILE);
+	glutCreateWindow("Wireframe render - RightClick for options");
 	glewExperimental = GL_TRUE;
 	glewInit();
 	GLenum err = glewInit();
@@ -152,23 +676,51 @@ int my_main( int argc, char **argv )
 	}
 	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
-	
-	
-	renderer = new Renderer();
+	renderer = new Renderer(1024, 1024,"minimal_vshader.glsl","minimal_fshader.glsl");
 	scene = new Scene(renderer);
+	Camera* camera = new Camera();
+	Light* light = new PointLight(1,vec3(1,1,1),vec3(-2,0,1));
+	Light* light2 = new DirectionalLight(1,vec3(1,0,1),vec3(0,1,0));
+	//renderer->setAmbientLight(AmbientLight(1,vec3(0.3,0.3,0.3)));
 
-	scene->loadOBJModel("meshes/bunny.obj");
+	std::cout << "[ ] Camera transform: " << std::endl;
+	camera->LookAt(vec3(0,0,1),vec3(0,0,-1),vec3(0,1,0));
+	camera->Ortho(-1,1,-1,1,0,5);
+	scene->addCamera(camera);
+	std::cout <<"!"<< camera->getProjection();
+	renderer->setCameraMatrixes(scene->getActiveCamera());
+
+	/* TODO implement
+	scene->addLightSource(light);
+	scene->addLightSource(light2);
+
+	*/
+
+	std::cout << "[ ] Reading mesh files... ";
+	MeshModel* demo_object = new MeshModel("meshes/bunny.obj");
+	scene->addMeshModel(demo_object);
+	std::cout << " Done!" << std::endl;
 	//----------------------------------------------------------------------------
+
 	// Initialize Callbacks
 
 	glutDisplayFunc( display );
+	glutSpecialFunc( keyboard_special );
 	glutKeyboardFunc( keyboard );
 	glutMouseFunc( mouse );
 	glutMotionFunc ( motion );
 	glutReshapeFunc( reshape );
 	initMenu();
 	
+	//Init the renderer
+	renderer->Init();
+	PrimMeshModel* model = new PrimMeshModel(PRIM_CUBE);
+	scene->addMeshModel(model);
+	std::cout << scene->getWorldControl() << " : (#)" << std::endl;
+	
+	//Set the camera projection we want and send it to renderer (vec3 cast to vec4)
 
+	std::cout << "[V] Done with the initialization! " << std::endl;
 	glutMainLoop();
 	delete scene;
 	delete renderer;

@@ -72,6 +72,7 @@ InitShader(const char* vShaderFile, const char* fShaderFile)
 	glAttachShader( program, shader );
     }
 
+
     /* link  and error check */
     glLinkProgram(program);
 
