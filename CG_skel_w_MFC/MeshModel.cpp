@@ -118,13 +118,16 @@ void MeshModel::loadFile(string fileName)
 		}
 	}
 	
-	//Three vertices per face, three coordinates per vertex
-	
-	face_num = faces.size();
+	/* 
+	Convert the vectors read from the files to GLfloat arrays
+	*/
+
+	//array size is [3 * 3 * face_num], we have 3 * face_num vertices, and 3 coordinates for each.
+		face_num = faces.size();
 	GLfloat* vertices_array = new GLfloat[face_num*3 * 3];
 	GLfloat* vertex_normals_array = new GLfloat[face_num*3*3];
 	GLfloat* vertex_textures_array = new GLfloat[face_num*3*3];
-	// * Convert buffers to float arrays to send to the GPU *
+	// convert
 	int k = 0;
 	for (vector<FaceIdcs>::iterator it = faces.begin(); it != faces.end(); ++it)
 	{
@@ -150,13 +153,27 @@ void MeshModel::loadFile(string fileName)
 	delete[] vertex_textures_array;
 }
 
+/// @brief This function handles taking arrays of vertices and sending them to the GPU.
+///
+/// If a parameter is not given (nullptr), an empty one will be generated/calculated
+/// This populates: [vao, vert_vao, face_vao, box_vao], which handle [model draw, vertex normals draw, face normals draw, bounding box draw] respectively
+/// @param vertices_array Existing GLfloat array of points. each 9 floats is a face. cannot be nullptr
+/// @param vertex_normals_array Same order of vertices as {vertices_array}. if nullptr, face normals will be sent
+/// @param vertex_textures_array Same order of vertices as {vertices_array}. texture coord for each vertex.
+/// @param face_num Number of faces sent. all arrays should be [9 * facenum] length
 void MeshModel::generateBuffers(const GLfloat* vertices_array, const GLfloat* vertex_normals_array, const GLfloat* vertex_textures_array, int face_num){
+	// Generate a new array object for the main draw
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-	//Generate a new array instead
+	/*
+	Handling nullptr inputs
+	*/
+	//Generate a new array instead, if nulls were inputted.
 	GLfloat* vn_arr = vertex_normals_array != nullptr ? nullptr : new GLfloat[3 * 3 * face_num];
 	GLfloat* vt_arr = vertex_textures_array != nullptr ? nullptr : new GLfloat[3 * 3 * face_num];
+
+	//Generate vertex normals with the faces
 	if(vertex_normals_array == nullptr){
 		//Caclulate normal per face
 		for(int face = 0; face < face_num; face ++){
@@ -177,19 +194,23 @@ void MeshModel::generateBuffers(const GLfloat* vertices_array, const GLfloat* ve
 		//TODO handle no textures
 	}
 
+	/*
+	Generate the buffer objects to store these arrays
+	*/
 	GLuint vbos[3] = {0,0,0};
 	glGenBuffers(3, vbos);
 	vbo_vertices = vbos[0];
 	vbo_normals = vbos[1];
 	vbo_textures = vbos[2];
 
-
+	//vertices, passed with location = 0
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
 	glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float)*3*3,
 		vertices_array, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
+	// normals, passed with location = 1
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_normals);
 	if(vertex_normals_array)
 		glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float)*3*3, vertex_normals_array, GL_STATIC_DRAW);
@@ -198,6 +219,7 @@ void MeshModel::generateBuffers(const GLfloat* vertices_array, const GLfloat* ve
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(1); 
 
+	// textures, passed with location = 2
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_textures);
 	if(vertex_textures_array)
 		glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float)*3*3, vertex_textures_array, GL_STATIC_DRAW);
@@ -216,10 +238,12 @@ void MeshModel::generateBuffers(const GLfloat* vertices_array, const GLfloat* ve
 	glBindVertexArray(vert_vao);
 
 	glGenBuffers(1, &vert_vbo);
-	GLfloat* vert_points = new GLfloat[2 * 3 * 3 * face_num];
+	GLfloat* vert_points = new GLfloat[2 * 3 * 3 * face_num];	//Length is twice the amount of vertices, we store the end of their normal aswell
 	for(int i = 0; i < 3 * face_num; i ++){
 		for(int coord = 0; coord < 3; coord ++){
+			// vertex point
 			vert_points[3*2*i + coord] = vertices_array[3*i + coord];
+			// normal end point
 			if(vertex_normals_array)
 				vert_points[3 * (2*i + 1) + coord] = vertices_array[3*i + coord] + NORMAL_LENGTH * vertex_normals_array[3*i + coord];
 			else
@@ -227,8 +251,7 @@ void MeshModel::generateBuffers(const GLfloat* vertices_array, const GLfloat* ve
 		}
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, face_vbo);
-	glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float)*3*3 * 2,
-		vert_points, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, face_num*sizeof(float) * 3 * 3 * 2, vert_points, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 	delete[] vert_points;
@@ -293,6 +316,8 @@ void MeshModel::generateBuffers(const GLfloat* vertices_array, const GLfloat* ve
 	glBindVertexArray(0);
 }
 
+/// @brief 
+/// @param renderer 
 void MeshModel::draw(Renderer* renderer)
 {
 	mat4 full_trans = _world_transform * _model_transform;
@@ -312,7 +337,7 @@ mat4 MeshModel::getFullTransformation() {
 void MeshModel::translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, bool isWorld) {
 	if(isWorld){
 		applyWorldTransformation(Translate(x_trans,y_trans,z_trans));
-		applyWorldNormalTransformation(Translate(-x_trans,-y_trans,-z_trans));
+		applyWorldNormalTransformation(Translate(-x_trans,-y_trans,-z_trans));	//Normal Matrix = (M^-1)^T, we give it the inverse and the function will transform it
 	}
 	else{
 		applyModelTransformation(Translate(x_trans,y_trans,z_trans));
@@ -390,7 +415,6 @@ void MeshModel::toggleSpecialMaterial() {
 	// Placeholder implementation
 }
 
-// TODO: Implement this function
 void MeshModel::resetToCenter() {
 	_model_transform = mat4();
 	_world_transform = mat4();
