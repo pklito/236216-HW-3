@@ -27,24 +27,6 @@ Renderer::~Renderer(void)
 	}
 }
 
-void Renderer::StartDraw()
-{
-	glUseProgram(programs[current_program].program);
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-	glClearColor(0.0, 0.0, 0.0, 1.0);
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glDepthFunc(GL_LESS);
-}
-
-void Renderer::EndDraw()
-{
-	glFlush();
-	glutSwapBuffers();
-	glUseProgram(0);
-}
-
 void Renderer::CreateBuffers(int width, int height)
 {
 	m_width = width;
@@ -89,6 +71,24 @@ void Renderer::SetDemoBuffer()
 		m_outBuffer[INDEX(m_width, i, 256, 1)] = 0;
 		m_outBuffer[INDEX(m_width, i, 256, 2)] = 1;
 	}
+}
+
+void Renderer::StartDraw()
+{
+	glUseProgram(programs[current_program].program);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glDepthFunc(GL_LESS);
+}
+
+void Renderer::EndDraw()
+{
+	glFlush();
+	glutSwapBuffers();
+	glUseProgram(0);
 }
 
 /// @brief Render a mesh with a certain program
