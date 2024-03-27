@@ -45,6 +45,7 @@ public:
 	virtual void rotate(float angle, int axis) {}
 	virtual void scale(float x, float y, float z) {}
 	virtual CString getName(){ return _T("Generic Light");}
+	virtual int passArray(GLfloat* array) const {return 1;};
 
 };
 
@@ -63,6 +64,16 @@ public:
 	virtual void rotate(float angle, int axis) override {}
 	virtual void scale(float x, float y, float z) override {intensity *= x;}
 	virtual CString getName() override { return _T("Point Light");}
+	virtual int passArray(GLfloat* array) const override {
+		array[0] = intensity * color[0];
+		array[1] = intensity * color[1];
+		array[2] = intensity * color[2];
+
+		array[3] = position[0];
+		array[4] = position[1];
+		array[5] = position[2];
+		return 6;
+	};
 };
 
 class DirectionalLight : public Light {
@@ -81,6 +92,16 @@ public:
 	virtual void scale(float x, float y, float z) override {intensity *= x;}
 
 	virtual CString getName() override { return _T("Directional Light");}
+	virtual int passArray(GLfloat* array) const override {
+		array[0] = intensity * color[0];
+		array[1] = intensity * color[1];
+		array[2] = intensity * color[2];
+
+		array[3] = direction[0];
+		array[4] = direction[1];
+		array[5] = direction[2];
+		return 6;
+	};
 };
 
 class AmbientLight : public Light {
@@ -88,6 +109,12 @@ public:
 	AmbientLight() : Light(0,vec3(0,0,0)) {}
 	AmbientLight(float intensity, const vec3& color) : Light(intensity, color) {}
 	virtual CString getName() override { return _T("Ambient Light");}
+	virtual int passArray(GLfloat* array) const override {
+		array[0] = intensity * color[0];
+		array[1] = intensity * color[1];
+		array[2] = intensity * color[2];
+		return 3;
+	};
 };
 
 ////////////// TRIPLE

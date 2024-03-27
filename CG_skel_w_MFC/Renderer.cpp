@@ -76,15 +76,44 @@ void Renderer::SetDemoBuffer()
 //
 // Rendering
 //
-
+#define LIGHT_ARRAY_MAX 10
 /// @brief Assumes glUseProgram happened
 /// @param program 
 void Renderer::_passLights(Program & program){
 	//glUseProgram(program.program);
-	GLfloat light_point_array[10*3*2];
-	GLfloat light_directional_array[10*3*2];
+
+	// Create the buffers to send as uniforms
+	GLfloat light_point_array[LIGHT_ARRAY_MAX*3*2];
+	GLfloat directional_array[LIGHT_ARRAY_MAX*3*2];
 	GLfloat ambient_array[3];
+
+	// store which light we're sending currently
+	int point_num = 0;
+	int directional_num = 0;
+	std::vector<Light*>& lights_ref = *lights;
+	for(Light* light : lights_ref){
+		// send the light data to the right buffer
+		if(dynamic_cast<PointLight*>(light) && point_num < LIGHT_ARRAY_MAX){
+			light->passArray(light_point_array + 6*point_num);
+			point_num += 1;
+		}
+
+		if(dynamic_cast<DirectionalLight*>(light) && directional_num < LIGHT_ARRAY_MAX){
+			light->passArray(light_point_array + 6*directional_num);
+			point_num += 1;
+		}
+	}
+	//only one ambient light, copy its colors onto the buffer
+	ambient_light.passArray(ambient_array);
+
+	//
+	// Send the buffers to the shader!
+	//
+
 	
+	glUniformMatrix4fv(program.find("point_lights"), point_num, GL_FALSE, light_point_array);
+	glUniformMatrix4fv(program.find("directional_lights"), directional_num, GL_FALSE, directional_array);
+	glUniformMatrix4fv(program.find("ambient_light"), 1, GL_FALSE, ambient_array);
 
 }
 void Renderer::StartDraw()
