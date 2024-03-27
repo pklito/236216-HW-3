@@ -53,6 +53,7 @@ protected:
 	vec3 position;
 
 public:
+	//PointLight() : Light(0, vec3(0,0,0)), position(0,0,0) {}
 	PointLight(float intensity, const vec3& color,vec3 position) : Light(intensity, color), position(position) {}
 
 	void setPosition(const vec3& postion) {this->position = position;}
@@ -69,6 +70,7 @@ protected:
 	vec3 direction;
 
 public:
+	//DirectionalLight() : Light(0,vec3(0,0,0)), direction(vec3(0,0,0)) {}
 	DirectionalLight(float intensity, const vec3& color,vec3 direction) : Light(intensity, color), direction(direction) {}
 
 	void setDirection(const vec3& direction) {this->direction = normalize(direction);}
@@ -83,6 +85,7 @@ public:
 
 class AmbientLight : public Light {
 public:
+	AmbientLight() : Light(0,vec3(0,0,0)) {}
 	AmbientLight(float intensity, const vec3& color) : Light(intensity, color) {}
 	virtual CString getName() override { return _T("Ambient Light");}
 };

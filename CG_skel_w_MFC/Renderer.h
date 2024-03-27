@@ -73,9 +73,13 @@ class Renderer
 	mat4 mat_project;
 	vec3 camera_position;
 
-	void CreateBuffers(int width, int height);
-	void CreateLocalBuffer();
+	//lights
+	std::vector<Light*>* lights;
+	AmbientLight ambient_light;
 
+	void CreateBuffers(int width, int height);
+	
+	void _passLights(Program & program);
 	void _DrawTris(Program &program, GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform);
 	//////////////////////////////
 	// openGL stuff. Don't touch.
@@ -105,6 +109,11 @@ public:
 	void SetProjection(const mat4 &projection);
 	void setCameraMatrixes(const mat4 &cTransform, const mat4 &Projection);
 	void setCameraMatrixes(Camera *camera);
+	
+	void setLights(std::vector<Light*>* lights) {this->lights = lights;};
+	void setAmbientLight(const AmbientLight& light) {ambient_light = light;};
+	AmbientLight getAmbientLight() {return ambient_light;};
+
 	void SwapBuffers();
 	void ClearColorBuffer();
 	void ClearDepthBuffer();

@@ -3,7 +3,7 @@
 
 varying vec3 fNormal;
 out vec4 fColor;
-
+uniform mat3 light[10];
 
 void main() 
 { 

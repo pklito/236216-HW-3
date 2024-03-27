@@ -73,15 +73,38 @@ void Renderer::SetDemoBuffer()
 	}
 }
 
+//
+// Rendering
+//
+
+/// @brief Assumes glUseProgram happened
+/// @param program 
+void Renderer::_passLights(Program & program){
+	//glUseProgram(program.program);
+	GLfloat light_point_array[10*3*2];
+	GLfloat light_directional_array[10*3*2];
+	GLfloat ambient_array[3];
+	
+
+}
 void Renderer::StartDraw()
 {
+	//Choose the current program
 	glUseProgram(programs[current_program].program);
+	//Pass light sources
+
+	//Send over the light sources
+	_passLights(programs[current_program]);
+
+	//Enable backface culling and Z buffering
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
+
+	//Clear the buffers
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glDepthFunc(GL_LESS);
+	glDepthFunc(GL_LESS);	//Choose pixels with a smaller zvalue
 }
 
 void Renderer::EndDraw()
