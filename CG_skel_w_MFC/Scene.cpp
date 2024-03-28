@@ -285,7 +285,6 @@ void Scene::rotateCameraToSelectedObject()
 
 // SCENE UNIMPLEMENTED
 
-/*
 void Scene::addLightSource(Light* light)
 {
 	lights.push_back(light);
@@ -302,6 +301,7 @@ Light* Scene::getSelectedLight(){
 		return nullptr;
 	return lights[activeLight];
 }
+/*
 Material Scene::getSelectedMaterial(){
 	return dynamic_cast<MeshModel*>(models[activeModel])->getMaterial();
 }

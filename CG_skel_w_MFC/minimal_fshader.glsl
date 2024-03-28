@@ -1,6 +1,7 @@
 
 #version 150
 
+varying vec4 fPos;
 varying vec3 fNormal;
 out vec4 fColor;
 uniform mat2x3 point_lights[10];
@@ -15,7 +16,7 @@ void main()
    vec3 ambient_mat = vec3(0.2,0.2,0.2);
    vec3 color = vec3(0,0,0);
    for(int i = 0; i < 10; ++i){
-      color += diffuse_mat * point_lights[i][0] * max(0,dot(point_lights[i][1],fNormal));
+      color += diffuse_mat * point_lights[i][0] * max(0,dot(normalize(point_lights[i][1]-fPos.xyz),fNormal));
    }
    color += ambient_light * ambient_mat;
    fColor = vec4(color,1.0);
