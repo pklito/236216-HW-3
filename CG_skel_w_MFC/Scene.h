@@ -71,6 +71,7 @@ class Scene
 	vector<Model *> models;
 	vector<Camera *> cameras;
 	Renderer *m_renderer;
+	std::vector<Light*> lights;
 
 	bool world_control;
 	bool moving_model;
@@ -78,7 +79,7 @@ class Scene
 
 public:
 	// Scene() : world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false), {std::cout << "NO RENDERER PROVIDED!" << std::endl;};
-	Scene(Renderer *renderer) : m_renderer(renderer), world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false){/*m_renderer->setLights(&lights); */};
+	Scene(Renderer *renderer) : m_renderer(renderer), world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false), lights() {m_renderer->setLights(&lights);};
 	void loadOBJModel(string fileName);
 	void draw();
 	void drawDemo();
