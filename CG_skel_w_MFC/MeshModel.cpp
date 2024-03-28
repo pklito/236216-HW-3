@@ -301,6 +301,69 @@ void MeshModel::generateBuffers(const GLfloat *vertices_array, const GLfloat *ve
 
 	//
 	// BOUNDING BOX drawing vao
+	glGenVertexArrays(1, &box_vao);
+	glBindVertexArray(box_vao);
+
+	glGenBuffers(1, &box_vbo);
+
+	float minX = vertices_array[0];
+	float minY = vertices_array[1];
+	float minZ = vertices_array[2];
+	float maxX = vertices_array[0];
+	float maxY = vertices_array[1];
+	float maxZ = vertices_array[2];
+
+	for (int i = 3; i < face_num * 3 * 3; i += 3) {
+		minX = min(minX, vertices_array[i]);
+		minY = min(minY, vertices_array[i + 1]);
+		minZ = min(minZ, vertices_array[i + 2]);
+		maxX = max(maxX, vertices_array[i]);
+		maxY = max(maxY, vertices_array[i + 1]);
+		maxZ = max(maxZ, vertices_array[i + 2]);
+	}
+
+	// Calculate bounding box vertices
+	GLfloat bounding_box_vertices[] = {
+		// Vertices of the bounding box
+		minX, minY, minZ,  // Minimum corner
+		maxX, minY, minZ,
+		maxX, minY, minZ,
+		maxX, minY, maxZ,
+		maxX, minY, maxZ,
+		minX, minY, maxZ,
+		minX, minY, maxZ,
+		minX, minY, minZ,
+		// Repeat the same vertices for the top face
+		minX, maxY, minZ,  // Maximum corner
+		maxX, maxY, minZ,
+		maxX, maxY, minZ,
+		maxX, maxY, maxZ,
+		maxX, maxY, maxZ,
+		minX, maxY, maxZ,
+		minX, maxY, maxZ,
+		minX, maxY, minZ,
+		// Connect the corners of the bounding box
+		minX, minY, minZ,
+		minX, maxY, minZ,
+		maxX, minY, minZ,
+		maxX, maxY, minZ,
+		maxX, minY, maxZ,
+		maxX, maxY, maxZ,
+		minX, minY, maxZ,
+		minX, maxY, maxZ
+	};
+
+	// Bind and fill the bounding box VBO with the vertices
+	glBindBuffer(GL_ARRAY_BUFFER, box_vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(bounding_box_vertices), bounding_box_vertices, GL_STATIC_DRAW);
+
+	// Specify the layout of the bounding box VBO
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(0);
+
+	// Unbind the VBO and VAO
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 	//
 	/*
 	glGenVertexArrays(1, &vert_vao);
@@ -352,7 +415,7 @@ void MeshModel::draw(Renderer *renderer)
 	// TODO: implement bounding box
 	if (draw_bounding_box)
 	{
-		renderer->DrawLines(box_vao, 24, full_trans);
+		renderer->DrawLines(box_vao, 8*3, full_trans);
 	}
 }
 
