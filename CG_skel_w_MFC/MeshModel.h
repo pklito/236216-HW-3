@@ -9,7 +9,7 @@ using namespace std;
 class MeshModel : public Model
 {
 protected:
-	MeshModel() {}
+	MeshModel() : draw_wireframe(false), draw_vertex_normals(false),draw_bounding_box(false), draw_face_normals(false) {}
 	void generateBuffers(const GLfloat *vertices_array, const GLfloat *vertex_normals_array, const GLfloat *vertex_textures_array, int face_num);
 
 	int face_num;

@@ -109,8 +109,8 @@ void Renderer::_passLights(Program & program){
 	//
 	// Send the buffers to the shader!
 	//
-	glUniformMatrix4fv(program.find("point_lights"), point_num, GL_FALSE, light_point_array);
-	glUniformMatrix4fv(program.find("directional_lights"), directional_num, GL_FALSE, directional_array);
+	glUniformMatrix2x3fv(program.find("point_lights"), point_num, GL_FALSE, light_point_array);
+	glUniformMatrix2x3fv(program.find("directional_lights"), directional_num, GL_FALSE, directional_array);
 	glUniform3fv(program.find("ambient_light"), 1, ambient_array);
 
 }

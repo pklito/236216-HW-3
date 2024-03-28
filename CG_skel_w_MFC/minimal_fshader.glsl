@@ -11,12 +11,12 @@ uniform vec3 ambient_light;
 void main() 
 { 
    //temp material
-   vec3 diffuse_mat = vec3(0.3,0.3,0.3);
+   vec3 diffuse_mat = vec3(1,0.3,0.3);
    vec3 specular_mat = vec3(0.3,0.3,0.3);
    vec3 ambient_mat = vec3(0.2,0.2,0.2);
    vec3 color = vec3(0,0,0);
    for(int i = 0; i < 10; ++i){
-      color += diffuse_mat * point_lights[i][0] * max(0,dot(normalize(point_lights[i][1]-fPos.xyz),fNormal));
+      color += diffuse_mat * point_lights[i][0] * dot(normalize(point_lights[i][1]-fPos.xyz),fNormal);
    }
    color += ambient_light * ambient_mat;
    fColor = vec4(color,1.0);
