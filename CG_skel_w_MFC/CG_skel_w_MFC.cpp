@@ -393,20 +393,22 @@ void keyboard(unsigned char key, int x, int y)
 	case '2':
 		scene->changeCurrsColor();
 		break;
-	case '7':
+	/*case '7':
 		changeMaterialColor();
 		break;
 	case '6':
 		scene->changeCurrsMaterial();
-		break;
+		break;*/
 
 	/* TODO
 	case '3':
 		scene->changeShadingMethod();
 		break;
+		*/
 	case 'h':
 		changeLight();
 		break;
+		/*
 	case '8':
 		renderer->setAntiAliasing(!(renderer->getAntiAliasingFlag()));
 		display();
@@ -479,7 +481,6 @@ void deleteMenu(int id)
 
 void lightMenu(int id)
 {
-	/* TODO implement
 	Light* light;
 	vec3 color;
 	float intensity = -1;
@@ -506,7 +507,6 @@ void lightMenu(int id)
 			}
 			break;
 	}
-	*/
 }
 void primMenu(int id)
 {
@@ -756,9 +756,6 @@ int my_main(int argc, char **argv)
 
 	// Init the renderer
 	renderer->Init();
-	PrimMeshModel *model = new PrimMeshModel(PRIM_CUBE);
-	scene->addMeshModel(model);
-	std::cout << scene->getWorldControl() << " : (#)" << std::endl;
 
 	// Set the camera projection we want and send it to renderer (vec3 cast to vec4)
 
