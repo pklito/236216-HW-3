@@ -153,6 +153,7 @@ void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const 
 {
 	// Bind the models settings
 	glUseProgram(program.program);
+	_passLights(program);
 	glBindVertexArray(vao);
 
 	GLfloat full_transform_array[16];

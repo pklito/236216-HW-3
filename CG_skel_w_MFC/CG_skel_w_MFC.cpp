@@ -730,7 +730,7 @@ int my_main(int argc, char **argv)
 	scene->addCamera(camera);
 	std::cout << "!" << camera->getProjection();
 	renderer->setCameraMatrixes(scene->getActiveCamera());
-
+	renderer->setAmbientLight(AmbientLight(1,vec3(0.3,0,0.1)));
 	/* TODO implement
 	scene->addLightSource(light);
 	scene->addLightSource(light2);
