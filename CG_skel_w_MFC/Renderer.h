@@ -108,7 +108,7 @@ public:
 
 	void SetCameraTransformInverse(const mat4 &cTransform);
 	void SetProjection(const mat4 &projection);
-	void setCameraMatrixes(const mat4 &cTransform, const mat4 &Projection);
+	void setCameraMatrixes(const mat4 &cTransform, const mat4 &Projection, const vec3 &camera_pos);
 	void setCameraMatrixes(Camera *camera);
 	
 	void setLights(std::vector<Light*>* lights) {this->lights = lights;};

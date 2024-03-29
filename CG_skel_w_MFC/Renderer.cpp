@@ -166,6 +166,8 @@ void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const 
 	toFloatArray(normal_trans_array, wm_normal_transform);
 	glUniformMatrix4fv(program.find("normal_transform"), 1, GL_FALSE, normal_trans_array);
 
+	GLfloat camera_array[3] = {camera_position.x, camera_position.y, camera_position.z};
+	glUniform3fv(program.find("camera_position"), 1, camera_array);
 	// Draw
 	glDrawArrays(GL_TRIANGLES, 0, face_count * 3);
 	glBindVertexArray(0);
@@ -242,15 +244,16 @@ void Renderer::SetProjection(const mat4 &projection)
 	mat_project = projection;
 }
 
-void Renderer::setCameraMatrixes(const mat4 &cTransformInverse, const mat4 &Projection)
+void Renderer::setCameraMatrixes(const mat4 &cTransformInverse, const mat4 &Projection, const vec3 &camera_pos)
 {
 	SetCameraTransformInverse(cTransformInverse);
 	SetProjection(Projection);
+	camera_position = camera_pos;
 }
 
 void Renderer::setCameraMatrixes(Camera *camera)
 {
-	setCameraMatrixes(camera->getTransformInverse(), camera->getProjection());
+	setCameraMatrixes(camera->getTransformInverse(), camera->getProjection(), camera->getCameraPosition());
 }
 
 void Renderer::Init()
