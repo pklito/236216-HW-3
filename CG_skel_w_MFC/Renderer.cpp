@@ -4,6 +4,7 @@
 #include "InitShader.h"
 #include "GL\freeglut.h"
 #include "scene.h"
+#include "Texture.h"
 
 #define INDEX(width, x, y, c) ((x) + (y) * (width)) * 3 + c
 
@@ -99,9 +100,22 @@ void Renderer::SetDemoBuffer()
 /// @param wm_normal_transform world*model transform of the model normals
 void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform)
 {
+	GLenum error;
+
+	// Before any OpenGL call, clear the previous error flag
+	while ((error = glGetError()) != GL_NO_ERROR) {
+		std::cerr << "OpenGL error (first): " << error << std::endl;
+	}
+
 	// Bind the models settings
 	glUseProgram(program.program);
+	while ((error = glGetError()) != GL_NO_ERROR) {
+		std::cerr << "OpenGL error (after use program): " << error << std::endl;
+	}
 	glBindVertexArray(vao);
+	while ((error = glGetError()) != GL_NO_ERROR) {
+		std::cerr << "OpenGL error (after bind vertex array): " << error << std::endl;
+	}
 
 	GLfloat full_transform_array[16];
 	toFloatArray(full_transform_array, wm_transform);
@@ -110,14 +124,60 @@ void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const 
 	GLfloat proj_array[16];
 	toFloatArray(proj_array, mat_project * mat_transform_inverse);
 	glUniformMatrix4fv(program.find("camera_transform"), 1, GL_FALSE, proj_array);
-
+	/*
 	GLfloat normal_trans_array[16];
 	toFloatArray(normal_trans_array, wm_normal_transform);
 	glUniformMatrix4fv(program.find("normal_transform"), 1, GL_FALSE, normal_trans_array);
+	*/
+
+	// Draw
+	// 
+	// Before any OpenGL call, clear the previous error flag
+	while ((error = glGetError()) != GL_NO_ERROR) {
+		std::cerr << "OpenGL error (before): " << error << std::endl;
+	}
+
+	// Generate texture
+	GLuint texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	// Set the texture wrapping/filtering options (on the currently bound texture object)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// Load and generate the texture
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load("mashes/shirt4.jpg", &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
+
+	// Bind the vertex array object
+	glBindVertexArray(vao);
+
+	// Set up vertex attribute pointer for texture coordinates
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	// Bind the texture before drawing
+	glBindTexture(GL_TEXTURE_2D, texture);
 
 	// Draw
 	glDrawArrays(GL_TRIANGLES, 0, face_count * 3);
+
+	// Unbind the vertex array object and texture
 	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 /// @brief Render a mesh with the current selected program

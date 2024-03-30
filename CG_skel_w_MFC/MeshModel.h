@@ -27,6 +27,8 @@ protected:
 	GLuint box_vao;
 	GLuint box_vbo;
 
+	std::vector<vec2> textureCoordinates;
+
 	// add more attributes
 	mat4 _world_transform;
 	mat4 _model_transform;

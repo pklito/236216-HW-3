@@ -23,6 +23,9 @@
 #include "CPopup.h"
 #include "CColorPicker.h"
 #include "CPopNumber.h"
+#include "png/png.h"
+#include "texture.h"
+#include "stb_image.h"
 
 #define BUFFER_OFFSET(offset) ((GLvoid *)(offset))
 
@@ -738,7 +741,11 @@ int my_main(int argc, char **argv)
 	*/
 
 	std::cout << "[ ] Reading mesh files... ";
-	MeshModel *demo_object = new MeshModel("meshes/bunny.obj");
+	MeshModel *demo_object = new MeshModel("meshes/shirt.obj");
+
+	Texture texture("meshes/shirt4.jpg");
+	texture.Bind();
+
 	scene->addMeshModel(demo_object);
 	std::cout << " Done!" << std::endl;
 	//----------------------------------------------------------------------------
@@ -755,8 +762,6 @@ int my_main(int argc, char **argv)
 
 	// Init the renderer
 	renderer->Init();
-	PrimMeshModel *model = new PrimMeshModel(PRIM_CUBE);
-	scene->addMeshModel(model);
 	std::cout << scene->getWorldControl() << " : (#)" << std::endl;
 
 	// Set the camera projection we want and send it to renderer (vec3 cast to vec4)
