@@ -72,7 +72,9 @@ MeshModel::~MeshModel(void)
 	glDeleteBuffers(1, &vbo_vertices);
 	glDeleteBuffers(1, &vbo_textures);
 	glDeleteBuffers(1, &vbo_normals);
-	glDeleteBuffers(1, &vbo_materials);
+	glDeleteBuffers(1, &vbo_mat_ambient);
+	glDeleteBuffers(1, &vbo_mat_diffuse);
+	glDeleteBuffers(1, &vbo_mat_specular);
 	glDeleteVertexArrays(1, &vao);
 }
 
@@ -207,13 +209,17 @@ void MeshModel::generateBuffers(int face_num, const GLfloat *vertices_array, con
 	/*
 	Generate the buffer objects to store these arrays
 	*/
-	GLuint vbos[3] = {0, 0, 0};
-	glGenBuffers(3, vbos);
+	GLuint vbos[6] = {0, 0, 0, 0, 0, 0};
+	glGenBuffers(6, vbos);
 	vbo_vertices = vbos[0];
 	vbo_normals = vbos[1];
 	vbo_textures = vbos[2];
-	//vbo_materials = vbos[3];
+	vbo_mat_ambient = vbos[3];
+	vbo_mat_diffuse = vbos[3];
+	vbo_mat_specular = vbos[3];
 
+
+	generateMaterialBuffer(face_num, vbo_mat_ambient, vbo_mat_diffuse, vbo_mat_specular);
 	// vertices, passed with location = 0
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
 	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3,
@@ -239,7 +245,6 @@ void MeshModel::generateBuffers(int face_num, const GLfloat *vertices_array, con
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
 	glEnableVertexAttribArray(2);
 
-	generateMaterialBuffer();
 
 
 	//
@@ -333,34 +338,44 @@ void MeshModel::generateBuffers(int face_num, const GLfloat *vertices_array, con
 	glBindVertexArray(0);
 }
 
-void MeshModel::generateMaterialBuffer(){
-	GLfloat *vm_arr = new GLfloat[9 * 3 * face_num];
-
+void MeshModel::generateMaterialBuffer(int face_num, int vbo_mat1, int vbo_mat2, int vbo_mat3){
+	GLfloat *vm1_arr = new GLfloat[3 * 3 * face_num];
+	GLfloat *vm2_arr = new GLfloat[3 * 3 * face_num];
+	GLfloat *vm3_arr = new GLfloat[3 * 3 * face_num];
 	for(int i = 0; i < 3 * face_num; i ++){
-		vm_arr[i * 9 + 0] = 0.1;
-		vm_arr[i * 9 + 1] = 0.1;
-		vm_arr[i * 9 + 2] = 0.1;
+		vm1_arr[i * 3 + 0] = .1;
+		vm1_arr[i * 3 + 1] = .3;
+		vm1_arr[i * 3 + 2] = .1;
 
-		vm_arr[i * 9 + 3] = 0.8;
-		vm_arr[i * 9 + 4] = 0.3;
-		vm_arr[i * 9 + 5] = 0.8;
+		vm2_arr[i * 3 + 0] = 0.3;
+		vm2_arr[i * 3 + 1] = 0.3;
+		vm2_arr[i * 3 + 2] = 0;
 
-		vm_arr[i * 9 + 6] = 0.5;
-		vm_arr[i * 9 + 7] = 0.5;
-		vm_arr[i * 9 + 8] = 0.0;
+		vm3_arr[i * 3 + 0] = 0.3;
+		vm3_arr[i * 3 + 1] = 0.3;
+		vm3_arr[i * 3 + 2] = 0.3;
 	}
 
 	// textures, passed with location = 3
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_materials);
-	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 9, vm_arr, GL_STATIC_DRAW);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)0);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_mat1);
+	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3, vm1_arr, GL_STATIC_DRAW);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
 	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)(3));
+	
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_mat2);
+	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3, vm2_arr, GL_STATIC_DRAW);
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)(0));
 	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)(6));
+	
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_mat3);
+	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3, vm3_arr, GL_STATIC_DRAW);
+	glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)(0));
 	glEnableVertexAttribArray(5);
 
-	delete[] vm_arr;
+	delete[] vm1_arr;
+	delete[] vm2_arr;
+	delete[] vm3_arr;
+
 }
 
 /// @brief

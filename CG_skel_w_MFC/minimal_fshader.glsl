@@ -20,7 +20,7 @@ vec3 specular_calc(vec3 light_color, vec3 light_direction){
 
    vec3 view_direction = camera_position - fPos.xyz;
    float cos_phi = dot(reflect(-light_direction,fNormal),view_direction);
-   return mat_specular * light_color * pow(cos_phi, 5);  //TODO change 5 to uniform
+   return mat_specular * light_color * pow(cos_phi, 3);  //TODO change 5 to uniform
 }
 
 vec3 diffuse_calc(vec3 light_color, vec3 direction){
@@ -39,9 +39,11 @@ void main()
    }
    // directional lights
    for(int i = 0; i < 10; ++i){
-      vec3 dir = directional_lights[i][1];
+      if(length(directional_lights[i][1]) > 0.1){
+      vec3 dir = normalize(directional_lights[i][1]);
       color += specular_calc(directional_lights[i][0], dir);
       color += diffuse_calc(directional_lights[i][0], dir);
+      }
    }
 
    //ambient lights

@@ -730,10 +730,10 @@ int my_main(int argc, char **argv)
 	scene->addCamera(camera);
 	std::cout << "!" << camera->getProjection();
 	renderer->setCameraMatrixes(scene->getActiveCamera());
-	renderer->setAmbientLight(AmbientLight(1,vec3(0.3,0,0.1)));
+	renderer->setAmbientLight(AmbientLight(1,vec3(0.6,0.3,0.3)));
 
 	scene->addLightSource(light);
-	scene->addLightSource(light2);
+	//scene->addLightSource(light2);
 
 	std::cout << "[ ] Reading mesh files... ";
 	MeshModel *demo_object = new MeshModel("meshes/bunny.obj");
