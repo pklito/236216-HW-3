@@ -219,7 +219,8 @@ void MeshModel::generateBuffers(int face_num, const GLfloat *vertices_array, con
 	vbo_mat_specular = vbos[3];
 
 
-	generateMaterialBuffer(face_num, vbo_mat_ambient, vbo_mat_diffuse, vbo_mat_specular);
+	generateMaterialBuffer(face_num, vao, vbo_mat_ambient, vbo_mat_diffuse, vbo_mat_specular);
+
 	// vertices, passed with location = 0
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
 	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3,
@@ -338,7 +339,10 @@ void MeshModel::generateBuffers(int face_num, const GLfloat *vertices_array, con
 	glBindVertexArray(0);
 }
 
-void MeshModel::generateMaterialBuffer(int face_num, int vbo_mat1, int vbo_mat2, int vbo_mat3){
+void MeshModel::generateMaterialBuffer(int face_num, int vao, int vbo_mat1, int vbo_mat2, int vbo_mat3){
+	
+	glBindVertexArray(vao);
+
 	GLfloat *vm1_arr = new GLfloat[3 * 3 * face_num];
 	GLfloat *vm2_arr = new GLfloat[3 * 3 * face_num];
 	GLfloat *vm3_arr = new GLfloat[3 * 3 * face_num];
@@ -358,17 +362,17 @@ void MeshModel::generateMaterialBuffer(int face_num, int vbo_mat1, int vbo_mat2,
 
 	// textures, passed with location = 3
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_mat1);
-	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3, vm1_arr, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3, vm1_arr, GL_DYNAMIC_DRAW);
 	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
 	glEnableVertexAttribArray(3);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_mat2);
-	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3, vm2_arr, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3, vm2_arr, GL_DYNAMIC_DRAW);
 	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)(0));
 	glEnableVertexAttribArray(4);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_mat3);
-	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3, vm3_arr, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3, vm3_arr, GL_DYNAMIC_DRAW);
 	glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)(0));
 	glEnableVertexAttribArray(5);
 
