@@ -22,9 +22,9 @@ void main()
     fPos = world_pos;
     fNormal = normalize((normal_transform * vec4(vNormal,1.0)).xyz);
 
-    mat_ambient = abs(vMatAmb);
-    mat_diffuse = abs(vMatDiff);
-    mat_specular = abs( vMatSpec);
+    mat_ambient = vMatAmb;
+    mat_diffuse = vMatDiff;
+    mat_specular = vMatSpec;
     //screen position
     gl_Position = camera_transform * world_pos;
 }
