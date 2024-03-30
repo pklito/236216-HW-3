@@ -722,7 +722,7 @@ int my_main(int argc, char **argv)
 	Camera *camera = new Camera();
 	Light *light = new PointLight(1, vec3(1, 1, 1), vec3(-2, 0, 1));
 	Light *light2 = new DirectionalLight(1, vec3(1, 0, 1), vec3(0, 1, 0));
-	// renderer->setAmbientLight(AmbientLight(1,vec3(0.3,0.3,0.3)));
+	renderer->setAmbientLight(AmbientLight(1,vec3(0.3,0.3,0.3)));
 
 	std::cout << "[ ] Camera transform: " << std::endl;
 	camera->LookAt(vec3(0, 0, 1), vec3(0, 0, -1), vec3(0, 1, 0));
@@ -733,10 +733,7 @@ int my_main(int argc, char **argv)
 	renderer->setAmbientLight(AmbientLight(1,vec3(0.3,0,0.1)));
 
 	scene->addLightSource(light);
-	/* TODO implement
 	scene->addLightSource(light2);
-
-	*/
 
 	std::cout << "[ ] Reading mesh files... ";
 	MeshModel *demo_object = new MeshModel("meshes/bunny.obj");

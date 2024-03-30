@@ -11,12 +11,15 @@ class MeshModel : public Model
 protected:
 	MeshModel() : draw_wireframe(false), draw_vertex_normals(false),draw_bounding_box(false), draw_face_normals(false) {}
 	void generateBuffers( int face_num, const GLfloat *vertices_array, const GLfloat *vertex_normals_array, const GLfloat *vertex_textures_array, const GLfloat *vertex_material_array);
+	void generateMaterialBuffer();
 
 	int face_num;
 	GLuint vao;
 	GLuint vbo_vertices;
 	GLuint vbo_normals;
 	GLuint vbo_textures;
+	GLuint vbo_materials;
+
 
 	GLuint vert_vao;
 	GLuint vert_vbo;

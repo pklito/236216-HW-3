@@ -72,6 +72,7 @@ MeshModel::~MeshModel(void)
 	glDeleteBuffers(1, &vbo_vertices);
 	glDeleteBuffers(1, &vbo_textures);
 	glDeleteBuffers(1, &vbo_normals);
+	glDeleteBuffers(1, &vbo_materials);
 	glDeleteVertexArrays(1, &vao);
 }
 
@@ -129,6 +130,7 @@ void MeshModel::loadFile(string fileName)
 	GLfloat *vertices_array = new GLfloat[face_num * 3 * 3];
 	GLfloat *vertex_normals_array = new GLfloat[face_num * 3 * 3];
 	GLfloat *vertex_textures_array = new GLfloat[face_num * 3 * 3];
+	//GLfloat *vertex_material_array = new GLfloat[face_num * 3 * 9];
 	// convert
 	int k = 0;
 	for (vector<FaceIdcs>::iterator it = faces.begin(); it != faces.end(); ++it)
@@ -210,6 +212,7 @@ void MeshModel::generateBuffers(int face_num, const GLfloat *vertices_array, con
 	vbo_vertices = vbos[0];
 	vbo_normals = vbos[1];
 	vbo_textures = vbos[2];
+	//vbo_materials = vbos[3];
 
 	// vertices, passed with location = 0
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
@@ -235,6 +238,9 @@ void MeshModel::generateBuffers(int face_num, const GLfloat *vertices_array, con
 		glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3, vt_arr, GL_STATIC_DRAW);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
 	glEnableVertexAttribArray(2);
+
+	generateMaterialBuffer();
+
 
 	//
 	// VERTEX NORMAL drawing vao
@@ -325,6 +331,36 @@ void MeshModel::generateBuffers(int face_num, const GLfloat *vertices_array, con
 	delete[] vt_arr;
 	delete[] vn_arr;
 	glBindVertexArray(0);
+}
+
+void MeshModel::generateMaterialBuffer(){
+	GLfloat *vm_arr = new GLfloat[9 * 3 * face_num];
+
+	for(int i = 0; i < 3 * face_num; i ++){
+		vm_arr[i * 9 + 0] = 0.1;
+		vm_arr[i * 9 + 1] = 0.1;
+		vm_arr[i * 9 + 2] = 0.1;
+
+		vm_arr[i * 9 + 3] = 0.8;
+		vm_arr[i * 9 + 4] = 0.3;
+		vm_arr[i * 9 + 5] = 0.8;
+
+		vm_arr[i * 9 + 6] = 0.5;
+		vm_arr[i * 9 + 7] = 0.5;
+		vm_arr[i * 9 + 8] = 0.0;
+	}
+
+	// textures, passed with location = 3
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_materials);
+	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 9, vm_arr, GL_STATIC_DRAW);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)0);
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)(3));
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void *)(6));
+	glEnableVertexAttribArray(5);
+
+	delete[] vm_arr;
 }
 
 /// @brief
