@@ -15,9 +15,35 @@ Renderer::Renderer() : Renderer(512, 512, "vshader.glsl", "fshader.glsl")
 Renderer::Renderer(int width, int height, const char *vshader, const char *fshader) : m_width(width), m_height(height), programs(), current_program(0)
 {
 	InitOpenGLRendering();
+
+	glGenTextures(1, &gScreenTex);
+	glBindTexture(GL_TEXTURE_2D, gScreenTex);
+
+	// Set the texture wrapping/filtering options (on the currently bound texture object)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// Load and generate the texture (if needed)
+	int img_width, img_height, nrChannels; // Use different variable names
+	unsigned char* data = stbi_load("meshes/shirt4.jpg", &img_width, &img_height, &nrChannels, 0); // Update variable names here
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, img_width, img_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data); // Update variable names here
+		glGenerateMipmap(GL_TEXTURE_2D);
+		stbi_image_free(data);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+
+	texture_unit_index = 4;
+
 	CreateBuffers(width, height);
 	CreateProgram(vshader, fshader);
-	program_wireframe = Program("lines_vshader.glsl", "lines_fshader.glsl", "world_transform", "camera_transform", "color");
+	program_wireframe = Program("lines_vshader.glsl", "lines_fshader.glsl", "world_transform", "camera_transform", "normal_transform", "texture");
 }
 
 Renderer::~Renderer(void)
@@ -56,7 +82,7 @@ void Renderer::CreateBuffers(int width, int height)
 
 void Renderer::CreateProgram(const char *vshader, const char *fshader)
 {
-	programs.push_back(Program(vshader, fshader, "world_transform", "camera_transform", "normal_transform"));
+	programs.push_back(Program(vshader, fshader, "world_transform", "camera_transform", "normal_transform", "texture"));
 }
 
 void Renderer::RemoveProgram(int index)
@@ -98,24 +124,16 @@ void Renderer::SetDemoBuffer()
 /// @param face_count amount of vertices/3
 /// @param wm_transform world*model transform of the model
 /// @param wm_normal_transform world*model transform of the model normals
-void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform)
+void Renderer::_DrawTris(Program & program, GLuint vao, GLuint face_count, const mat4 & wm_transform, const mat4 & wm_normal_transform)
 {
 	GLenum error;
-
-	// Before any OpenGL call, clear the previous error flag
 	while ((error = glGetError()) != GL_NO_ERROR) {
-		std::cerr << "OpenGL error (first): " << error << std::endl;
+		std::cerr << "OpenGL error in _DrawTris: " << error << std::endl;
 	}
-
 	// Bind the models settings
 	glUseProgram(program.program);
-	while ((error = glGetError()) != GL_NO_ERROR) {
-		std::cerr << "OpenGL error (after use program): " << error << std::endl;
-	}
+	std::cout << "current program in _drawTris is: " << program.program << std::endl;
 	glBindVertexArray(vao);
-	while ((error = glGetError()) != GL_NO_ERROR) {
-		std::cerr << "OpenGL error (after bind vertex array): " << error << std::endl;
-	}
 
 	GLfloat full_transform_array[16];
 	toFloatArray(full_transform_array, wm_transform);
@@ -124,61 +142,30 @@ void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const 
 	GLfloat proj_array[16];
 	toFloatArray(proj_array, mat_project * mat_transform_inverse);
 	glUniformMatrix4fv(program.find("camera_transform"), 1, GL_FALSE, proj_array);
-	
+
 	GLfloat normal_trans_array[16];
 	toFloatArray(normal_trans_array, wm_normal_transform);
 	glUniformMatrix4fv(program.find("normal_transform"), 1, GL_FALSE, normal_trans_array);
-	
 
-	// Draw
-	// 
-	// Before any OpenGL call, clear the previous error flag
-	while ((error = glGetError()) != GL_NO_ERROR) {
-		std::cerr << "OpenGL error (before): " << error << std::endl;
-	}
+	// Bind the texture to the specified texture unit index
+	glActiveTexture(GL_TEXTURE0 + texture_unit_index);
+	glBindTexture(GL_TEXTURE_2D, gScreenTex);
 
-	// Generate texture
-	GLuint texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	// Set the texture wrapping/filtering options (on the currently bound texture object)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// Load and generate the texture
-	int width, height, nrChannels;
-	unsigned char* data = stbi_load("meshes/shirt4.jpg", &width, &height, &nrChannels, 0);
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
-
-	// Bind the vertex array object
-	glBindVertexArray(vao);
+	// Set the uniform sampler2D to the texture unit index
+	glUniform1i(program.find("texture"), texture_unit_index);
 
 	// Set up vertex attribute pointer for texture coordinates
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
-	// Bind the texture before drawing
-	glBindTexture(GL_TEXTURE_2D, texture);
-
 	// Draw
 	glDrawArrays(GL_TRIANGLES, 0, face_count * 3);
 
-	// Unbind the vertex array object and texture
+	// Unbind the vertex array object
 	glBindVertexArray(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+
 
 /// @brief Render a mesh with the current selected program
 /// @param program Program class
@@ -190,6 +177,7 @@ void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4 &wm_transform,
 {
 
 	_DrawTris(programs[current_program], vao, face_count, wm_transform, wm_normal_transform);
+	std::cout << "current program in drawMesh is: " << programs[current_program].program << std::endl;
 }
 
 /// @brief Identical to DrawMesh, ut GL_LINE_STRIP, and a hardcoded program.
@@ -312,7 +300,9 @@ void Renderer::InitOpenGLRendering()
 	glVertexAttribPointer(vTexCoord, 2, GL_FLOAT, GL_FALSE, 0,
 						  (GLvoid *)sizeof(vtc));
 	glProgramUniform1i(program, glGetUniformLocation(program, "texture"), 0);
-	a = glGetError();
+	while ((a = glGetError()) != GL_NO_ERROR) {
+		std::cerr << "OpenGL error (after glProgramUniform1i for texture): " << a << std::endl;
+	}
 }
 
 void Renderer::CreateOpenGLBuffer()

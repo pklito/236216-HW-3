@@ -4,7 +4,6 @@
 in  vec2 vTexCoord;
 in  vec2 vPosition;
 
-
 out vec2 texCoord;
 
 void main()

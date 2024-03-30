@@ -215,7 +215,7 @@ void MeshModel::generateBuffers(const GLfloat *vertices_array, const GLfloat *ve
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
 	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3,
 				 vertices_array, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_TRUE, 3 * sizeof(float), (void *)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
 	glEnableVertexAttribArray(0);
 
 	// normals, passed with location = 1

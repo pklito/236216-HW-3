@@ -77,6 +77,7 @@ class Renderer
 	void CreateLocalBuffer();
 
 	void _DrawTris(Program &program, GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform);
+	GLuint texture_unit_index;
 	//////////////////////////////
 	// openGL stuff. Don't touch.
 
