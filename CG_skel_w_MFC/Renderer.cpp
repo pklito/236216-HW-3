@@ -99,8 +99,8 @@ void Renderer::_passLights(Program & program){
 		}
 
 		if(dynamic_cast<DirectionalLight*>(light) && directional_num < LIGHT_ARRAY_MAX){
-			light->passArray(light_point_array + 6*directional_num);
-			point_num += 1;
+			light->passArray(directional_array + 6*directional_num);
+			directional_num += 1;
 		}
 	}
 	//only one ambient light, copy its colors onto the buffer

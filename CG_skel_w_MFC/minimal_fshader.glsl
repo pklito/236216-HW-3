@@ -39,11 +39,9 @@ void main()
    }
    // directional lights
    for(int i = 0; i < 10; ++i){
-      if(length(directional_lights[i][1]) > 0.1){
-      vec3 dir = normalize(directional_lights[i][1]);
+      vec3 dir = directional_lights[i][1];
       color += specular_calc(directional_lights[i][0], dir);
       color += diffuse_calc(directional_lights[i][0], dir);
-      }
    }
 
    //ambient lights
