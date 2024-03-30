@@ -124,11 +124,11 @@ void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const 
 	GLfloat proj_array[16];
 	toFloatArray(proj_array, mat_project * mat_transform_inverse);
 	glUniformMatrix4fv(program.find("camera_transform"), 1, GL_FALSE, proj_array);
-	/*
+	
 	GLfloat normal_trans_array[16];
 	toFloatArray(normal_trans_array, wm_normal_transform);
 	glUniformMatrix4fv(program.find("normal_transform"), 1, GL_FALSE, normal_trans_array);
-	*/
+	
 
 	// Draw
 	// 
@@ -150,7 +150,7 @@ void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const 
 
 	// Load and generate the texture
 	int width, height, nrChannels;
-	unsigned char* data = stbi_load("mashes/shirt4.jpg", &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load("meshes/shirt4.jpg", &width, &height, &nrChannels, 0);
 	if (data)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
