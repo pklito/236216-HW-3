@@ -30,17 +30,16 @@ Renderer::Renderer(int width, int height, const char *vshader, const char *fshad
 	unsigned char* data = stbi_load("meshes/shirt4.jpg", &img_width, &img_height, &nrChannels, 0); // Update variable names here
 	if (data)
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, img_width, img_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data); // Update variable names here
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, img_width, img_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		stbi_image_free(data);
+		std::cout << "Texture loaded successfully." << std::endl; // Add this line for debug
 	}
 	else
 	{
 		std::cout << "Failed to load texture" << std::endl;
 	}
-
-	texture_unit_index = 4;
-
+	
 	CreateBuffers(width, height);
 	CreateProgram(vshader, fshader);
 	program_wireframe = Program("lines_vshader.glsl", "lines_fshader.glsl", "world_transform", "camera_transform", "normal_transform", "texture");
@@ -126,6 +125,8 @@ void Renderer::SetDemoBuffer()
 /// @param wm_normal_transform world*model transform of the model normals
 void Renderer::_DrawTris(Program & program, GLuint vao, GLuint face_count, const mat4 & wm_transform, const mat4 & wm_normal_transform)
 {
+	texture_unit_index = program.program;
+
 	GLenum error;
 	while ((error = glGetError()) != GL_NO_ERROR) {
 		std::cerr << "OpenGL error in _DrawTris: " << error << std::endl;
@@ -150,10 +151,12 @@ void Renderer::_DrawTris(Program & program, GLuint vao, GLuint face_count, const
 	// Bind the texture to the specified texture unit index
 	glActiveTexture(GL_TEXTURE0 + texture_unit_index);
 	glBindTexture(GL_TEXTURE_2D, gScreenTex);
+	std::cout << "Texture bound successfully." << std::endl;
 
 	// Set the uniform sampler2D to the texture unit index
 	glUniform1i(program.find("texture"), texture_unit_index);
 
+	glBindVertexArray(vao);
 	// Set up vertex attribute pointer for texture coordinates
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
