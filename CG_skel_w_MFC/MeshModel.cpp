@@ -149,7 +149,7 @@ void MeshModel::loadFile(string fileName)
 	}
 
 	// pass only the arrays that were filled.
-	generateBuffers(vertices_array, (vertex_normals.size() > 0) ? vertex_normals_array : nullptr, (vertex_textures.size() > 0) ? vertex_textures_array : nullptr, face_num);
+	generateBuffers(face_num,vertices_array, (vertex_normals.size() > 0) ? vertex_normals_array : nullptr, (vertex_textures.size() > 0) ? vertex_textures_array : nullptr, nullptr);
 
 	delete[] vertices_array;
 	delete[] vertex_normals_array;
@@ -164,7 +164,7 @@ void MeshModel::loadFile(string fileName)
 /// @param vertex_normals_array Same order of vertices as {vertices_array}. if nullptr, face normals will be sent
 /// @param vertex_textures_array Same order of vertices as {vertices_array}. texture coord for each vertex.
 /// @param face_num Number of faces sent. all arrays should be [9 * facenum] length
-void MeshModel::generateBuffers(const GLfloat *vertices_array, const GLfloat *vertex_normals_array, const GLfloat *vertex_textures_array, int face_num)
+void MeshModel::generateBuffers(int face_num, const GLfloat *vertices_array, const GLfloat *vertex_normals_array, const GLfloat *vertex_textures_array, const GLfloat *material_textures_array)
 {
 	// Generate a new array object for the main draw
 	glGenVertexArrays(1, &vao);
@@ -499,7 +499,7 @@ void PrimMeshModel::Cube()
 		}
 	}
 
-	generateBuffers(vertices_array, nullptr, nullptr, face_num);
+	generateBuffers(face_num, vertices_array, nullptr, nullptr, nullptr);
 }
 
 void PrimMeshModel::Tetrahedron()
@@ -511,5 +511,5 @@ void PrimMeshModel::Tetrahedron()
 	face_num = 4;
 	static GLfloat vertices_array[3 * 4 * 3] = {base1, base2, base3, top, base1, base3, top, base2, base1, top, base3, base2};
 
-	generateBuffers(vertices_array, nullptr, nullptr, face_num);
+	generateBuffers(face_num, vertices_array, nullptr, nullptr, nullptr);
 }

@@ -10,7 +10,7 @@ class MeshModel : public Model
 {
 protected:
 	MeshModel() : draw_wireframe(false), draw_vertex_normals(false),draw_bounding_box(false), draw_face_normals(false) {}
-	void generateBuffers(const GLfloat *vertices_array, const GLfloat *vertex_normals_array, const GLfloat *vertex_textures_array, int face_num);
+	void generateBuffers( int face_num, const GLfloat *vertices_array, const GLfloat *vertex_normals_array, const GLfloat *vertex_textures_array, const GLfloat *vertex_material_array);
 
 	int face_num;
 	GLuint vao;
