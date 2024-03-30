@@ -738,7 +738,11 @@ int my_main(int argc, char **argv)
 	//scene->addLightSource(light2);
 
 	std::cout << "[ ] Reading mesh files... ";
-	MeshModel *demo_object = new MeshModel("meshes/bunny.obj");
+	MeshModel *demo_object = new MeshModel("meshes/shirt.obj");
+
+	Texture texture("meshes/shirt4.jpg");
+	texture.Bind();
+
 	scene->addMeshModel(demo_object);
 	std::cout << " Done!" << std::endl;
 	//----------------------------------------------------------------------------

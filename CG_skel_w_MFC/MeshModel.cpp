@@ -111,7 +111,6 @@ void MeshModel::loadFile(string fileName)
 		else if (lineType == "vt")
 		{
 			vertex_textures.push_back(vec3fFromStream(issLine));
-			// texture
 		}
 		else if (lineType == "#" || lineType == "")
 		{
@@ -170,6 +169,7 @@ void MeshModel::loadFile(string fileName)
 /// @param face_num Number of faces sent. all arrays should be [9 * facenum] length
 void MeshModel::generateBuffers(int face_num, const GLfloat *vertices_array, const GLfloat *vertex_normals_array, const GLfloat *vertex_textures_array, const GLfloat *material_textures_array)
 {
+	
 	// Generate a new array object for the main draw
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
