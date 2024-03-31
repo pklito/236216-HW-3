@@ -9,13 +9,13 @@
 class Texture 
 {
 	unsigned int m_RendererID;
-	std::string m_FilePath;
-	unsigned char* m_LocalBuffer;
 	int m_width, m_height, m_BPP;
 public:
 	Texture(const std::string& path);
+	Texture() : m_RendererID(0), m_width(0), m_height(0), m_BPP(0) {};
 	~Texture();
 
+	void load(const std::string& path);
 	void Bind(unsigned int slot = 0) const;
 	void Unbind() const;
 
