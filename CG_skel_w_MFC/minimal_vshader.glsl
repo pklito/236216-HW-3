@@ -10,6 +10,7 @@ uniform mat4 world_transform;
 uniform mat4 camera_transform;
 uniform mat4 normal_transform;
 varying vec3 fNormal;
+varying vec2 fTexture;
 varying vec4 fPos;
 
 varying vec3 mat_diffuse;
@@ -21,6 +22,7 @@ void main()
     vec4 world_pos = world_transform * vec4(vPosition,1.0);
     fPos = world_pos;
     fNormal = normalize((normal_transform * vec4(vNormal,1.0)).xyz);
+    fTexture = vTexture.xy;
 
     mat_ambient = vMatAmb;
     mat_diffuse = vMatDiff;

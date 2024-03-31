@@ -11,6 +11,9 @@ uniform vec3 camera_position;
 varying vec3 mat_diffuse;
 varying vec3 mat_ambient;
 varying vec3 mat_specular;
+varying vec2 fTexture;
+uniform sampler2D ourTexture;
+
 vec3 reflect(vec3 vector, vec3 normal) {
     return vector - normal * 2 * dot(vector, normal);
 }
@@ -46,5 +49,6 @@ void main()
 
    //ambient lights
    color += ambient_light * mat_ambient;
-   fColor = vec4(color,1.0);
+
+   fColor = texture(ourTexture, fTexture) * vec4(color,1.0);
 } 

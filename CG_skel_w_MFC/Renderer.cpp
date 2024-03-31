@@ -154,8 +154,11 @@ void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const 
 	glUseProgram(program.program);
 	_passLights(program);
 	glBindVertexArray(vao);
-	if(textureID != -1);
+	if(textureID != -1);{
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textureID);
+		glUniform1i(program.find("ourTexture"), 0);
+	}
 
 	GLfloat full_transform_array[16];
 	toFloatArray(full_transform_array, wm_transform);
