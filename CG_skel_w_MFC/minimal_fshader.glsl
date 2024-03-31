@@ -50,5 +50,5 @@ void main()
    //ambient lights
    color += ambient_light * mat_ambient;
 
-   fColor = texture(ourTexture, fTexture) * vec4(color,1.0);
+   fColor = texture(ourTexture, fTexture);
 } 
