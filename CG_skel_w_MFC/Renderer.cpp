@@ -190,7 +190,7 @@ void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const 
 void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform, const int textureID)
 {
 
-	_DrawTris(programs[current_program], vao, face_count, wm_transform, wm_normal_transform);
+	_DrawTris(programs[current_program], vao, face_count, wm_transform, wm_normal_transform, textureID);
 }
 
 /// @brief Identical to DrawMesh, ut GL_LINE_STRIP, and a hardcoded program.
