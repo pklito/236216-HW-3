@@ -83,6 +83,7 @@ float blue = 0.8f;
 void handleEffect(Scene* scene) {
 	while (isEffectActive) {
 		// Update color components
+		std::cout << "Now handling effect" << std::endl;
 		int choice = rand() % 3; // 0, 1, or 2
 		if (choice == 0) {
 			if (red >= 1.0f || red <= 0.0f) {
@@ -111,7 +112,7 @@ void handleEffect(Scene* scene) {
 		scene->draw();
 
 		// Sleep for 500 milliseconds (half a second)
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		std::this_thread::sleep_for(std::chrono::milliseconds(150));
 	}
 }
 
@@ -120,9 +121,8 @@ void startEffect(Scene* scene) {
 	// Set the flag to true to activate the effect
 	isEffectActive = true;
 
-	// Start a new thread to handle the effect
-	std::thread effectThread(handleEffect, scene);
-	effectThread.detach(); // Detach the thread to run independently
+	// Call handleEffect in a loop until isEffectActive becomes false
+	handleEffect(scene);
 }
 
 // Function to stop the effect
@@ -131,14 +131,13 @@ void stopEffect() {
 	isEffectActive = false;
 }
 
-
-void toggleEffect() {
-	isEffectActive = !isEffectActive;
+// Function to toggle the effect on/off
+void toggleEffect(Scene* scene) {
 	if (isEffectActive) {
-		startEffect(scene);
+		stopEffect();
 	}
 	else {
-		stopEffect;
+		startEffect(scene);
 	}
 }
 
@@ -404,7 +403,7 @@ void keyboard(unsigned char key, int x, int y)
 		renderer->setCameraMatrixes(scene->getActiveCamera());
 		break;
 	case 'x':
-		toggleEffect();
+		toggleEffect(scene);
 		//scene->setRotateAndChangeColorToCurrObj(!(scene->getRotateAndColor()));
 		break;
 	case 'z': // return model to center
