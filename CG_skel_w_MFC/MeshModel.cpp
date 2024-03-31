@@ -251,7 +251,7 @@ void MeshModel::generateBuffers(const GLfloat *vertices_array, const GLfloat* ve
 	// colors, passed with location = 3
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_colors);
 	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3, vertex_colors_array, GL_STATIC_DRAW);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(3);
 
 	//
