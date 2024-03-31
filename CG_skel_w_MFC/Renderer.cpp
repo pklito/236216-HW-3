@@ -12,7 +12,7 @@ Renderer::Renderer() : Renderer(512, 512, "vshader.glsl", "fshader.glsl")
 {
 }
 
-Renderer::Renderer(int width, int height, const char *vshader, const char *fshader) : m_width(width), m_height(height), programs(), current_program(0)
+Renderer::Renderer(int width, int height, const char* vshader, const char* fshader) : m_width(width), m_height(height), programs(), current_program(0)
 {
 	InitOpenGLRendering();
 
@@ -39,7 +39,7 @@ Renderer::Renderer(int width, int height, const char *vshader, const char *fshad
 	{
 		std::cout << "Failed to load texture" << std::endl;
 	}
-	
+
 	CreateBuffers(width, height);
 	CreateProgram(vshader, fshader);
 	program_wireframe = Program("lines_vshader.glsl", "lines_fshader.glsl", "world_transform", "camera_transform", "normal_transform", "texture");
@@ -79,7 +79,7 @@ void Renderer::CreateBuffers(int width, int height)
 	m_outBuffer = new float[3 * m_width * m_height];
 }
 
-void Renderer::CreateProgram(const char *vshader, const char *fshader)
+void Renderer::CreateProgram(const char* vshader, const char* fshader)
 {
 	programs.push_back(Program(vshader, fshader, "world_transform", "camera_transform", "normal_transform", "texture"));
 }
@@ -123,7 +123,7 @@ void Renderer::SetDemoBuffer()
 /// @param face_count amount of vertices/3
 /// @param wm_transform world*model transform of the model
 /// @param wm_normal_transform world*model transform of the model normals
-void Renderer::_DrawTris(Program & program, GLuint vao, GLuint face_count, const mat4 & wm_transform, const mat4 & wm_normal_transform)
+void Renderer::_DrawTris(Program& program, GLuint vao, GLuint face_count, const mat4& wm_transform, const mat4& wm_normal_transform)
 {
 	texture_unit_index = program.program;
 
@@ -176,7 +176,7 @@ void Renderer::_DrawTris(Program & program, GLuint vao, GLuint face_count, const
 /// @param face_count amount of vertices/3
 /// @param wm_transform world*model transform of the model
 /// @param wm_normal_transform world*model transform of the model normals
-void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform)
+void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4& wm_transform, const mat4& wm_normal_transform)
 {
 
 	_DrawTris(programs[current_program], vao, face_count, wm_transform, wm_normal_transform);
@@ -189,11 +189,11 @@ void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4 &wm_transform,
 /// @param face_count amount of vertices/3
 /// @param wm_transform world*model transform of the model
 /// @param wm_normal_transform world*model transform of the model normals
-void Renderer::DrawWireframe(GLuint vao, GLuint face_count, const mat4 &wm_transform)
+void Renderer::DrawWireframe(GLuint vao, GLuint face_count, const mat4& wm_transform)
 {
 
 	glUseProgram(program_wireframe.program);
-	GLfloat color_arr[3] = {0.8, 0.8, 0.8};
+	GLfloat color_arr[3] = { 0.8, 0.8, 0.8 };
 	glUniform3fv(program_wireframe.find("color"), 1, color_arr);
 
 	// set the polygons to draw as lines
@@ -207,14 +207,14 @@ void Renderer::DrawWireframe(GLuint vao, GLuint face_count, const mat4 &wm_trans
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-void Renderer::DrawLines(GLuint lines_vao, GLuint lines_count, const mat4 &wm_transform, vec3 color)
+void Renderer::DrawLines(GLuint lines_vao, GLuint lines_count, const mat4& wm_transform, vec3 color)
 {
 	glUseProgram(program_wireframe.program);
 
 	// Bind the models settings
 	glBindVertexArray(lines_vao);
 
-	GLfloat color_arr[3] = {color.x, color.y, color.z};
+	GLfloat color_arr[3] = { color.x, color.y, color.z };
 	glUniform3fv(program_wireframe.find("color"), 1, color_arr);
 
 	GLfloat full_transform_array[16];
@@ -233,22 +233,22 @@ void Renderer::DrawLines(GLuint lines_vao, GLuint lines_count, const mat4 &wm_tr
 }
 
 // Camera
-void Renderer::SetCameraTransformInverse(const mat4 &cTransform)
+void Renderer::SetCameraTransformInverse(const mat4& cTransform)
 {
 	mat_transform_inverse = cTransform;
 }
-void Renderer::SetProjection(const mat4 &projection)
+void Renderer::SetProjection(const mat4& projection)
 {
 	mat_project = projection;
 }
 
-void Renderer::setCameraMatrixes(const mat4 &cTransformInverse, const mat4 &Projection)
+void Renderer::setCameraMatrixes(const mat4& cTransformInverse, const mat4& Projection)
 {
 	SetCameraTransformInverse(cTransformInverse);
 	SetProjection(Projection);
 }
 
-void Renderer::setCameraMatrixes(Camera *camera)
+void Renderer::setCameraMatrixes(Camera* camera)
 {
 	setCameraMatrixes(camera->getTransformInverse(), camera->getProjection());
 }
@@ -277,14 +277,14 @@ void Renderer::InitOpenGLRendering()
 		-1, 1,
 		-1, 1,
 		1, -1,
-		1, 1};
+		1, 1 };
 	const GLfloat tex[] = {
 		0, 0,
 		1, 0,
 		0, 1,
 		0, 1,
 		1, 0,
-		1, 1};
+		1, 1 };
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vtc) + sizeof(tex), NULL, GL_STATIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vtc), vtc);
@@ -296,12 +296,12 @@ void Renderer::InitOpenGLRendering()
 
 	glEnableVertexAttribArray(vPosition);
 	glVertexAttribPointer(vPosition, 2, GL_FLOAT, GL_FALSE, 0,
-						  0);
+		0);
 
 	GLint vTexCoord = glGetAttribLocation(program, "vTexCoord");
 	glEnableVertexAttribArray(vTexCoord);
 	glVertexAttribPointer(vTexCoord, 2, GL_FLOAT, GL_FALSE, 0,
-						  (GLvoid *)sizeof(vtc));
+		(GLvoid*)sizeof(vtc));
 	glProgramUniform1i(program, glGetUniformLocation(program, "texture"), 0);
 	while ((a = glGetError()) != GL_NO_ERROR) {
 		std::cerr << "OpenGL error (after glProgramUniform1i for texture): " << a << std::endl;
