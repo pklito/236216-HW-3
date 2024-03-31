@@ -6,6 +6,8 @@
 #include "GL/glew.h"
 #include "InitShader.h"
 #include <map>
+#include "stb_image.h"
+#include "Texture.h"
 
 class Camera;
 

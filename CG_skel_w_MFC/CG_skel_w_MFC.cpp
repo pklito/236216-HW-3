@@ -23,7 +23,6 @@
 #include "CPopup.h"
 #include "CColorPicker.h"
 #include "CPopNumber.h"
-#include "png/png.h"
 #include "texture.h"
 #include "stb_image.h"
 
