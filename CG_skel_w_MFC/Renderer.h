@@ -110,4 +110,6 @@ public:
 	void ClearColorBuffer();
 	void ClearDepthBuffer();
 	void SetDemoBuffer();
+
+	int getCurrProgram() { return current_program; }
 };

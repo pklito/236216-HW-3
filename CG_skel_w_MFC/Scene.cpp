@@ -198,6 +198,21 @@ void Scene::rotateObject(GLfloat theta_angle, int axis)
 	}
 }
 
+void Scene::setRotateAndChangeColorToCurrObj(bool change)
+{
+	rotateAndColor = change;
+}
+
+bool Scene::getRotateAndColor()
+{
+	return rotateAndColor;
+}
+
+void Scene::setColorToObject(float r, float g, float b)
+{
+	models[activeModel]->setColor(r, g, b);
+}
+
 void Scene::changeCurrsColor()
 {
 	models[activeModel]->changeColor();

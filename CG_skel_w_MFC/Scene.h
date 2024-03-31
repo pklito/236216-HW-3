@@ -28,6 +28,7 @@ public:
 	void setData(int dat) { data = dat; }
 	virtual void resetToCenter() = 0;
 	virtual void changeColor() = 0;
+	virtual void setColor(float r, float g, float b) = 0;
 };
 
 class Camera
@@ -75,10 +76,11 @@ class Scene
 	bool world_control;
 	bool moving_model;
 	bool fillCurrObj;
+	bool rotateAndColor;
 
 public:
 	// Scene() : world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false), {std::cout << "NO RENDERER PROVIDED!" << std::endl;};
-	Scene(Renderer *renderer) : m_renderer(renderer), world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false){/*m_renderer->setLights(&lights); */};
+	Scene(Renderer *renderer) : m_renderer(renderer), world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false), rotateAndColor(false){/*m_renderer->setLights(&lights); */};
 	void loadOBJModel(string fileName);
 	void draw();
 	void drawDemo();
@@ -119,6 +121,10 @@ public:
 	void changeCurrsColor();
 	void changeShadingMethod();
 	void changeCurrsMaterial();
+	void setColorToObject(float r, float g, float b);
+
+	void setRotateAndChangeColorToCurrObj(bool change);
+	bool getRotateAndColor();
 
 	Material getSelectedMaterial();
 	void setSelectedMaterial(const Material &mat);

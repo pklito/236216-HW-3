@@ -10,13 +10,16 @@ class MeshModel : public Model
 {
 protected:
 	MeshModel() {}
-	void generateBuffers(const GLfloat *vertices_array, const GLfloat *vertex_normals_array, const GLfloat *vertex_textures_array, int face_num);
+	void generateBuffers(const GLfloat *vertices_array, const GLfloat* vertex_colors_array, const GLfloat *vertex_normals_array, const GLfloat *vertex_textures_array, int face_num);
 
 	int face_num;
 	GLuint vao;
 	GLuint vbo_vertices;
 	GLuint vbo_normals;
 	GLuint vbo_textures;
+
+	GLuint color_vao;
+	GLuint vbo_colors;
 
 	GLuint vert_vao;
 	GLuint vert_vbo;
@@ -63,6 +66,7 @@ public:
 	void setFillObj(bool fill);
 
 	void changeColor();
+	void setColor(float r, float g, float b);
 
 	/*
 	void setMaterial(const Material& new_mat){material = new_mat;}

@@ -15,17 +15,18 @@ struct FaceIdcs
 	int v[4];
 	int vn[4];
 	int vt[4];
+	int vc[4]; // Color indices
 
 	FaceIdcs()
 	{
 		for (int i = 0; i < 4; i++)
-			v[i] = vn[i] = vt[i] = 0;
+			v[i] = vn[i] = vt[i] = vc[i] = 0;
 	}
 
 	FaceIdcs(std::istream &aStream)
 	{
 		for (int i = 0; i < 4; i++)
-			v[i] = vn[i] = vt[i] = 0;
+			v[i] = vn[i] = vt[i] = vc[i] = 0;
 
 		char c;
 		for (int i = 0; i < 3; i++)
@@ -44,6 +45,9 @@ struct FaceIdcs
 			if (aStream.peek() != '/')
 				continue;
 			aStream >> c >> vn[i];
+			if (aStream.peek() != '/')
+				continue;
+			aStream >> c >> vc[i]; // Read color index
 		}
 	}
 };
@@ -82,6 +86,8 @@ void MeshModel::loadFile(string fileName)
 	vector<vec3> vertices;
 	vector<vec3> vertex_normals;
 	vector<vec3> vertex_textures;
+
+	vector<vec3> vertex_colors;
 	// while not end of file
 	while (!ifile.eof())
 	{
@@ -96,8 +102,10 @@ void MeshModel::loadFile(string fileName)
 		issLine >> std::ws >> lineType;
 
 		// based on the type parse data
-		if (lineType == "v") // BUG FIXED
+		if (lineType == "v") { // BUG FIXED
 			vertices.push_back(vec3fFromStream(issLine));
+			vertex_colors.push_back(vec3(0.2, 0.3, 0.8));
+		}
 		else if (lineType == "f") // BUG FIXED
 			faces.push_back(issLine);
 		else if (lineType == "vn")
@@ -128,6 +136,8 @@ void MeshModel::loadFile(string fileName)
 	GLfloat *vertices_array = new GLfloat[face_num * 3 * 3];
 	GLfloat *vertex_normals_array = new GLfloat[face_num * 3 * 3];
 	GLfloat *vertex_textures_array = new GLfloat[face_num * 3 * 3];
+
+	GLfloat *vertex_colors_array = new GLfloat[face_num * 3 * 3];
 	// convert
 	int k = 0;
 	for (vector<FaceIdcs>::iterator it = faces.begin(); it != faces.end(); ++it)
@@ -137,6 +147,7 @@ void MeshModel::loadFile(string fileName)
 			for (int coord = 0; coord < 3; coord++)
 			{ // x, y, z
 				vertices_array[k + coord] = vertices[it->v[i] - 1][coord];
+				vertex_colors_array[k + coord] = vertex_colors[it->v[i] - 1][coord];
 				if (vertex_normals.size() > 0)
 					vertex_normals_array[k + coord] = vertex_normals[it->vn[i] - 1][coord];
 				if (vertex_textures.size() > 0)
@@ -146,13 +157,13 @@ void MeshModel::loadFile(string fileName)
 			k += 3;
 		}
 	}
-
 	// pass only the arrays that were filled.
-	generateBuffers(vertices_array, (vertex_normals.size() > 0) ? vertex_normals_array : nullptr, (vertex_textures.size() > 0) ? vertex_textures_array : nullptr, face_num);
+	generateBuffers(vertices_array, vertex_colors_array, (vertex_normals.size() > 0) ? vertex_normals_array : nullptr, (vertex_textures.size() > 0) ? vertex_textures_array : nullptr, face_num);
 
 	delete[] vertices_array;
 	delete[] vertex_normals_array;
 	delete[] vertex_textures_array;
+	delete[] vertex_colors_array;
 }
 
 /// @brief This function handles taking arrays of vertices and sending them to the GPU.
@@ -163,7 +174,7 @@ void MeshModel::loadFile(string fileName)
 /// @param vertex_normals_array Same order of vertices as {vertices_array}. if nullptr, face normals will be sent
 /// @param vertex_textures_array Same order of vertices as {vertices_array}. texture coord for each vertex.
 /// @param face_num Number of faces sent. all arrays should be [9 * facenum] length
-void MeshModel::generateBuffers(const GLfloat *vertices_array, const GLfloat *vertex_normals_array, const GLfloat *vertex_textures_array, int face_num)
+void MeshModel::generateBuffers(const GLfloat *vertices_array, const GLfloat* vertex_colors_array, const GLfloat *vertex_normals_array, const GLfloat *vertex_textures_array, int face_num)
 {
 	
 	// Generate a new array object for the main draw
@@ -205,11 +216,12 @@ void MeshModel::generateBuffers(const GLfloat *vertices_array, const GLfloat *ve
 	/*
 	Generate the buffer objects to store these arrays
 	*/
-	GLuint vbos[3] = {0, 0, 0};
-	glGenBuffers(3, vbos);
+	GLuint vbos[4] = {0, 0, 0, 0};
+	glGenBuffers(4, vbos);
 	vbo_vertices = vbos[0];
 	vbo_normals = vbos[1];
 	vbo_textures = vbos[2];
+	vbo_colors = vbos[3];
 
 	// vertices, passed with location = 0
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
@@ -235,6 +247,12 @@ void MeshModel::generateBuffers(const GLfloat *vertices_array, const GLfloat *ve
 		glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 2, vt_arr, GL_STATIC_DRAW);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0); 
 	glEnableVertexAttribArray(2);
+
+	// colors, passed with location = 3
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_colors);
+	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3, vertex_colors_array, GL_STATIC_DRAW);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(3);
 
 	//
 	// VERTEX NORMAL drawing vao
@@ -396,6 +414,7 @@ void MeshModel::draw(Renderer *renderer)
 {
 	mat4 full_trans = _world_transform * _model_transform;
 	mat4 full_norm_trans = _world_normal_transform * _model_normal_transform;
+
 	if (!draw_wireframe)
 	{
 		renderer->DrawMesh(vao, face_num, full_trans, full_norm_trans); // TODO: calculate this transform on change
@@ -417,6 +436,7 @@ void MeshModel::draw(Renderer *renderer)
 	{
 		renderer->DrawLines(box_vao, 8*3, full_trans);
 	}
+
 }
 
 mat4 MeshModel::getFullTransformation()
@@ -517,6 +537,36 @@ void MeshModel::changeColor()
 	// Placeholder implementation
 }
 
+void MeshModel::setColor(float r, float g, float b)
+{
+	vector<vec3> vertex_colors;
+
+	for (int i = 0; i < face_num * 3; ++i)
+	{
+		// Assuming each vertex has a color attribute index of 3 (modify accordingly)
+		// Set RGB values for each vertex
+		vertex_colors.push_back(vec3(r, g, b)); // Push RGB color to vertex_colors vector
+	}
+
+	GLfloat* vertex_colors_array = new GLfloat[face_num * 3 * 3];
+	// Convert vertex_colors to vertex_colors_array
+	int k = 0;
+	for (const auto& color : vertex_colors)
+	{
+		for (int coord = 0; coord < 3; coord++)
+		{ // x, y, z
+			vertex_colors_array[k + coord] = color[coord];
+		}
+		// Iterate to next vertex
+		k += 3;
+	}
+	
+	// Update the vertex buffer object (VBO) with the new color data
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_colors); // Assuming vbo_colors is the ID of the vertex color buffer object
+	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3, vertex_colors_array, GL_STATIC_DRAW);
+	delete[] vertex_colors_array;
+}
+
 // TODO: Implement this function
 void MeshModel::toggleSpecialMaterial()
 {
@@ -554,15 +604,22 @@ void PrimMeshModel::Cube()
 	face_num = 12;
 
 	static GLfloat vertices_array[12 * 3 * 3];
+	static GLfloat vertex_colors_array[12 * 3 * 3];
 	for (int i = 0; i < 3 * face_num; i++)
 	{
 		for (int coord = 0; coord < 3; coord++)
 		{
 			vertices_array[3 * i + coord] = cube_points[face_indices[i]][coord];
+			// Set color to cyan for all vertices
+			vertex_colors_array[3 * i + coord] = 0.0f; // Red
+			vertex_colors_array[3 * i + coord + 1] = 1.0f; // Green
+			vertex_colors_array[3 * i + coord + 2] = 1.0f; // Blue
 		}
 	}
 
-	generateBuffers(vertices_array, nullptr, nullptr, face_num);
+	generateBuffers(vertices_array, vertex_colors_array, nullptr, nullptr, face_num);
+	delete[] vertices_array;
+	delete[] vertex_colors_array;
 }
 
 void PrimMeshModel::Tetrahedron()
@@ -573,6 +630,15 @@ void PrimMeshModel::Tetrahedron()
 #define top 0, 1, 0
 	face_num = 4;
 	static GLfloat vertices_array[3 * 4 * 3] = {base1, base2, base3, top, base1, base3, top, base2, base1, top, base3, base2};
+	static GLfloat vertex_colors_array[3 * 4 * 3];
 
-	generateBuffers(vertices_array, nullptr, nullptr, face_num);
+	// Fill vertex_colors_array with cyan color
+	for (int i = 0; i < 3 * face_num * 3; i += 3)
+	{
+		vertex_colors_array[i] = 0.0f; // Red
+		vertex_colors_array[i + 1] = 1.0f; // Green
+		vertex_colors_array[i + 2] = 1.0f; // Blue
+	}
+
+	generateBuffers(vertices_array, vertex_colors_array, nullptr, nullptr, face_num);
 }

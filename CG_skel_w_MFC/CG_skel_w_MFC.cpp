@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "CG_skel_w_MFC.h"
+#include <thread>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -68,6 +69,78 @@ int last_x, last_y;
 bool lb_down, rb_down, mb_down;
 
 float increment = 0.2;
+
+bool isEffectActive = false;
+float rotationAngle = 20.0f;
+float r_colorIncrement = 0.05f;
+float g_colorIncrement = 0.05f;
+float b_colorIncrement = 0.05f;
+float red = 0.2f;
+float green = 0.3f;
+float blue = 0.8f;
+
+
+void handleEffect(Scene* scene) {
+	while (isEffectActive) {
+		// Update color components
+		int choice = rand() % 3; // 0, 1, or 2
+		if (choice == 0) {
+			if (red >= 1.0f || red <= 0.0f) {
+				r_colorIncrement = -r_colorIncrement;
+			}
+			red += r_colorIncrement;
+		}
+		else if (choice == 1) {
+			if (green >= 1.0f || green <= 0.0f) {
+				g_colorIncrement = -g_colorIncrement;
+			}
+			green += g_colorIncrement;
+		}
+		else if (choice == 2) {
+			if (blue >= 1.0f || blue <= 0.0f) {
+				b_colorIncrement = -b_colorIncrement;
+			}
+			blue += b_colorIncrement;
+		}
+
+		// Set color and rotate object
+		scene->setColorToObject(red, green, blue);
+		scene->rotateObject(rotationAngle, 1);
+
+		// Redraw the scene
+		scene->draw();
+
+		// Sleep for 500 milliseconds (half a second)
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	}
+}
+
+// Function to start the effect
+void startEffect(Scene* scene) {
+	// Set the flag to true to activate the effect
+	isEffectActive = true;
+
+	// Start a new thread to handle the effect
+	std::thread effectThread(handleEffect, scene);
+	effectThread.detach(); // Detach the thread to run independently
+}
+
+// Function to stop the effect
+void stopEffect() {
+	// Set the flag to false to deactivate the effect
+	isEffectActive = false;
+}
+
+
+void toggleEffect() {
+	isEffectActive = !isEffectActive;
+	if (isEffectActive) {
+		startEffect(scene);
+	}
+	else {
+		stopEffect;
+	}
+}
 
 //----------------------------------------------------------------------------
 // Camera + Scene modiications
@@ -277,8 +350,12 @@ void display(void)
 		renderer->FillEdges(0.02, vec3(0.1, 0.1, 0.5));
 	}
 	*/
+	while (isEffectActive) {
+		return;
+	}
 
 	scene->draw();
+
 }
 
 void reshape(int width, int height)
@@ -325,6 +402,10 @@ void keyboard(unsigned char key, int x, int y)
 	case ',':
 		scene->getActiveCamera()->translate(0, 0, -0.1, scene->getWorldControl());
 		renderer->setCameraMatrixes(scene->getActiveCamera());
+		break;
+	case 'x':
+		toggleEffect();
+		//scene->setRotateAndChangeColorToCurrObj(!(scene->getRotateAndColor()));
 		break;
 	case 'z': // return model to center
 		scene->returnModelToCenter();
