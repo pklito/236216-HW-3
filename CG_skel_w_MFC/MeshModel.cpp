@@ -62,9 +62,11 @@ vec2 vec2fFromStream(std::istream &aStream)
 	return vec2(x, y);
 }
 
-MeshModel::MeshModel(string fileName) : MeshModel()
+MeshModel::MeshModel(string fileName, string textureName) : MeshModel()
 {
 	loadFile(fileName);
+	if(textureName.length() > 0)
+		texture.load(textureName);
 }
 
 MeshModel::~MeshModel(void)

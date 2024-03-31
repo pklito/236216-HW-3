@@ -4,6 +4,7 @@
 #include "InitShader.h"
 #include "GL\freeglut.h"
 #include "scene.h"
+#include "Texture.h"
 
 #define INDEX(width, x, y, c) ((x) + (y) * (width)) * 3 + c
 

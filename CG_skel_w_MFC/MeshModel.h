@@ -44,13 +44,15 @@ protected:
 	bool draw_face_normals;
 	bool draw_bounding_box;
 
+	Texture texture;
+
 	void applyWorldTransformation(const mat4 &transformation);
 	void applyModelTransformation(const mat4 &transformation);
 	void applyWorldNormalTransformation(const mat4 &transformation_inv);
 	void applyModelNormalTransformation(const mat4 &transformation_inv);
 
 public:
-	MeshModel(string fileName);
+	MeshModel(string fileName, string textureName = "");
 	~MeshModel(void);
 	void loadFile(string fileName);
 	void draw(Renderer *renderer) override;
