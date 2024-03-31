@@ -204,8 +204,15 @@ void MeshModel::generateBuffers(int face_num, const GLfloat *vertices_array, con
 	}
 	if (vertex_textures_array == nullptr)
 	{
-		std::fill(vt_arr, vt_arr + (9 * face_num), 0);
-		// TODO handle no textures
+		for(int i = 0; i < 3 * face_num; i ++){
+			vec3 p = vec3(vertices_array[3 * i + 0], vertices_array[3 * i + 1], vertices_array[3 * i + 2]);
+			//TODO convert point to coordinate
+			vt_arr[3*i + 0] = 0;
+			vt_arr[3*i + 1] = 0;
+			vt_arr[3*i + 2] = 0;
+			
+		}
+		
 	}
 
 	/*
@@ -502,25 +509,21 @@ void MeshModel::applyModelNormalTransformation(const mat4 &transformation_inv)
 	_model_normal_transform = transpose(transformation_inv) * _model_normal_transform;
 }
 
-// TODO: Implement this function
 void MeshModel::setShowNormals(bool change)
 {
 	draw_face_normals = change;
 }
 
-// TODO: Implement this function
 void MeshModel::setShowNormalsToVertices(bool change)
 {
 	draw_vertex_normals = change;
 }
 
-// TODO: Implement this function
 void MeshModel::setShowBox(bool change)
 {
 	draw_bounding_box = change;
 }
 
-// TODO: Implement this function
 void MeshModel::setFillObj(bool fill)
 {
 	draw_wireframe = !fill;
