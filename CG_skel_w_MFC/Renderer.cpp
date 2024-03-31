@@ -148,12 +148,14 @@ void Renderer::EndDraw()
 /// @param face_count amount of vertices/3
 /// @param wm_transform world*model transform of the model
 /// @param wm_normal_transform world*model transform of the model normals
-void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform)
+void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform, const int textureID)
 {
 	// Bind the models settings
 	glUseProgram(program.program);
 	_passLights(program);
 	glBindVertexArray(vao);
+	if(textureID != -1);
+		glBindTexture(GL_TEXTURE_2D, textureID);
 
 	GLfloat full_transform_array[16];
 	toFloatArray(full_transform_array, wm_transform);
@@ -180,7 +182,7 @@ void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const 
 /// @param face_count amount of vertices/3
 /// @param wm_transform world*model transform of the model
 /// @param wm_normal_transform world*model transform of the model normals
-void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform)
+void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform, const int textureID)
 {
 
 	_DrawTris(programs[current_program], vao, face_count, wm_transform, wm_normal_transform);

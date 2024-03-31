@@ -8,9 +8,10 @@
 
 class Texture 
 {
+public:
 	unsigned int m_RendererID;
 	int m_width, m_height, m_BPP;
-public:
+
 	Texture(const std::string& path);
 	Texture() : m_RendererID(0), m_width(0), m_height(0), m_BPP(0) {};
 	~Texture();
