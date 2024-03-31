@@ -218,6 +218,31 @@ void MeshModel::generateBuffers(int face_num, const GLfloat *vertices_array, con
 	vbo_mat_diffuse = vbos[4];
 	vbo_mat_specular = vbos[5];
 
+//MATERIALS
+	GLfloat *vm1_arr = new GLfloat[3 * 3 * face_num];
+	GLfloat *vm2_arr = new GLfloat[3 * 3 * face_num];
+	GLfloat *vm3_arr = new GLfloat[3 * 3 * face_num];
+	for(int i = 0; i < 3 * face_num; i ++){
+
+		vm1_arr[i * 3] = 0.1; vm1_arr[i * 3 + 1] = 0.1; vm1_arr[i*3+2] = 0.1;
+		vm2_arr[i * 3 + 0] = vertices_array[3*i+0]; vm2_arr[i * 3 + 1] = vertices_array[3 * i + 1]; vm2_arr[i * 3 + 2] = vertices_array[3 * i + 2];
+		vm3_arr[i * 3 + 0] = 0.3; vm3_arr[i * 3 + 1] = vertices_array[i * 3 + 1]/ 3; vm3_arr[i * 3 + 2] = 0.3;
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_mat_ambient);
+	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3, vm1_arr, GL_STATIC_DRAW);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+	glEnableVertexAttribArray(3);
+	
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_mat_diffuse);
+	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3, vm2_arr, GL_STATIC_DRAW);
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)(0));
+	glEnableVertexAttribArray(4);
+	
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_mat_specular);
+	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3, vm3_arr, GL_STATIC_DRAW);
+	glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)(0));
+	glEnableVertexAttribArray(5);
+	
 	// vertices, passed with location = 0
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
 	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3,
@@ -242,31 +267,6 @@ void MeshModel::generateBuffers(int face_num, const GLfloat *vertices_array, con
 		glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3, vt_arr, GL_STATIC_DRAW);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
 	glEnableVertexAttribArray(2);
-
-	//MATERIALS
-	GLfloat *vm1_arr = new GLfloat[3 * 3 * face_num];
-	GLfloat *vm2_arr = new GLfloat[3 * 3 * face_num];
-	GLfloat *vm3_arr = new GLfloat[3 * 3 * face_num];
-	for(int i = 0; i < 3 * face_num; i ++){
-
-		vm1_arr[i * 3] = 0.1; vm1_arr[i * 3 + 1] = 0.1; vm1_arr[i*3+2] = 0.1;
-		vm2_arr[i * 3 + 0] = vertices_array[3*i+0]; vm2_arr[i * 3 + 1] = vertices_array[3 * i + 1]; vm2_arr[i * 3 + 2] = vertices_array[3 * i + 2];
-		vm3_arr[i * 3 + 0] = 0.3; vm3_arr[i * 3 + 1] = vertices_array[i * 3 + 1]/ 3; vm3_arr[i * 3 + 2] = 0.3;
-	}
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_mat_ambient);
-	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3, vm1_arr, GL_STATIC_DRAW);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-	glEnableVertexAttribArray(3);
-	
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_mat_diffuse);
-	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3, vm2_arr, GL_STATIC_DRAW);
-	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)(0));
-	glEnableVertexAttribArray(4);
-	
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_mat_specular);
-	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3, vm3_arr, GL_STATIC_DRAW);
-	glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)(0));
-	glEnableVertexAttribArray(5);
 
 	//
 	// VERTEX NORMAL drawing vao
