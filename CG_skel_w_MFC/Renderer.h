@@ -7,6 +7,8 @@
 #include "InitShader.h"
 #include <map>
 #include "util.h"
+#include "stb_image.h"
+#include "Texture.h"
 
 class Camera;
 

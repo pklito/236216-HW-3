@@ -198,6 +198,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Texture.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\stb_image.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -261,6 +269,14 @@
 			</File>
 			<File
 				RelativePath=".\vec.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Texture.h"
+				>
+			</File>
+			<File
+				RelativePath=".\stb_image.h"
 				>
 			</File>
 		</Filter>

@@ -23,6 +23,8 @@
 #include "CPopup.h"
 #include "CColorPicker.h"
 #include "CPopNumber.h"
+#include "texture.h"
+#include "stb_image.h"
 
 #define BUFFER_OFFSET(offset) ((GLvoid *)(offset))
 
