@@ -7,6 +7,8 @@
 #include "Texture.h"
 
 #define INDEX(width, x, y, c) ((x) + (y) * (width)) * 3 + c
+GLenum err;
+#define DEBUG_BUG() while((err = glGetError()) != GL_NO_ERROR){ std::cerr << __FUNCTION__ << ":" << gluErrorString(err) << std::endl;}
 
 Renderer::Renderer() : Renderer(512, 512, "vshader.glsl", "fshader.glsl")
 {
