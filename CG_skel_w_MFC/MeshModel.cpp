@@ -483,7 +483,7 @@ void MeshModel::draw(Renderer *renderer)
 	mat4 full_norm_trans = _world_normal_transform * _model_normal_transform;
 	if (!draw_wireframe)
 	{
-		renderer->DrawMesh(vao, face_num, full_trans, full_norm_trans,texture.m_RendererID); // TODO: calculate this transform on change
+		renderer->DrawMesh(vao, face_num, full_trans, full_norm_trans,texture.m_RendererID, uniform_mat); // TODO: calculate this transform on change
 	}
 	else
 	{
@@ -601,7 +601,7 @@ void MeshModel::changeColor()
 // TODO: Implement this function
 void MeshModel::toggleSpecialMaterial()
 {
-	// Placeholder implementation
+	draw_single_color = !draw_single_color;
 }
 
 void MeshModel::resetToCenter()

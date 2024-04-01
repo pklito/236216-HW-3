@@ -9,7 +9,7 @@ using namespace std;
 class MeshModel : public Model
 {
 protected:
-	MeshModel() : draw_wireframe(false), draw_vertex_normals(false),draw_bounding_box(false), draw_face_normals(false) {}
+	MeshModel() : draw_wireframe(false), draw_vertex_normals(false),draw_bounding_box(false), draw_face_normals(false), draw_single_color(true), uniform_mat(Material(vec3(0,0,0),vec3(0,0,0),vec3(0,0,0),0)) {}
 	void generateBuffers( int face_num, const GLfloat *vertices_array, const GLfloat *vertex_normals_array, const GLfloat *vertex_textures_array, const GLfloat *vertex_material_array);
 	void generateMaterialBuffer(int face_num, const vec3&, const vec3&, const vec3&);
 
@@ -44,7 +44,10 @@ protected:
 	bool draw_face_normals;
 	bool draw_bounding_box;
 
+	bool draw_single_color;
 	Texture texture;
+
+	Material uniform_mat;
 
 	void applyWorldTransformation(const mat4 &transformation);
 	void applyModelTransformation(const mat4 &transformation);
