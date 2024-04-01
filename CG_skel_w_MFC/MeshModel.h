@@ -73,10 +73,8 @@ public:
 
 	void changeColor();
 
-	/*
-	void setMaterial(const Material& new_mat){material = new_mat;}
-	Material getMaterial(){return material;}
-	*/
+	void setMaterial(const Material& new_mat){uniform_mat = new_mat;}
+	Material getMaterial(){return uniform_mat;}
 	void toggleSpecialMaterial() override;
 	void resetToCenter();
 };

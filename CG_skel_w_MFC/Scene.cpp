@@ -301,7 +301,6 @@ Light* Scene::getSelectedLight(){
 		return nullptr;
 	return lights[activeLight];
 }
-/*
 Material Scene::getSelectedMaterial(){
 	return dynamic_cast<MeshModel*>(models[activeModel])->getMaterial();
 }
@@ -309,6 +308,7 @@ void Scene::setSelectedMaterial(const Material& mat){
 	dynamic_cast<MeshModel*>(models[activeModel])->setMaterial(mat);
 }
 
+/*
 void Scene::changeShadingMethod()
 {
 	m_renderer->changeShadingMethod();

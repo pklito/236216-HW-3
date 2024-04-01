@@ -167,7 +167,6 @@ void addProjCamera()
 int selected_type = 0;
 void changeMaterialColor()
 {
-	/*
 	vec3 color_out;
 	float intensity = -1;
 
@@ -188,7 +187,7 @@ void changeMaterialColor()
 	}
 	scene->setSelectedMaterial(mat);
 
-	selected_type = (selected_type += 1)%3;*/
+	selected_type = (selected_type += 1)%3;
 }
 
 void addOrthoCamera()
