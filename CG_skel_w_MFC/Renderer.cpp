@@ -19,6 +19,7 @@ Renderer::Renderer(int width, int height, const char *vshader, const char *fshad
 	InitOpenGLRendering();
 	CreateBuffers(width, height);
 	CreateProgram(vshader, fshader);
+	CreateProgram("gouraud_vshader.glsl", "generic_fshader.glsl");
 	program_wireframe = Program("lines_vshader.glsl", "lines_fshader.glsl", "world_transform", "camera_transform", "color");
 	program_texture = Program("phong_vshader.glsl", "texture_fshader.glsl", "world_transform", "camera_transform");
 }
