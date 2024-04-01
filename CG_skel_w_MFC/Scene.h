@@ -97,6 +97,8 @@ public:
 	void addCamera(Camera *camera);
 	void addLightSource(Light *light);
 
+	
+	void setHideTexture(bool change);
 	void setShowNormalsForMeshModels(bool change);
 	void setShowNormalsToVerticesForMeshModels(bool change);
 	void setShowBoxForMeshModels(bool change);

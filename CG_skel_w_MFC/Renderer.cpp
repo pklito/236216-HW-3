@@ -19,8 +19,9 @@ Renderer::Renderer(int width, int height, const char *vshader, const char *fshad
 	InitOpenGLRendering();
 	CreateBuffers(width, height);
 	CreateProgram(vshader, fshader);
+	CreateProgram("gouraud_vshader.glsl", "generic_fshader.glsl");
 	program_wireframe = Program("lines_vshader.glsl", "lines_fshader.glsl", "world_transform", "camera_transform", "color");
-	program_texture = Program("minimal_vshader.glsl", "texture_fshader.glsl", "world_transform", "camera_transform");
+	program_texture = Program("phong_vshader.glsl", "texture_fshader.glsl", "world_transform", "camera_transform");
 }
 
 Renderer::~Renderer(void)
@@ -151,7 +152,7 @@ void Renderer::EndDraw()
 /// @param face_count amount of vertices/3
 /// @param wm_transform world*model transform of the model
 /// @param wm_normal_transform world*model transform of the model normals
-void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform, const int textureID)
+void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform, const int textureID, const Material& uniform_mat)
 {
 	// Bind the models settings
 	glUseProgram(program.program);
@@ -162,10 +163,14 @@ void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const 
 		glBindTexture(GL_TEXTURE_2D, textureID);
 		glUniform1i(program.find("ourTexture"), 0);
 	}
-
+	
 	GLfloat full_transform_array[16];
 	toFloatArray(full_transform_array, wm_transform);
 	glUniformMatrix4fv(program.find("world_transform"), 1, GL_FALSE, full_transform_array);
+
+	GLfloat material_array[9];
+	toFloatArray(material_array, mat3(uniform_mat.color_ambient,uniform_mat.color_diffuse,uniform_mat.color_specular));
+	glUniformMatrix3fv(program.find("uniform_material"), 1, GL_FALSE, material_array);
 
 	GLfloat proj_array[16];
 	toFloatArray(proj_array, mat_project * mat_transform_inverse);
@@ -188,14 +193,14 @@ void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const 
 /// @param face_count amount of vertices/3
 /// @param wm_transform world*model transform of the model
 /// @param wm_normal_transform world*model transform of the model normals
-void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform, const int textureID)
+void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform, const int textureID ,const Material& uniform_mat)
 {
 	//send the designated texture program
 	if(textureID != -1){
-		_DrawTris(program_texture, vao, face_count, wm_transform, wm_normal_transform, textureID);
+		_DrawTris(program_texture, vao, face_count, wm_transform, wm_normal_transform, textureID, uniform_mat);
 	}
 	else{
-		_DrawTris(programs[current_program], vao, face_count, wm_transform, wm_normal_transform, textureID);
+		_DrawTris(programs[current_program], vao, face_count, wm_transform, wm_normal_transform, textureID, uniform_mat);
 	}
 }
 

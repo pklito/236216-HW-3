@@ -85,7 +85,7 @@ class Renderer
 	void CreateBuffers(int width, int height);
 	
 	void _passLights(Program & program);
-	void _DrawTris(Program &program, GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform, const int textureID = -1);
+	void _DrawTris(Program &program, GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform, const int textureID = -1,const Material& uniform_mat = Material(vec3(0,0,0),vec3(0,0,0),vec3(0,0,0),0));
 	//////////////////////////////
 	// openGL stuff. Don't touch.
 
@@ -106,7 +106,7 @@ public:
 	void CreateProgram(const char *vshader, const char *fshader);
 	void RemoveProgram(int index);
 
-	void DrawMesh(GLuint vao, GLuint face_count, const mat4 &transform = mat4(), const mat4 &normal_transform = mat4(), const int textureID=-1);
+	void DrawMesh(GLuint vao, GLuint face_count, const mat4 &transform = mat4(), const mat4 &normal_transform = mat4(), const int textureID=-1,const Material& uniform_mat = Material(vec3(0,0,0),vec3(0,0,0),vec3(0,0,0),0));
 	void DrawWireframe(GLuint vao, GLuint face_count, const mat4 &wm_transform);
 	void DrawLines(GLuint lines_vao, GLuint lines_count, const mat4 &wm_transform, vec3 color = vec3(1, 0, 1));
 

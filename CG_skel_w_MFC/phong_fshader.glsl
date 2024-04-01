@@ -15,7 +15,6 @@ in vec3 fDiffuse;
 in vec3 fAmbient;
 in vec3 fSpecular;
 in vec2 fTexture;
-uniform sampler2D ourTexture;
 
 //assuming matrix elements are non negative, I want to know if the matrix is all zeros, or close to it
 bool isZero(mat3 matrix){
@@ -42,11 +41,12 @@ void main()
 { 
    //Decide if to take the materials from the vertices or from a uniform
    vec3 ambient_mat = fAmbient;
-   vec3 diffuse_mat = texture(ourTexture, fTexture).xyz;
+   vec3 diffuse_mat = fDiffuse;
    vec3 specular_mat = fSpecular;
 
    if(!isZero(uniform_material)){
       ambient_mat = uniform_material[0];
+      diffuse_mat = uniform_material[1];
       specular_mat = uniform_material[2];
    }
 

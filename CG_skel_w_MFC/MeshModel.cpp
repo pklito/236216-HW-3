@@ -483,7 +483,10 @@ void MeshModel::draw(Renderer *renderer)
 	mat4 full_norm_trans = _world_normal_transform * _model_normal_transform;
 	if (!draw_wireframe)
 	{
-		renderer->DrawMesh(vao, face_num, full_trans, full_norm_trans,texture.m_RendererID); // TODO: calculate this transform on change
+		const int texture_id = hide_texture ? -1 : texture.m_RendererID;
+		const Material material = (draw_complex_material) ? Material(vec3(0,0,0),vec3(0,0,0),vec3(0,0,0),0) : uniform_mat;
+		renderer->DrawMesh(vao, face_num, full_trans, full_norm_trans, texture_id, material); // TODO: calculate this transform on change
+		
 	}
 	else
 	{
@@ -592,6 +595,10 @@ void MeshModel::setFillObj(bool fill)
 	draw_wireframe = !fill;
 }
 
+void MeshModel::setHideTexture(bool hide){
+	hide_texture = hide;
+}
+
 // TODO: Implement this function
 void MeshModel::changeColor()
 {
@@ -601,7 +608,7 @@ void MeshModel::changeColor()
 // TODO: Implement this function
 void MeshModel::toggleSpecialMaterial()
 {
-	// Placeholder implementation
+	draw_complex_material = !draw_complex_material;
 }
 
 void MeshModel::resetToCenter()

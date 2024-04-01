@@ -51,6 +51,8 @@ enum MENU_STATES
 	HIDE_VERTEX_NORMALS,
 	DRAW_BOUNDING_BOX,
 	HIDE_BOUNDING_BOX,
+	SHOW_TEXTURE,
+	HIDE_TEXTURE,
 
 	ADD_TETRAHEDRON,
 	ADD_CUBE,
@@ -167,7 +169,6 @@ void addProjCamera()
 int selected_type = 0;
 void changeMaterialColor()
 {
-	/*
 	vec3 color_out;
 	float intensity = -1;
 
@@ -188,7 +189,7 @@ void changeMaterialColor()
 	}
 	scene->setSelectedMaterial(mat);
 
-	selected_type = (selected_type += 1)%3;*/
+	selected_type = (selected_type += 1)%3;
 }
 
 void addOrthoCamera()
@@ -395,12 +396,12 @@ void keyboard(unsigned char key, int x, int y)
 	case '2':
 		scene->changeCurrsColor();
 		break;
-	/*case '7':
+	case '7':
 		changeMaterialColor();
 		break;
 	case '6':
 		scene->changeCurrsMaterial();
-		break;*/
+		break;
 
 	/* TODO
 	case '3':
@@ -575,6 +576,12 @@ void optionMenu(int id)
 			// Logic to draw normals to vertices (turn off)
 			scene->setShowNormalsToVerticesForMeshModels(false);
 			break;
+		case SHOW_TEXTURE:
+			scene->setHideTexture(false);
+			break;
+		case HIDE_TEXTURE:
+			scene->setHideTexture(true);
+			break;
 		}
 	}
 	glutPostRedisplay();
@@ -665,6 +672,8 @@ void initMenu()
 	glutAddMenuEntry("Hide Normals To Vertices", HIDE_VERTEX_NORMALS);
 	glutAddMenuEntry("Draw Bounding Box", DRAW_BOUNDING_BOX);
 	glutAddMenuEntry("Hide Bounding Box", HIDE_BOUNDING_BOX);
+	glutAddMenuEntry("Show Texture (if present)", SHOW_TEXTURE);
+	glutAddMenuEntry("Hide texture", HIDE_TEXTURE);
 	// Draw Hide cameras
 	// Draw hide vertex normals
 
@@ -719,7 +728,7 @@ int my_main(int argc, char **argv)
 	}
 	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
-	renderer = new Renderer(1024, 1024, "minimal_vshader.glsl", "minimal_fshader.glsl");
+	renderer = new Renderer(1024, 1024, "phong_vshader.glsl", "phong_fshader.glsl");
 	scene = new Scene(renderer);
 	Camera *camera = new Camera();
 	Light *light = new PointLight(1, vec3(1, 1, 1), vec3(-2, 0, 1));

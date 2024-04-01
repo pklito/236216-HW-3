@@ -33,8 +33,8 @@ void Scene::drawDemo()
 		{0.1f, -0.1f, 0.0f},
 		{0.0f, 0.1f, 0.0f}};
 
-	GLuint program = InitShader("minimal_vshader.glsl",
-								"minimal_fshader.glsl");
+	GLuint program = InitShader("phong_vshader.glsl",
+								"phong_fshader.glsl");
 
 	glUseProgram(program);
 
@@ -61,6 +61,18 @@ void Scene::drawDemo()
 
 // Scene
 
+void Scene::setHideTexture(bool change){
+	for (Model *model : models)
+	{
+		// Check if the model is of type MeshModel
+		MeshModel *meshModel = dynamic_cast<MeshModel *>(model);
+		if (meshModel != nullptr)
+		{
+			// It's a MeshModel, call setShowNormals
+			meshModel->setHideTexture(change);
+		}
+	}
+}
 void Scene::setShowNormalsToVerticesForMeshModels(bool change)
 {
 	for (Model *model : models)
@@ -301,7 +313,6 @@ Light* Scene::getSelectedLight(){
 		return nullptr;
 	return lights[activeLight];
 }
-/*
 Material Scene::getSelectedMaterial(){
 	return dynamic_cast<MeshModel*>(models[activeModel])->getMaterial();
 }
@@ -309,6 +320,7 @@ void Scene::setSelectedMaterial(const Material& mat){
 	dynamic_cast<MeshModel*>(models[activeModel])->setMaterial(mat);
 }
 
+/*
 void Scene::changeShadingMethod()
 {
 	m_renderer->changeShadingMethod();
