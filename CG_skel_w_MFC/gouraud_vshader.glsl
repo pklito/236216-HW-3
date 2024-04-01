@@ -26,7 +26,7 @@ bool isZero(mat3 matrix){
    return dot(matrix*vec3(1,1,1), vec3(1,1,1)) < 0.01;
 }
 
-vec3 reflect(vec3 vector, vec3 normal) {
+vec3 reflect_ray(vec3 vector, vec3 normal) {
     return vector - normal * 2 * dot(vector, normal);
 }
 
@@ -34,7 +34,7 @@ vec3 specular_calc(vec3 light_color, vec3 light_direction, vec3 specular_mat, ve
    //TODO get material from vshader
 
    vec3 view_direction = camera_position - fPos.xyz;
-   float cos_phi = dot(reflect(-light_direction,fNormal),view_direction);
+   float cos_phi = dot(reflect_ray(-light_direction,fNormal),view_direction);
    return specular_mat * light_color * pow(cos_phi, 3);  //TODO change 5 to uniform
 }
 
