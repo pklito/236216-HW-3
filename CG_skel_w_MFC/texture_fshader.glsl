@@ -1,8 +1,8 @@
 
 #version 150
 
-varying vec4 fPos;
-varying vec3 fNormal;
+in vec4 fPos;
+in vec3 fNormal;
 out vec4 fColor;
 uniform mat2x3 point_lights[10];
 uniform mat2x3 directional_lights[10];
@@ -11,10 +11,10 @@ uniform vec3 camera_position;
 
 uniform mat3 uniform_material;
 
-varying vec3 fDiffuse;
-varying vec3 fAmbient;
-varying vec3 fSpecular;
-varying vec2 fTexture;
+in vec3 fDiffuse;
+in vec3 fAmbient;
+in vec3 fSpecular;
+in vec2 fTexture;
 uniform sampler2D ourTexture;
 
 //assuming matrix elements are non negative, I want to know if the matrix is all zeros, or close to it

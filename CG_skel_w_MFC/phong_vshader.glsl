@@ -9,13 +9,13 @@ layout (location = 5) in  vec3 vMatSpec;
 uniform mat4 world_transform;
 uniform mat4 camera_transform;
 uniform mat4 normal_transform;
-varying vec3 fNormal;
-varying vec2 fTexture;
-varying vec4 fPos;
+out vec3 fNormal;
+out vec2 fTexture;
+out vec4 fPos;
 
-varying vec3 fDiffuse;
-varying vec3 fSpecular;
-varying vec3 fAmbient;
+out vec3 fDiffuse;
+out vec3 fSpecular;
+out vec3 fAmbient;
 void main()
 {
     //world position for lights
