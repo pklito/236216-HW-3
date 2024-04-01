@@ -63,6 +63,8 @@ public:
 
 class Renderer
 {
+	float time;
+
 	float *m_outBuffer; // 3*width*height
 	float *m_zbuffer;	// width*height
 	int m_width, m_height;

@@ -16,6 +16,8 @@ out vec4 fPos;
 out vec3 fDiffuse;
 out vec3 fSpecular;
 out vec3 fAmbient;
+
+uniform float time;
 void main()
 {
     //world position for lights
@@ -28,5 +30,5 @@ void main()
     fDiffuse = vMatDiff;
     fSpecular = vMatSpec;
     //screen position
-    gl_Position = camera_transform * world_pos;
+    gl_Position = camera_transform * (world_pos + 0.05 * (vec4(fNormal,1) * (sin(time) * sin(vPosition.x) * cos(vPosition.y) * sin(vPosition.z))));
 }

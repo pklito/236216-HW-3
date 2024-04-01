@@ -16,6 +16,7 @@ in vec3 fAmbient;
 in vec3 fSpecular;
 in vec2 fTexture;
 
+uniform float time;
 //assuming matrix elements are non negative, I want to know if the matrix is all zeros, or close to it
 bool isZero(mat3 matrix){
    return dot(matrix*vec3(1,1,1), vec3(1,1,1)) < 0.01;

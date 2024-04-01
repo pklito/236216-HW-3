@@ -16,6 +16,7 @@ Renderer::Renderer() : Renderer(512, 512, "vshader.glsl", "fshader.glsl")
 
 Renderer::Renderer(int width, int height, const char *vshader, const char *fshader) : m_width(width), m_height(height), programs(), current_program(0)
 {
+	time = 0;
 	InitOpenGLRendering();
 	CreateBuffers(width, height);
 	CreateProgram(vshader, fshader);
@@ -121,6 +122,7 @@ void Renderer::_passLights(Program & program){
 }
 void Renderer::StartDraw()
 {
+	time += 0.03;
 	//Choose the current program
 	glUseProgram(programs[current_program].program);
 	//Pass light sources
@@ -182,6 +184,8 @@ void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const 
 
 	GLfloat camera_array[3] = {camera_position.x, camera_position.y, camera_position.z};
 	glUniform3fv(program.find("camera_position"), 1, camera_array);
+
+	glUniform1f(program.find("time"), time);
 	// Draw
 	glDrawArrays(GL_TRIANGLES, 0, face_count * 3);
 	glBindVertexArray(0);
