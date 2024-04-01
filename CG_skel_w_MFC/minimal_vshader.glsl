@@ -13,9 +13,9 @@ varying vec3 fNormal;
 varying vec2 fTexture;
 varying vec4 fPos;
 
-varying vec3 mat_diffuse;
-varying vec3 mat_specular;
-varying vec3 mat_ambient;
+varying vec3 fDiffuse;
+varying vec3 fSpecular;
+varying vec3 fAmbient;
 void main()
 {
     //world position for lights
@@ -24,9 +24,9 @@ void main()
     fNormal = normalize((normal_transform * vec4(vNormal,1.0)).xyz);
     fTexture = vTexture.xy;
 
-    mat_ambient = vMatAmb;
-    mat_diffuse = vMatDiff;
-    mat_specular = vMatSpec;
+    fAmbient = vMatAmb;
+    fDiffuse = vMatDiff;
+    fSpecular = vMatSpec;
     //screen position
     gl_Position = camera_transform * world_pos;
 }
