@@ -33,8 +33,8 @@ void Scene::drawDemo()
 		{0.1f, -0.1f, 0.0f},
 		{0.0f, 0.1f, 0.0f}};
 
-	GLuint program = InitShader("minimal_vshader.glsl",
-								"minimal_fshader.glsl");
+	GLuint program = InitShader("phong_vshader.glsl",
+								"phong_fshader.glsl");
 
 	glUseProgram(program);
 

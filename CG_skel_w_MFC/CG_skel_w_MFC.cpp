@@ -728,7 +728,7 @@ int my_main(int argc, char **argv)
 	}
 	fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
-	renderer = new Renderer(1024, 1024, "minimal_vshader.glsl", "minimal_fshader.glsl");
+	renderer = new Renderer(1024, 1024, "phong_vshader.glsl", "phong_fshader.glsl");
 	scene = new Scene(renderer);
 	Camera *camera = new Camera();
 	Light *light = new PointLight(1, vec3(1, 1, 1), vec3(-2, 0, 1));
