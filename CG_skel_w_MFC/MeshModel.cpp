@@ -206,7 +206,7 @@ void MeshModel::generateBuffers(int face_num, const GLfloat *vertices_array, con
 	{
 		for(int i = 0; i < 3 * face_num; i ++){
 			vec3 p = vec3(vertices_array[3 * i + 0], vertices_array[3 * i + 1], vertices_array[3 * i + 2]);
-			//TODO convert point to coordinate
+			//TODO WORK convert point to coordinate
 			vt_arr[3*i + 0] = 0;
 			vt_arr[3*i + 1] = 0;
 			vt_arr[3*i + 2] = 0;
@@ -605,7 +605,6 @@ void MeshModel::changeColor()
 	// Placeholder implementation
 }
 
-// TODO: Implement this function
 void MeshModel::toggleSpecialMaterial()
 {
 	draw_complex_material = !draw_complex_material;
