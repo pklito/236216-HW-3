@@ -12,6 +12,7 @@
 
 class Camera;
 
+
 class Program
 {
 private:
