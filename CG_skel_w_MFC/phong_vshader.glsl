@@ -21,7 +21,8 @@ uniform float time;
 void main()
 {
     //world position for lights
-    vec4 world_pos = world_transform * vec4(vPosition,1.0);
+    vec3 time_morph = 0.5 * (normalize(vPosition) * (sin(time) * sin(vPosition.x) * cos(vPosition.y) * sin(vPosition.z)));
+    vec4 world_pos = world_transform * vec4(vPosition + time_morph ,1.0);
     fPos = world_pos;
     fNormal = normalize((normal_transform * vec4(vNormal,1.0)).xyz);
     fTexture = vTexture.xy;
@@ -30,5 +31,5 @@ void main()
     fDiffuse = vMatDiff;
     fSpecular = vMatSpec;
     //screen position
-    gl_Position = camera_transform * (world_pos + 0.05 * (vec4(fNormal,1) * (sin(time) * sin(vPosition.x) * cos(vPosition.y) * sin(vPosition.z))));
+    gl_Position = camera_transform * (world_pos);
 }
