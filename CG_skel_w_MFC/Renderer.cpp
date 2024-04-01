@@ -16,6 +16,7 @@ Renderer::Renderer() : Renderer(512, 512, "vshader.glsl", "fshader.glsl")
 
 Renderer::Renderer(int width, int height, const char *vshader, const char *fshader) : m_width(width), m_height(height), programs(), current_program(0)
 {
+	use_time = false;
 	time = 0;
 	InitOpenGLRendering();
 	CreateBuffers(width, height);
@@ -122,7 +123,13 @@ void Renderer::_passLights(Program & program){
 }
 void Renderer::StartDraw()
 {
-	time += 0.03;
+	if (use_time) {
+		time += 0.03;
+	}
+	else {
+		time = 0;
+	}
+	
 	//Choose the current program
 	glUseProgram(programs[current_program].program);
 	//Pass light sources
@@ -277,6 +284,10 @@ void Renderer::setCameraMatrixes(const mat4 &cTransformInverse, const mat4 &Proj
 void Renderer::setCameraMatrixes(Camera *camera)
 {
 	setCameraMatrixes(camera->getTransformInverse(), camera->getProjection(), camera->getCameraPosition());
+}
+
+void Renderer::changeUseTime() {
+	use_time = !use_time;
 }
 
 void Renderer::Init()

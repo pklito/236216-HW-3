@@ -63,6 +63,7 @@ public:
 
 class Renderer
 {
+	bool use_time;
 	float time;
 
 	float *m_outBuffer; // 3*width*height
@@ -125,4 +126,5 @@ public:
 	void ClearColorBuffer();
 	void ClearDepthBuffer();
 	void SetDemoBuffer();
+	void changeUseTime();
 };

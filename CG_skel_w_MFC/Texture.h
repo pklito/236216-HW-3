@@ -17,6 +17,7 @@ public:
 	~Texture();
 
 	void load(const std::string& path);
+	void loadWoodTurbulenceTexture(int width, int height);
 	void Bind(unsigned int slot = 0) const;
 	void Unbind() const;
 
