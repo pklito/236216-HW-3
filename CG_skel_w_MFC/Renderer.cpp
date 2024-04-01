@@ -20,6 +20,7 @@ Renderer::Renderer(int width, int height, const char *vshader, const char *fshad
 	CreateBuffers(width, height);
 	CreateProgram(vshader, fshader);
 	program_wireframe = Program("lines_vshader.glsl", "lines_fshader.glsl", "world_transform", "camera_transform", "color");
+	program_texture = Program("texture_vshader.glsl", "texture_fshader.glsl", "world_transform", "camera_transform");
 }
 
 Renderer::~Renderer(void)
@@ -189,8 +190,13 @@ void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const 
 /// @param wm_normal_transform world*model transform of the model normals
 void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform, const int textureID)
 {
-
-	_DrawTris(programs[current_program], vao, face_count, wm_transform, wm_normal_transform, textureID);
+	//send the designated texture program
+	if(textureID != -1){
+		_DrawTris(program_texture, vao, face_count, wm_transform, wm_normal_transform, textureID);
+	}
+	else{
+		_DrawTris(programs[current_program], vao, face_count, wm_transform, wm_normal_transform, textureID);
+	}
 }
 
 /// @brief Identical to DrawMesh, ut GL_LINE_STRIP, and a hardcoded program.

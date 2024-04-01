@@ -67,6 +67,7 @@ class Renderer
 	int m_width, m_height;
 
 	// vertex/fragment shader
+	Program program_texture;
 	Program program_wireframe;
 	std::vector<Program> programs;
 	int current_program;
