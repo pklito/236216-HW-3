@@ -162,10 +162,14 @@ void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const 
 		glBindTexture(GL_TEXTURE_2D, textureID);
 		glUniform1i(program.find("ourTexture"), 0);
 	}
-
+	
 	GLfloat full_transform_array[16];
 	toFloatArray(full_transform_array, wm_transform);
 	glUniformMatrix4fv(program.find("world_transform"), 1, GL_FALSE, full_transform_array);
+
+	GLfloat material_array[9];
+	toFloatArray(material_array, mat3(uniform_mat.color_ambient,uniform_mat.color_diffuse,uniform_mat.color_specular));
+	glUniformMatrix3fv(program.find("uniform_material"), 1, GL_FALSE, material_array);
 
 	GLfloat proj_array[16];
 	toFloatArray(proj_array, mat_project * mat_transform_inverse);

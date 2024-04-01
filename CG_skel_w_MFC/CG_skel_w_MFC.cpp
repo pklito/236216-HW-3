@@ -395,12 +395,12 @@ void keyboard(unsigned char key, int x, int y)
 	case '2':
 		scene->changeCurrsColor();
 		break;
-	/*case '7':
+	case '7':
 		changeMaterialColor();
 		break;
 	case '6':
 		scene->changeCurrsMaterial();
-		break;*/
+		break;
 
 	/* TODO
 	case '3':
