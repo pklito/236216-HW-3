@@ -61,6 +61,18 @@ void Scene::drawDemo()
 
 // Scene
 
+void Scene::setHideTexture(bool change){
+	for (Model *model : models)
+	{
+		// Check if the model is of type MeshModel
+		MeshModel *meshModel = dynamic_cast<MeshModel *>(model);
+		if (meshModel != nullptr)
+		{
+			// It's a MeshModel, call setShowNormals
+			meshModel->setHideTexture(change);
+		}
+	}
+}
 void Scene::setShowNormalsToVerticesForMeshModels(bool change)
 {
 	for (Model *model : models)

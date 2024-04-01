@@ -51,6 +51,8 @@ enum MENU_STATES
 	HIDE_VERTEX_NORMALS,
 	DRAW_BOUNDING_BOX,
 	HIDE_BOUNDING_BOX,
+	SHOW_TEXTURE,
+	HIDE_TEXTURE,
 
 	ADD_TETRAHEDRON,
 	ADD_CUBE,
@@ -574,6 +576,12 @@ void optionMenu(int id)
 			// Logic to draw normals to vertices (turn off)
 			scene->setShowNormalsToVerticesForMeshModels(false);
 			break;
+		case SHOW_TEXTURE:
+			scene->setHideTexture(false);
+			break;
+		case HIDE_TEXTURE:
+			scene->setHideTexture(true);
+			break;
 		}
 	}
 	glutPostRedisplay();
@@ -664,6 +672,8 @@ void initMenu()
 	glutAddMenuEntry("Hide Normals To Vertices", HIDE_VERTEX_NORMALS);
 	glutAddMenuEntry("Draw Bounding Box", DRAW_BOUNDING_BOX);
 	glutAddMenuEntry("Hide Bounding Box", HIDE_BOUNDING_BOX);
+	glutAddMenuEntry("Show Texture (if present)", SHOW_TEXTURE);
+	glutAddMenuEntry("Hide texture", HIDE_TEXTURE);
 	// Draw Hide cameras
 	// Draw hide vertex normals
 
