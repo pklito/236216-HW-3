@@ -43,3 +43,5 @@ glew/Debug/*
 *.aps
 *.pdb
 glew/Release/*
+
+!CG_skel_w_MFC/meshes/*.obj
