@@ -27,7 +27,7 @@ vec3 specular_calc(vec3 light_color, vec3 light_direction){
 }
 
 vec3 diffuse_calc(vec3 light_color, vec3 direction){
-   return texture(ourTexture, fTexture) * light_color * dot(direction, fNormal);
+   return texture(ourTexture, fTexture).xyz * light_color * dot(direction, fNormal);
 }
 
 void main() 
