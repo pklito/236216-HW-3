@@ -145,15 +145,10 @@ void MeshModel::loadFile(string fileName)
 				vertices_array[k + coord] = vertices[it->v[i] - 1][coord];
 				if (vertex_normals.size() > 0)
 					vertex_normals_array[k + coord] = vertex_normals[it->vn[i] - 1][coord];
-				if (vertex_textures.size() > 0 && it->vt[i] != -1)
+				if (vertex_textures.size() > 0)
 				{
 					// Use provided texture coordinates
 					vertex_textures_array[k + coord] = vertex_textures[it->vt[i] - 1][coord];
-				}
-				else
-				{
-					// Generate wood texture coordinates for vertices without texture coordinates
-					vertex_textures_array[k + coord] = vertices[it->v[i] - 1][coord]; // Adjust scaling as needed
 				}
 			}
 			// iterate to next face
