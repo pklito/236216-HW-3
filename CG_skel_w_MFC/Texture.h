@@ -13,7 +13,7 @@ public:
 	int m_width, m_height, m_BPP;
 
 	Texture(const std::string& path);
-	Texture() : m_RendererID(0), m_width(0), m_height(0), m_BPP(0) {};
+	Texture() : m_RendererID(-1), m_width(0), m_height(0), m_BPP(0) {};
 	~Texture();
 
 	void load(const std::string& path);
