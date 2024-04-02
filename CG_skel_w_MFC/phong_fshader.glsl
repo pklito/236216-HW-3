@@ -120,19 +120,10 @@ float perlinNoise(vec3 P) {
 }
 
 // Generate wood texture
-vec3 generateWoodTexture(vec2 texCoord) {
+vec3 generateWoodTexture(vec3 point) {
     // Adjust texture coordinates based on scale
-    float x = texCoord.x * woodTextureScale;
-    float y = texCoord.y * woodTextureScale;
 
-    // Generate Perlin noise value
-    float noise = perlinNoise(vec3(x, y, 0.0));
-
-    // Apply wood-like transformation
-    noise = 10.0 * noise - floor(10.0 * noise);
-
-    // Adjust color based on noise value to create wood-like patterns
-    float color = (0.5 + 0.5 * noise);
+    float color = perlinNoise(woodTextureScale * point);
 
     return vec3(color, color, color); // Use the noise value for all RGB components
 }
@@ -183,7 +174,7 @@ void main()
    // If the flag to use wood texture is raised, apply wood texture
     if (useWoodTexture) {
         // Sample wood texture
-        vec3 woodColor = generateWoodTexture(fTexture);
+        vec3 woodColor = generateWoodTexture(fPos.xyz);
         // Assign wood texture color to the fragment
         fColor = vec4(woodColor, 1.0);
     } else {

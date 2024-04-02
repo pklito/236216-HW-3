@@ -194,7 +194,7 @@ void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const 
 	glUniform3fv(program.find("camera_position"), 1, camera_array);
 
 	glUniform1f(program.find("time"), time);
-	glUniform1f(program.find("useWoodTexture"), use_wood);
+	glUniform1i(program.find("useWoodTexture"), use_wood);
 	// Draw
 	glDrawArrays(GL_TRIANGLES, 0, face_count * 3);
 	glBindVertexArray(0);
