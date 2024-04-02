@@ -21,6 +21,14 @@ void Scene::draw()
 	{
 		(*(it))->draw(m_renderer);
 	}
+	for (auto it = cameras.begin(); it != cameras.end(); it++){
+		if(*it == cameras[activeCamera])
+			continue;
+		m_renderer->DrawCameraSymbol(*it);
+	}
+	for (auto it = lights.begin(); it != lights.end(); it++){
+		m_renderer->DrawLightSymbol(*it);
+	}
 	m_renderer->EndDraw();
 }
 
@@ -153,11 +161,9 @@ void Scene::translateObject(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans)
 {
 	if (!moving_model)
 	{
-		/* TODO implement
 		if(lights.size() >= 1){
 			lights[activeLight]->translate(x_trans,y_trans,z_trans);
 		}
-		*/
 		return;
 	}
 
@@ -179,11 +185,9 @@ void Scene::scaleObject(GLfloat scale)
 {
 	if (!moving_model)
 	{
-		/* TODO implement
 		if(lights.size() >= 1){
 			lights[activeLight]->scale(scale,scale,scale);
 		}
-		*/
 		return;
 	}
 
@@ -196,12 +200,9 @@ void Scene::rotateObject(GLfloat theta_angle, int axis)
 {
 	if (!moving_model)
 	{
-		/*
-		TODO implement
 		if(lights.size() >= 1){
 			lights[activeLight]->rotate(theta_angle, axis);
 		}
-		*/
 		return;
 	}
 	if (models.size() >= 1)
@@ -224,10 +225,9 @@ void Scene::cycleSelectedObject()
 {
 	if (!moving_model)
 	{
-		/* TODO implement
 		if(lights.size() >= 1){
 			activeLight = (activeLight+1)%lights.size();
-		} */
+		}
 		return;
 	}
 	if (models.size() >= 1)

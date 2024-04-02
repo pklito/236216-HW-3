@@ -16,6 +16,8 @@ in vec3 fAmbient;
 in vec3 fSpecular;
 in vec2 fTexture;
 
+in vec3 vPos;
+
 // 0 when time is not used.
 uniform float time;
 
@@ -126,6 +128,26 @@ vec3 generateWoodTexture(vec3 point) {
     float color = perlinNoise(woodTextureScale * point);
 
     return vec3(color, color, color); // Use the noise value for all RGB components
+
+vec3 getColorAnimation(vec3 diffuse_mat, float seed){
+   // Define color increments
+   float r_increment = abs(vPos.x/10);
+   float g_increment = abs(vPos.y/10);
+   float b_increment = abs(vPos.z/10);
+   float colorModificationFactor = 0.0;
+   if (time != 0.0) {
+      // Calculate a factor based on time to gradually change the color
+      colorModificationFactor = abs(sin(0.3*time * (1+seed)) * (10 - seed)); // Adjust the amplitude and frequency as needed
+   }
+
+   // Modify diffuse material based on the time factor
+   vec3 diffuse_mat_modified = diffuse_mat;
+   diffuse_mat_modified.r += r_increment * colorModificationFactor;
+   diffuse_mat_modified.g += g_increment * colorModificationFactor;
+   diffuse_mat_modified.b += b_increment * colorModificationFactor;
+
+   // Clamp modified diffuse material to the range [0, 1]
+   return clamp(diffuse_mat_modified, 0.0, 1.0);
 }
 
 //HSV, Taken from http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl. (https://stackoverflow.com/a/17897228)
@@ -160,13 +182,13 @@ vec3 reflect_ray(vec3 vector, vec3 normal) {
 vec3 specular_calc(vec3 light_color, vec3 light_direction, vec3 specular_mat){
    //TODO get material from vshader
 
-   vec3 view_direction = camera_position - fPos.xyz;
-   float cos_phi = dot(reflect_ray(-light_direction,fNormal),view_direction);
+   vec3 view_direction = normalize(camera_position - fPos.xyz);
+   float cos_phi = max(dot(reflect_ray(-light_direction,fNormal),view_direction),0);
    return specular_mat * light_color * pow(cos_phi, 3);  //TODO change 5 to uniform
 }
 
 vec3 diffuse_calc(vec3 light_color, vec3 direction, vec3 diffuse_mat){
-   return diffuse_mat * light_color * dot(direction, fNormal);
+   return diffuse_mat * light_color * max(dot(direction, fNormal),0);
 }
 
 void main() 
@@ -188,6 +210,9 @@ void main()
       diffuse_mat = uniform_material[1];
       specular_mat = uniform_material[2];
    }
+
+   vec3 diffuse_mat_modified = getColorAnimation(diffuse_mat, 0);
+   vec3 ambient_mat_modified = getColorAnimation(ambient_mat, 1.5);
 
    //calculate the color via light sources
    vec3 color = vec3(0,0,0);
@@ -212,7 +237,7 @@ void main()
 
    // point lights loop
    for(int i = 0; i < 10; ++i){
-      vec3 dir = normalize(point_lights[i][1]-fPos.xyz);
+      vec3 dir = normalize(point_lights[i][1] - fPos.xyz);
       color += specular_calc(point_lights[i][0], dir, specular_mat);
       color += diffuse_calc(point_lights[i][0], dir, diffuse_mat_modified);
    }
@@ -223,9 +248,9 @@ void main()
       color += diffuse_calc(directional_lights[i][0], dir, diffuse_mat_modified);
    }
 
-      //ambient lights
-      color += ambient_light * ambient_mat;
 
+      //ambient lights
+      color += ambient_light * ambient_mat_modified;
       fColor = vec4(color, 1);
    }
 } 

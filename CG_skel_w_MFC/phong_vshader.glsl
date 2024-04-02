@@ -17,6 +17,8 @@ out vec3 fDiffuse;
 out vec3 fSpecular;
 out vec3 fAmbient;
 
+out vec3 vPos;
+
 uniform float time;
 void main()
 {
@@ -27,6 +29,8 @@ void main()
     fNormal = normalize((normal_transform * vec4(vNormal,1.0)).xyz);
     fTexture = vTexture.xy;
 
+    vPos = vPosition;
+    
     fAmbient = vMatAmb;
     fDiffuse = vMatDiff;
     fSpecular = vMatSpec;
