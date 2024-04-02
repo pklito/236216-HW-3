@@ -28,6 +28,7 @@ public:
 	void setData(int dat) { data = dat; }
 	virtual void resetToCenter() = 0;
 	virtual void changeColor() = 0;
+	virtual void changeToWoodTex(bool wood) = 0;
 };
 
 class Camera
@@ -76,9 +77,11 @@ class Scene
 	bool moving_model;
 	bool fillCurrObj;
 
+	bool wood;
+
 public:
 	// Scene() : world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false), {std::cout << "NO RENDERER PROVIDED!" << std::endl;};
-	Scene(Renderer *renderer) : m_renderer(renderer), world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false), lights() {m_renderer->setLights(&lights);};
+	Scene(Renderer *renderer) : m_renderer(renderer), world_control(false), moving_model(true), activeModel(0), activeLight(0), activeCamera(0), fillCurrObj(false), wood(false), lights() {m_renderer->setLights(&lights);};
 	void loadOBJModel(string fileName);
 	void draw();
 	void drawDemo();
@@ -121,6 +124,8 @@ public:
 	void changeCurrsColor();
 	void changeShadingMethod();
 	void changeCurrsMaterial();
+
+	void changeWood();
 
 	Material getSelectedMaterial();
 	void setSelectedMaterial(const Material &mat);

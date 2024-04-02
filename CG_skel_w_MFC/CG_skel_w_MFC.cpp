@@ -354,6 +354,14 @@ void keyboard(unsigned char key, int x, int y)
 		scene->rotateCameraToSelectedObject();
 		renderer->setCameraMatrixes(scene->getActiveCamera());
 		break;
+	case 'c':
+		std::cout << "pressed c to change to wood" << std::endl;
+		//scene->changeWood();
+		renderer->changeUseWood();
+		break;
+	case 'x':
+		renderer->changeUseTime();
+		break;
 	case 'm':
 		scene->getActiveCamera()->rotate(-15, 1, scene->getWorldControl());
 		renderer->setCameraMatrixes(scene->getActiveCamera());

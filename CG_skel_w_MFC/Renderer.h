@@ -63,7 +63,9 @@ public:
 
 class Renderer
 {
+	bool use_time;
 	float time;
+	bool use_wood;
 	bool use_time;
 
 	float *m_outBuffer; // 3*width*height
@@ -136,4 +138,6 @@ public:
 	void ClearColorBuffer();
 	void ClearDepthBuffer();
 	void SetDemoBuffer();
+	void changeUseTime();
+	void changeUseWood();
 };

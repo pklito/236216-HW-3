@@ -146,7 +146,10 @@ void MeshModel::loadFile(string fileName)
 				if (vertex_normals.size() > 0)
 					vertex_normals_array[k + coord] = vertex_normals[it->vn[i] - 1][coord];
 				if (vertex_textures.size() > 0)
-					vertex_textures_array[k + coord] = vertex_textures[it->vt[i] - 1][coord]; // Take the face indexes from the vertix array BUG FIXED
+				{
+					// Use provided texture coordinates
+					vertex_textures_array[k + coord] = vertex_textures[it->vt[i] - 1][coord];
+				}
 			}
 			// iterate to next face
 			k += 3;
