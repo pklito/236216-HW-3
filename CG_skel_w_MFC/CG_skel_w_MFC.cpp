@@ -239,7 +239,6 @@ void readFromFile()
 void changeLight()
 {
 
-	/* TODO
 	if(scene->getMovingModel()){
 		vec3 colorvec;
 		float intensity = -1;
@@ -259,7 +258,7 @@ void changeLight()
 
 		light->setColor(colorvec);
 		light->setIntensity(intensity);
-	}*/
+	}
 }
 //----------------------------------------------------------------------------
 // Callbacks
@@ -735,7 +734,7 @@ int my_main(int argc, char **argv)
 	Camera *camera = new Camera();
 	Light *light = new PointLight(1, vec3(1, 1, 1), vec3(-2, 0, 1));
 	Light *light2 = new DirectionalLight(1, vec3(1, 0, 1), vec3(0, 1, 0));
-	renderer->setAmbientLight(AmbientLight(1,vec3(0.3,0.3,0.3)));
+	renderer->setAmbientLight(AmbientLight(0.5,vec3(0.3,0.3,0.3)));
 
 	std::cout << "[ ] Camera transform: " << std::endl;
 	camera->LookAt(vec3(0, 0, 1), vec3(0, 0, -1), vec3(0, 1, 0));
@@ -743,7 +742,6 @@ int my_main(int argc, char **argv)
 	scene->addCamera(camera);
 	std::cout << "!" << camera->getProjection();
 	renderer->setCameraMatrixes(scene->getActiveCamera());
-	renderer->setAmbientLight(AmbientLight(1,vec3(0.6,0.3,0.3)));
 
 	scene->addLightSource(light);
 	//scene->addLightSource(light2);
