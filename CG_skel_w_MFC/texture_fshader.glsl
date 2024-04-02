@@ -20,6 +20,15 @@ uniform sampler2D ourNormalTexture;
 
 in mat3 TBN;
 
+vec3 getNormal(){
+   vec3 normal = texture(ourNormalTexture, fTexture).rgb;
+   if(length(normal) < 0.1){
+      return fNormal;
+   }
+   normal = normal * 2.0 - 1.0;  
+   normal = normalize(TBN * normal); 
+}
+
 //assuming matrix elements are non negative, I want to know if the matrix is all zeros, or close to it
 bool isZero(mat3 matrix){
    return dot(matrix*vec3(1,1,1), vec3(1,1,1)) < 0.01;
@@ -33,12 +42,12 @@ vec3 specular_calc(vec3 light_color, vec3 light_direction, vec3 specular_mat){
    //TODO get material from vshader
 
    vec3 view_direction = normalize(camera_position - fPos.xyz);
-   float cos_phi = max(dot(reflect_ray(-light_direction,fNormal),view_direction),0);
+   float cos_phi = max(dot(reflect_ray(-light_direction,getNormal()),view_direction),0);
    return specular_mat * light_color * pow(cos_phi, 3);  //TODO change 5 to uniform
 }
 
 vec3 diffuse_calc(vec3 light_color, vec3 direction, vec3 diffuse_mat){
-   return diffuse_mat * light_color * max(dot(direction, fNormal),0);
+   return diffuse_mat * light_color * max(dot(direction, getNormal()),0);
 }
 
 void main() 

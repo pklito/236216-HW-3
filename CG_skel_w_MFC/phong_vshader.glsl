@@ -42,13 +42,7 @@ void main()
     gl_Position = camera_transform * (world_pos);
 
     //tangents
-    if(length(aTangent) < 0.1){
-        TBN = mat3(vec3(1,0,0),vec3(0,1,0),vec3(0,0,1));
-    }
-    else{
-        vec3 T = normalize(vec3(world_transform * vec4(aTangent,   0.0)));
-        vec3 B = normalize(vec3(world_transform * vec4(aBitangent, 0.0)));
-        vec3 N = normalize(vec3(world_transform * vec4(vNormal,    0.0)));
-        TBN = mat3(T, B, N);
-    }
+    vec3 T = normalize(vec3(world_transform * vec4(aTangent,   0.0)));
+    vec3 B = normalize(vec3(world_transform * vec4(aBitangent, 0.0)));
+    vec3 N = normalize(vec3(world_transform * vec4(vNormal,    0.0)));
 }
