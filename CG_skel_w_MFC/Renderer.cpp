@@ -17,6 +17,7 @@ Renderer::Renderer() : Renderer(512, 512, "vshader.glsl", "fshader.glsl")
 Renderer::Renderer(int width, int height, const char *vshader, const char *fshader) : m_width(width), m_height(height), programs(), current_program(0)
 {
 	time = 0;
+	use_time = false;
 	InitOpenGLRendering();
 	CreateBuffers(width, height);
 	CreateSymbol();
@@ -123,7 +124,12 @@ void Renderer::_passLights(Program & program){
 }
 void Renderer::StartDraw()
 {
-	time += 0.03;
+	if (use_time) {
+		time += 0.03;
+	}
+	else {
+		time = 0;
+	}
 	//Choose the current program
 	glUseProgram(programs[current_program].program);
 	//Pass light sources
@@ -282,6 +288,10 @@ void Renderer::_DrawSymbol(const vec3& pos, const vec3& color, int shape, float 
 		glDrawArrays(GL_LINE_LOOP, 0, SYMBOL_FACE_NUM * 3);
 	}
 	glUseProgram(0);
+}
+
+void Renderer::changeUseTime() {
+	use_time = !use_time;
 }
 
 void Renderer::DrawLightSymbol(Light* light){

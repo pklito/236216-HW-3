@@ -340,6 +340,9 @@ void keyboard(unsigned char key, int x, int y)
 		scene->getActiveCamera()->translate(0, 0, -0.1, scene->getWorldControl());
 		renderer->setCameraMatrixes(scene->getActiveCamera());
 		break;
+	case 'x':
+		renderer->changeUseTime();
+		break;
 	case 'z': // return model to center
 		scene->returnModelToCenter();
 		break;
