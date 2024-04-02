@@ -66,7 +66,7 @@ void main()
    }
 
    //ambient lights
-   //color += ambient_light * ambient_mat;
+   color += ambient_light * ambient_mat;
 
    fColor = vec4(color, 1);
 } 
