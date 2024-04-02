@@ -279,6 +279,8 @@ void display(void)
 	*/
 
 	scene->draw();
+	//TODO WORK disable this when animating is off
+	glutPostRedisplay();
 }
 
 void reshape(int width, int height)

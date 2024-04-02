@@ -16,12 +16,35 @@ in vec3 fAmbient;
 in vec3 fSpecular;
 in vec2 fTexture;
 
+// 0 when time is not used.
+uniform float time;
+
+//HSV, Taken from http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl. (https://stackoverflow.com/a/17897228)
+// All components are in the range [0…1], including hue.
+vec3 rgb2hsv(vec3 c)
+{
+    vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+    vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+    vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+
+    float d = q.x - min(q.w, q.y);
+    float e = 1.0e-10;
+    return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+}
+// All components are in the range [0…1], including hue.
+vec3 hsv2rgb(vec3 c)
+{
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
 //assuming matrix elements are non negative, I want to know if the matrix is all zeros, or close to it
 bool isZero(mat3 matrix){
    return dot(matrix*vec3(1,1,1), vec3(1,1,1)) < 0.01;
 }
 
-vec3 reflect(vec3 vector, vec3 normal) {
+vec3 reflect_ray(vec3 vector, vec3 normal) {
     return vector - normal * 2 * dot(vector, normal);
 }
 
@@ -29,7 +52,7 @@ vec3 specular_calc(vec3 light_color, vec3 light_direction, vec3 specular_mat){
    //TODO get material from vshader
 
    vec3 view_direction = camera_position - fPos.xyz;
-   float cos_phi = dot(reflect(-light_direction,fNormal),view_direction);
+   float cos_phi = dot(reflect_ray(-light_direction,fNormal),view_direction);
    return specular_mat * light_color * pow(cos_phi, 3);  //TODO change 5 to uniform
 }
 
