@@ -267,19 +267,19 @@ void Renderer::_DrawSymbol(const vec3& pos, const vec3& color, int shape){
 	glUniform3fv(program_wireframe.find("color"), 1, color_arr);
 
 	GLfloat full_transform_array[16];
-	toFloatArray(full_transform_array, mat4(1));
+	toFloatArray(full_transform_array, Translate(pos.x,pos.y,pos.z));
 	glUniformMatrix4fv(program_wireframe.find("world_transform"), 1, GL_FALSE, full_transform_array);
-
+	std::cout << vao_symbol << ", " << shape <<":" << pos << " " << color<<std::endl;
 	GLfloat proj_array[16];
 	toFloatArray(proj_array, mat_project * mat_transform_inverse);
 	glUniformMatrix4fv(program_wireframe.find("camera_transform"), 1, GL_FALSE, proj_array);
 
 	// Draw
 	if(shape == 1){
-	glDrawArrays(GL_TRIANGLES, 0, SYMBOL_FACE_NUM);
+	glDrawArrays(GL_TRIANGLES, 0, SYMBOL_FACE_NUM * 3);
 	}
 	else if(shape == 0){
-		glDrawArrays(GL_LINE_LOOP, 0, SYMBOL_FACE_NUM);
+		glDrawArrays(GL_LINE_LOOP, 0, SYMBOL_FACE_NUM * 3);
 	}
 	glUseProgram(0);
 }
@@ -299,7 +299,8 @@ void Renderer::DrawCameraSymbol(Camera* camera){
 	_DrawSymbol(camera->getCameraPosition(), vec3(1,0,1), 0);
 }
 void Renderer::CreateSymbol(){
-	const vec3 cube_points[] = {vec3(-0.05f, -0.05f, -0.05f), vec3(0.05f, -0.05f, -0.05f), vec3(0.05f, 0.05f, -0.05f), vec3(-0.05f, 0.05f, -0.05f), vec3(-0.05f, -0.05f, 0.05f), vec3(0.05f, -0.05f, 0.05f), vec3(0.05f, 0.05f, 0.05f), vec3(-0.05f, 0.05f, 0.05f)};
+	const int scale = 0.05f;
+	const vec3 cube_points[] = {vec3(-scale, -scale, -scale), vec3(scale, -scale, -scale), vec3(scale, scale, -scale), vec3(-scale, scale, -scale), vec3(-scale, -scale, scale), vec3(scale, -scale, scale), vec3(scale, scale, scale), vec3(-scale, scale, scale)};
 	const int face_indices[] = {
 		2, 1, 0,
 		0, 3, 2,
