@@ -29,7 +29,7 @@ vec3 getColorAnimation(vec3 diffuse_mat, float seed){
    float colorModificationFactor = 0.0;
    if (time != 0.0) {
       // Calculate a factor based on time to gradually change the color
-      colorModificationFactor = sin(0.3*time * (1+seed)) * (10 - seed) + 0.5; // Adjust the amplitude and frequency as needed
+      colorModificationFactor = abs(sin(0.3*time * (1+seed)) * (10 - seed)); // Adjust the amplitude and frequency as needed
    }
 
    // Modify diffuse material based on the time factor
