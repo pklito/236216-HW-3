@@ -175,7 +175,7 @@ void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const 
 	if(normalTextureID != -1){
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, normalTextureID);
-		glUniform1i(program.find("ourTexture"), 1);
+		glUniform1i(program.find("ourNormalTexture"), 1);
 	}
 	
 	GLfloat full_transform_array[16];
