@@ -209,8 +209,20 @@ void MeshModel::generateBuffers(int face_num, const GLfloat *vertices_array, con
 		for(int i = 0; i < 3 * face_num; i ++){
 			vec3 p = vec3(vertices_array[3 * i + 0], vertices_array[3 * i + 1], vertices_array[3 * i + 2]);
 			//TODO WORK convert point to coordinate
-			vt_arr[3*i + 0] = 0;
-			vt_arr[3*i + 1] = 0;
+			float max_num = max(abs(p.x),max(abs(p.y),abs(p.z)));
+			if(abs(p.x) > abs(p.y) && abs(p.x) > abs(p.z)){
+				vt_arr[3*i + 0] = abs(p.y+1)/max_num / 8 + 0.25;
+				vt_arr[3*i + 1] = abs(p.z+1)/max_num / 8 + 0.25;
+			}
+			else if(abs(p.y) > abs(p.z)){
+				vt_arr[3*i + 0] = abs(p.z+1)/max_num / 8 + 0.25;
+				vt_arr[3*i + 1] = abs(p.x+1)/max_num / 8 + 0.5;
+			}
+			else{
+				vt_arr[3*i + 0] = abs(p.x+1)/max_num / 8 + 0.25;
+				vt_arr[3*i + 1] = abs(p.y+1)/max_num / 8 + 0;
+			}
+
 			vt_arr[3*i + 2] = 0;
 			
 		}
