@@ -341,7 +341,8 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 	case 'c':
 		std::cout << "pressed c to change to wood" << std::endl;
-		scene->changeWood();
+		//scene->changeWood();
+		renderer->changeUseWood();
 		break;
 	case 'x':
 		renderer->changeUseTime();

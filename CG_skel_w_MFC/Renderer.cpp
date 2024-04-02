@@ -17,6 +17,7 @@ Renderer::Renderer() : Renderer(512, 512, "vshader.glsl", "fshader.glsl")
 Renderer::Renderer(int width, int height, const char *vshader, const char *fshader) : m_width(width), m_height(height), programs(), current_program(0)
 {
 	use_time = false;
+	use_wood = false;
 	time = 0;
 	InitOpenGLRendering();
 	CreateBuffers(width, height);
@@ -193,6 +194,7 @@ void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const 
 	glUniform3fv(program.find("camera_position"), 1, camera_array);
 
 	glUniform1f(program.find("time"), time);
+	glUniform1f(program.find("useWoodTexture"), use_wood);
 	// Draw
 	glDrawArrays(GL_TRIANGLES, 0, face_count * 3);
 	glBindVertexArray(0);
@@ -288,6 +290,10 @@ void Renderer::setCameraMatrixes(Camera *camera)
 
 void Renderer::changeUseTime() {
 	use_time = !use_time;
+}
+
+void Renderer::changeUseWood() {
+	use_wood = !use_wood;
 }
 
 void Renderer::Init()
