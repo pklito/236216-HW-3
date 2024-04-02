@@ -172,11 +172,24 @@ void changeMaterialColor()
 	vec3 color_out;
 	float intensity = -1;
 
-	queryLight(color_out, intensity);
+	
+	Material mat = scene->getSelectedMaterial();
+	Light* light;
+	if(selected_type == 0){
+		light = new AmbientLight(1,mat.color_ambient);
+	}
+	else if(selected_type == 1){
+		light = new PointLight(1, mat.color_diffuse, vec3(0,0,0));
+	}
+	else{
+		light = new DirectionalLight(1, mat.color_specular, vec3(0,0,0));
+	}
+
+	queryLight(color_out, intensity, light);
+	delete light;
 	if(intensity < 0){
 		return;
 	}
-	Material mat = scene->getSelectedMaterial();
 	if(selected_type == 1){
 		mat.color_diffuse = color_out;
 	}
