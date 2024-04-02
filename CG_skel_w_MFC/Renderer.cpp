@@ -294,10 +294,6 @@ void Renderer::_DrawSymbol(const vec3& pos, const vec3& color, int shape, float 
 	glUseProgram(0);
 }
 
-void Renderer::changeUseTime() {
-	use_time = !use_time;
-}
-
 void Renderer::DrawLightSymbol(Light* light){
 	PointLight* plight = dynamic_cast<PointLight*>(light);
 	if(plight){

@@ -359,9 +359,6 @@ void keyboard(unsigned char key, int x, int y)
 		//scene->changeWood();
 		renderer->changeUseWood();
 		break;
-	case 'x':
-		renderer->changeUseTime();
-		break;
 	case 'm':
 		scene->getActiveCamera()->rotate(-15, 1, scene->getWorldControl());
 		renderer->setCameraMatrixes(scene->getActiveCamera());

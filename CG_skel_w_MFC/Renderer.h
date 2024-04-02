@@ -63,7 +63,6 @@ public:
 
 class Renderer
 {
-	bool use_time;
 	float time;
 	bool use_wood;
 	bool use_time;
@@ -122,8 +121,6 @@ public:
 
 	void DrawLightSymbol(Light* light);
 	void DrawCameraSymbol(Camera* camera);
-
-	void changeUseTime();
 
 	void SetCameraTransformInverse(const mat4 &cTransform);
 	void SetProjection(const mat4 &projection);

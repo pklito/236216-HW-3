@@ -28,7 +28,6 @@ public:
 	void setData(int dat) { data = dat; }
 	virtual void resetToCenter() = 0;
 	virtual void changeColor() = 0;
-	virtual void changeToWoodTex(bool wood) = 0;
 };
 
 class Camera

@@ -254,10 +254,7 @@ void Scene::cycleActiveCamera()
 
 void Scene::changeWood() 
 {
-	std::cout << "wood = " << wood << " on entering changeWood()" << std::endl;
-	wood = !wood;
-	std::cout << "wood = " << wood << " after entering changeWood()" << std::endl;
-	models[activeModel]->changeToWoodTex(wood);
+	//none
 }
 
 void Scene::setFillObj(bool fill)
