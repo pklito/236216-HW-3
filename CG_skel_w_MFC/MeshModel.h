@@ -21,6 +21,8 @@ protected:
 	GLuint vbo_mat_ambient;
 	GLuint vbo_mat_diffuse;
 	GLuint vbo_mat_specular;
+	GLuint vbo_tangent;
+	GLuint vbo_bitangent;
 
 
 
@@ -47,6 +49,7 @@ protected:
 	bool draw_complex_material;
 	bool hide_texture;
 	Texture texture;
+	Texture normal_texture;
 
 	Material uniform_mat;
 
@@ -56,7 +59,7 @@ protected:
 	void applyModelNormalTransformation(const mat4 &transformation_inv);
 
 public:
-	MeshModel(string fileName, string textureName = "");
+	MeshModel(string fileName, string textureName = "", string normalTextureName = "");
 	~MeshModel(void);
 	void loadFile(string fileName);
 	void draw(Renderer *renderer) override;

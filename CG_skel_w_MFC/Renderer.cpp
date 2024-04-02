@@ -164,7 +164,7 @@ void Renderer::EndDraw()
 /// @param face_count amount of vertices/3
 /// @param wm_transform world*model transform of the model
 /// @param wm_normal_transform world*model transform of the model normals
-void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform, const int textureID, const Material& uniform_mat)
+void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform, const int textureID,const int normalTextureID, const Material& uniform_mat)
 {
 	// Bind the models settings
 	glUseProgram(program.program);
@@ -174,6 +174,11 @@ void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textureID);
 		glUniform1i(program.find("ourTexture"), 0);
+	}
+	if(normalTextureID != -1){
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, normalTextureID);
+		glUniform1i(program.find("ourNormalTexture"), 1);
 	}
 	
 	GLfloat full_transform_array[16];
@@ -208,14 +213,14 @@ void Renderer::_DrawTris(Program &program, GLuint vao, GLuint face_count, const 
 /// @param face_count amount of vertices/3
 /// @param wm_transform world*model transform of the model
 /// @param wm_normal_transform world*model transform of the model normals
-void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform, const int textureID ,const Material& uniform_mat)
+void Renderer::DrawMesh(GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform, const int textureID, const int normalTextureID ,const Material& uniform_mat)
 {
 	//send the designated texture program
 	if(textureID != -1){
-		_DrawTris(program_texture, vao, face_count, wm_transform, wm_normal_transform, textureID, uniform_mat);
+		_DrawTris(program_texture, vao, face_count, wm_transform, wm_normal_transform, textureID, normalTextureID, uniform_mat);
 	}
 	else{
-		_DrawTris(programs[current_program], vao, face_count, wm_transform, wm_normal_transform, textureID, uniform_mat);
+		_DrawTris(programs[current_program], vao, face_count, wm_transform, wm_normal_transform, textureID, normalTextureID, uniform_mat);
 	}
 }
 

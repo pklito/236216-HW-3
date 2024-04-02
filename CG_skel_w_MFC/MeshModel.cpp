@@ -62,11 +62,13 @@ vec2 vec2fFromStream(std::istream &aStream)
 	return vec2(x, y);
 }
 
-MeshModel::MeshModel(string fileName, string textureName) : MeshModel()
+MeshModel::MeshModel(string fileName, string textureName, string normalTextureName) : MeshModel()
 {
 	loadFile(fileName);
 	if(textureName.length() > 0)
 		texture.load(textureName);
+	if(normalTextureName.length() > 0)
+		normal_texture.load(normalTextureName);
 }
 
 MeshModel::~MeshModel(void)
@@ -221,14 +223,16 @@ void MeshModel::generateBuffers(int face_num, const GLfloat *vertices_array, con
 	/*
 	Generate the buffer objects to store these arrays
 	*/
-	GLuint vbos[6] = {0, 0, 0, 0, 0, 0};
-	glGenBuffers(6, vbos);
+	GLuint vbos[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+	glGenBuffers(8, vbos);
 	vbo_vertices = vbos[0];
 	vbo_normals = vbos[1];
 	vbo_textures = vbos[2];
 	vbo_mat_ambient = vbos[3];
 	vbo_mat_diffuse = vbos[4];
 	vbo_mat_specular = vbos[5];
+	vbo_tangent = vbos[6];
+	vbo_bitangent = vbos[7];
 
 //MATERIALS
 	GLfloat *vm1_arr = new GLfloat[3 * 3 * face_num];
@@ -281,6 +285,53 @@ void MeshModel::generateBuffers(int face_num, const GLfloat *vertices_array, con
 	glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)(0));
 	glEnableVertexAttribArray(5);
 
+	GLfloat *vert_tangents = new GLfloat[3 * 3 * face_num];
+	GLfloat *vert_bitangents = new GLfloat[3 * 3 * face_num];
+	const GLfloat* const & const const_vt_arr = (vertex_textures_array != nullptr) ? vertex_textures_array : vt_arr;
+	for (int face = 0; face < face_num; face++)
+	{
+		vec3 pos1 = vec3(vertices_array[9 * face + 0], vertices_array[9 * face + 1], vertices_array[9 * face + 2]);
+		vec3 pos2 = vec3(vertices_array[9 * face + 3], vertices_array[9 * face + 4], vertices_array[9 * face + 5]);
+		vec3 pos3 = vec3(vertices_array[9 * face + 6], vertices_array[9 * face + 7], vertices_array[9 * face + 8]);
+		vec2 uv1 = vec2(const_vt_arr[9 * face + 0], const_vt_arr[9 * face + 1]);
+		vec2 uv2 = vec2(const_vt_arr[9 * face + 3], const_vt_arr[9 * face + 4]);
+		vec2 uv3 = vec2(const_vt_arr[9 * face + 6], const_vt_arr[9 * face + 7]);
+
+		vec3 edge1 = pos2 - pos1;
+		vec3 edge2 = pos3 - pos1;
+		vec2 deltaUV1 = uv2 - uv1;
+		vec2 deltaUV2 = uv3 - uv1; 
+		float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+		vert_tangents[9 * face + 0] = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+		vert_tangents[9 * face + 1] = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+		vert_tangents[9 * face + 2] = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+
+		vert_bitangents[9 * face + 0] = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+		vert_bitangents[9 * face + 1] = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+		vert_bitangents[9 * face + 2] = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+
+		//copy same tangents for other two vertices in the face
+		for(int i = 1; i < 3; i ++){
+			for(int coord = 0; coord < 3; coord++){
+				vert_tangents[9 * face + 3 * i + coord] = vert_tangents[9 * face + coord];
+				vert_bitangents[9 * face + 3 * i + coord] = vert_bitangents[9 * face + coord];
+			}
+		}
+
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_tangent);
+	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3, vert_tangents, GL_STATIC_DRAW);
+	glVertexAttribPointer(6, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)(0));
+	glEnableVertexAttribArray(6);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_bitangent);
+	glBufferData(GL_ARRAY_BUFFER, face_num * sizeof(float) * 3 * 3, vert_bitangents, GL_STATIC_DRAW);
+	glVertexAttribPointer(7, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)(0));
+	glEnableVertexAttribArray(7);
+
+	delete[] vert_tangents;
+	delete[] vert_bitangents;
 	//
 	// VERTEX NORMAL drawing vao
 	//
@@ -487,8 +538,9 @@ void MeshModel::draw(Renderer *renderer)
 	if (!draw_wireframe)
 	{
 		const int texture_id = hide_texture ? -1 : texture.m_RendererID;
+		const int normal_texture_id = hide_texture ? -1 : normal_texture.m_RendererID;
 		const Material material = (draw_complex_material) ? Material(vec3(0,0,0),vec3(0,0,0),vec3(0,0,0),0) : uniform_mat;
-		renderer->DrawMesh(vao, face_num, full_trans, full_norm_trans, texture_id, material); // TODO: calculate this transform on change
+		renderer->DrawMesh(vao, face_num, full_trans, full_norm_trans, texture_id ,normal_texture_id, material); // TODO: calculate this transform on change
 		
 	}
 	else

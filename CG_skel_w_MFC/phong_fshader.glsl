@@ -18,6 +18,7 @@ in vec2 fTexture;
 
 in vec3 vPos;
 
+in mat3 TBN;
 // 0 when time is not used.
 uniform float time;
 

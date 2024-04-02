@@ -16,6 +16,10 @@ in vec3 fAmbient;
 in vec3 fSpecular;
 in vec2 fTexture;
 uniform sampler2D ourTexture;
+uniform sampler2D ourNormalTexture;
+
+in mat3 TBN;
+
 
 //assuming matrix elements are non negative, I want to know if the matrix is all zeros, or close to it
 bool isZero(mat3 matrix){
@@ -26,16 +30,16 @@ vec3 reflect_ray(vec3 vector, vec3 normal) {
     return vector - normal * 2 * dot(vector, normal);
 }
 
-vec3 specular_calc(vec3 light_color, vec3 light_direction, vec3 specular_mat){
+vec3 specular_calc(vec3 light_color, vec3 light_direction, vec3 specular_mat,vec3 normal){
    //TODO get material from vshader
 
    vec3 view_direction = normalize(camera_position - fPos.xyz);
-   float cos_phi = max(dot(reflect_ray(-light_direction,fNormal),view_direction),0);
+   float cos_phi = max(dot(reflect_ray(-light_direction,normal),view_direction),0);
    return specular_mat * light_color * pow(cos_phi, 3);  //TODO change 5 to uniform
 }
 
-vec3 diffuse_calc(vec3 light_color, vec3 direction, vec3 diffuse_mat){
-   return diffuse_mat * light_color * max(dot(direction, fNormal),0);
+vec3 diffuse_calc(vec3 light_color, vec3 direction, vec3 diffuse_mat, vec3 normal){
+   return diffuse_mat * light_color * max(dot(direction, normal),0);
 }
 
 void main() 
@@ -44,6 +48,16 @@ void main()
    vec3 ambient_mat = fAmbient;
    vec3 diffuse_mat = texture(ourTexture, fTexture).xyz;
    vec3 specular_mat = fSpecular;
+
+   vec3 normal = texture(ourNormalTexture, fTexture).rgb;
+   normal = normal * 2.0 - 1.0;  
+   normal = TBN * normal;
+   if(length(normal) < 0.1){
+      normal = fNormal;
+   }
+   else{
+      normal = normalize(normal); 
+   }
 
    if(!isZero(uniform_material)){
       ambient_mat = uniform_material[0];
@@ -55,14 +69,14 @@ void main()
    // point lights loop
    for(int i = 0; i < 10; ++i){
       vec3 dir = normalize(point_lights[i][1] - fPos.xyz);
-      color += specular_calc(point_lights[i][0], dir, specular_mat);
-      color += diffuse_calc(point_lights[i][0], dir, diffuse_mat);
+      color += specular_calc(point_lights[i][0], dir, specular_mat,normal);
+      color += diffuse_calc(point_lights[i][0], dir, diffuse_mat,normal);
    }
    // directional lights
    for(int i = 0; i < 10; ++i){
       vec3 dir = directional_lights[i][1];
-      color += specular_calc(directional_lights[i][0], dir, specular_mat);
-      color += diffuse_calc(directional_lights[i][0], dir, diffuse_mat);
+      color += specular_calc(directional_lights[i][0], dir, specular_mat,normal);
+      color += diffuse_calc(directional_lights[i][0], dir, diffuse_mat,normal);
    }
 
    //ambient lights
