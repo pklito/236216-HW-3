@@ -258,7 +258,7 @@ void Renderer::DrawLines(GLuint lines_vao, GLuint lines_count, const mat4 &wm_tr
 	glUseProgram(0);
 }
 // draw symbols
-void Renderer::_DrawSymbol(const vec3& pos, const vec3& color, int shape){
+void Renderer::_DrawSymbol(const vec3& pos, const vec3& color, int shape, float scale){
 	//passes color
 	glUseProgram(program_wireframe.program);
 	glBindVertexArray(vao_symbol);
@@ -267,9 +267,9 @@ void Renderer::_DrawSymbol(const vec3& pos, const vec3& color, int shape){
 	glUniform3fv(program_wireframe.find("color"), 1, color_arr);
 
 	GLfloat full_transform_array[16];
-	toFloatArray(full_transform_array, Translate(pos.x,pos.y,pos.z));
+	toFloatArray(full_transform_array, Translate(pos.x,pos.y,pos.z)*Scale(scale,scale,scale));
 	glUniformMatrix4fv(program_wireframe.find("world_transform"), 1, GL_FALSE, full_transform_array);
-	std::cout << vao_symbol << ", " << shape <<":" << pos << " " << color<<std::endl;
+
 	GLfloat proj_array[16];
 	toFloatArray(proj_array, mat_project * mat_transform_inverse);
 	glUniformMatrix4fv(program_wireframe.find("camera_transform"), 1, GL_FALSE, proj_array);
@@ -291,8 +291,9 @@ void Renderer::DrawLightSymbol(Light* light){
 	}
 	DirectionalLight* dlight = dynamic_cast<DirectionalLight*>(light);
 	if(dlight){
-		_DrawSymbol(dlight->getDirection() * 0.5, dlight->getColor(), 1);
-		_DrawSymbol(dlight->getDirection() * 0.55, dlight->getColor(), 1);
+		_DrawSymbol(dlight->getDirection() * 0.5, dlight->getColor(), 1,0.5);
+		_DrawSymbol(dlight->getDirection() * 0.6, dlight->getColor(), 1,0.5);
+		_DrawSymbol(dlight->getDirection() * 0.7, dlight->getColor(), 1,0.5);
 	}
 }
 void Renderer::DrawCameraSymbol(Camera* camera){

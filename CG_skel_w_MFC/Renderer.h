@@ -89,8 +89,8 @@ class Renderer
 
 	void CreateBuffers(int width, int height);
 	void CreateSymbol();
-	
-	void _DrawSymbol(const vec3& pos, const vec3& color, int shape);
+
+	void _DrawSymbol(const vec3& pos, const vec3& color, int shape, float scale = 1);
 	void _passLights(Program & program);
 	void _DrawTris(Program &program, GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform, const int textureID = -1,const Material& uniform_mat = Material(vec3(0,0,0),vec3(0,0,0),vec3(0,0,0),0));
 	//////////////////////////////
