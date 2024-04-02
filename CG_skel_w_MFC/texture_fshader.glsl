@@ -29,13 +29,13 @@ vec3 reflect_ray(vec3 vector, vec3 normal) {
 vec3 specular_calc(vec3 light_color, vec3 light_direction, vec3 specular_mat){
    //TODO get material from vshader
 
-   vec3 view_direction = camera_position - fPos.xyz;
-   float cos_phi = dot(reflect_ray(-light_direction,fNormal),view_direction);
+   vec3 view_direction = normalize(camera_position - fPos.xyz);
+   float cos_phi = max(dot(reflect_ray(-light_direction,fNormal),view_direction),0);
    return specular_mat * light_color * pow(cos_phi, 3);  //TODO change 5 to uniform
 }
 
 vec3 diffuse_calc(vec3 light_color, vec3 direction, vec3 diffuse_mat){
-   return diffuse_mat * light_color * dot(direction, fNormal);
+   return diffuse_mat * light_color * max(dot(direction, fNormal),0);
 }
 
 void main() 
@@ -54,7 +54,7 @@ void main()
    vec3 color = vec3(0,0,0);
    // point lights loop
    for(int i = 0; i < 10; ++i){
-      vec3 dir = normalize(point_lights[i][1]-fPos.xyz);
+      vec3 dir = normalize(point_lights[i][1] - fPos.xyz);
       color += specular_calc(point_lights[i][0], dir, specular_mat);
       color += diffuse_calc(point_lights[i][0], dir, diffuse_mat);
    }

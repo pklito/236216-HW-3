@@ -48,7 +48,6 @@ public:
 	mat4 getTransform();
 	mat4 getTransformInverse();
 
-	void draw(Renderer *renderer);
 	vec3 getCameraPosition();
 	void translate(GLfloat x_trans, GLfloat y_trans, GLfloat z_trans, bool in_world);
 	void rotate(GLfloat theta_angle, int mode, bool in_world);

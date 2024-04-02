@@ -172,11 +172,24 @@ void changeMaterialColor()
 	vec3 color_out;
 	float intensity = -1;
 
-	queryLight(color_out, intensity);
+	
+	Material mat = scene->getSelectedMaterial();
+	Light* light;
+	if(selected_type == 0){
+		light = new AmbientLight(1,mat.color_ambient);
+	}
+	else if(selected_type == 1){
+		light = new PointLight(1, mat.color_diffuse, vec3(0,0,0));
+	}
+	else{
+		light = new DirectionalLight(1, mat.color_specular, vec3(0,0,0));
+	}
+
+	queryLight(color_out, intensity, light);
+	delete light;
 	if(intensity < 0){
 		return;
 	}
-	Material mat = scene->getSelectedMaterial();
 	if(selected_type == 1){
 		mat.color_diffuse = color_out;
 	}
@@ -239,7 +252,6 @@ void readFromFile()
 void changeLight()
 {
 
-	/* TODO
 	if(scene->getMovingModel()){
 		vec3 colorvec;
 		float intensity = -1;
@@ -259,7 +271,7 @@ void changeLight()
 
 		light->setColor(colorvec);
 		light->setIntensity(intensity);
-	}*/
+	}
 }
 //----------------------------------------------------------------------------
 // Callbacks
@@ -735,7 +747,7 @@ int my_main(int argc, char **argv)
 	Camera *camera = new Camera();
 	Light *light = new PointLight(1, vec3(1, 1, 1), vec3(-2, 0, 1));
 	Light *light2 = new DirectionalLight(1, vec3(1, 0, 1), vec3(0, 1, 0));
-	renderer->setAmbientLight(AmbientLight(1,vec3(0.3,0.3,0.3)));
+	renderer->setAmbientLight(AmbientLight(0.5,vec3(0.3,0.3,0.3)));
 
 	std::cout << "[ ] Camera transform: " << std::endl;
 	camera->LookAt(vec3(0, 0, 1), vec3(0, 0, -1), vec3(0, 1, 0));
@@ -743,7 +755,6 @@ int my_main(int argc, char **argv)
 	scene->addCamera(camera);
 	std::cout << "!" << camera->getProjection();
 	renderer->setCameraMatrixes(scene->getActiveCamera());
-	renderer->setAmbientLight(AmbientLight(1,vec3(0.6,0.3,0.3)));
 
 	scene->addLightSource(light);
 	//scene->addLightSource(light2);

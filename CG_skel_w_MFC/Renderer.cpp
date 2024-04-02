@@ -9,7 +9,7 @@
 #define INDEX(width, x, y, c) ((x) + (y) * (width)) * 3 + c
 GLenum err;
 #define DEBUG_BUG() while((err = glGetError()) != GL_NO_ERROR){ std::cerr << __FUNCTION__ << ":" << gluErrorString(err) << std::endl;}
-
+#define SYMBOL_FACE_NUM 12
 Renderer::Renderer() : Renderer(512, 512, "vshader.glsl", "fshader.glsl")
 {
 }
@@ -19,6 +19,7 @@ Renderer::Renderer(int width, int height, const char *vshader, const char *fshad
 	time = 0;
 	InitOpenGLRendering();
 	CreateBuffers(width, height);
+	CreateSymbol();
 	CreateProgram(vshader, fshader);
 	CreateProgram("gouraud_vshader.glsl", "generic_fshader.glsl");
 	program_wireframe = Program("lines_vshader.glsl", "lines_fshader.glsl", "world_transform", "camera_transform", "color");
@@ -256,7 +257,87 @@ void Renderer::DrawLines(GLuint lines_vao, GLuint lines_count, const mat4 &wm_tr
 
 	glUseProgram(0);
 }
+// draw symbols
+void Renderer::_DrawSymbol(const vec3& pos, const vec3& color, int shape, float scale){
+	//passes color
+	glUseProgram(program_wireframe.program);
+	glBindVertexArray(vao_symbol);
+	//pass the color
+	GLfloat color_arr[3] = {color.x, color.y, color.z};
+	glUniform3fv(program_wireframe.find("color"), 1, color_arr);
 
+	GLfloat full_transform_array[16];
+	toFloatArray(full_transform_array, Translate(pos.x,pos.y,pos.z)*Scale(scale,scale,scale));
+	glUniformMatrix4fv(program_wireframe.find("world_transform"), 1, GL_FALSE, full_transform_array);
+
+	GLfloat proj_array[16];
+	toFloatArray(proj_array, mat_project * mat_transform_inverse);
+	glUniformMatrix4fv(program_wireframe.find("camera_transform"), 1, GL_FALSE, proj_array);
+
+	// Draw
+	if(shape == 1){
+	glDrawArrays(GL_TRIANGLES, 0, SYMBOL_FACE_NUM * 3);
+	}
+	else if(shape == 0){
+		glDrawArrays(GL_LINE_LOOP, 0, SYMBOL_FACE_NUM * 3);
+	}
+	glUseProgram(0);
+}
+
+void Renderer::DrawLightSymbol(Light* light){
+	PointLight* plight = dynamic_cast<PointLight*>(light);
+	if(plight){
+		_DrawSymbol(plight->getPosition(), plight->getColor(), 1);
+	}
+	DirectionalLight* dlight = dynamic_cast<DirectionalLight*>(light);
+	if(dlight){
+		_DrawSymbol(dlight->getDirection() * 0.5, dlight->getColor(), 1,0.5);
+		_DrawSymbol(dlight->getDirection() * 0.6, dlight->getColor(), 1,0.5);
+		_DrawSymbol(dlight->getDirection() * 0.7, dlight->getColor(), 1,0.5);
+	}
+}
+void Renderer::DrawCameraSymbol(Camera* camera){
+	_DrawSymbol(camera->getCameraPosition(), vec3(1,0,1), 0);
+}
+void Renderer::CreateSymbol(){
+	const float scale = 0.05f;
+	const vec3 cube_points[] = {vec3(-scale, -scale, -scale), vec3(scale, -scale, -scale), vec3(scale, scale, -scale), vec3(-scale, scale, -scale), vec3(-scale, -scale, scale), vec3(scale, -scale, scale), vec3(scale, scale, scale), vec3(-scale, scale, scale)};
+	const int face_indices[] = {
+		2, 1, 0,
+		0, 3, 2,
+		6, 5, 1,
+		1, 2, 6,
+		7, 4, 5,
+		5, 6, 7,
+		3, 0, 4,
+		4, 7, 3,
+		6, 2, 3,
+		3, 7, 6,
+		5, 4, 0,
+		0, 1, 5};
+
+	// Hardcoded cube vertices
+
+	static GLfloat vertices_array[SYMBOL_FACE_NUM * 3 * 3];
+	for (int i = 0; i < 3 * SYMBOL_FACE_NUM; i++)
+	{
+		for (int coord = 0; coord < 3; coord++)
+		{
+			vertices_array[3 * i + coord] = cube_points[face_indices[i]][coord];
+		}
+	}
+	glGenVertexArrays(1, &vao_symbol);
+	glBindVertexArray(vao_symbol);
+	glGenBuffers(1, &vbo_symbol);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_symbol);
+	glBufferData(GL_ARRAY_BUFFER, SYMBOL_FACE_NUM * sizeof(float) * 3 * 3,
+				 vertices_array, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+	glEnableVertexAttribArray(0);
+	//unbind
+	glBindVertexArray(0);
+}
 // Camera
 void Renderer::SetCameraTransformInverse(const mat4 &cTransform)
 {
