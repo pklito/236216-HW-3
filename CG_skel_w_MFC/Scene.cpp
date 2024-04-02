@@ -22,6 +22,8 @@ void Scene::draw()
 		(*(it))->draw(m_renderer);
 	}
 	for (auto it = cameras.begin(); it != cameras.end(); it++){
+		if(*it == cameras[activeCamera])
+			continue;
 		m_renderer->DrawCameraSymbol(*it);
 	}
 	for (auto it = lights.begin(); it != lights.end(); it++){
