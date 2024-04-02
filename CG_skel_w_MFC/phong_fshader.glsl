@@ -73,19 +73,38 @@ void main()
       specular_mat = uniform_material[2];
    }
 
+   // Define color increments
+   float r_increment = 0.05;
+   float g_increment = 0.05;
+   float b_increment = 0.05;
+   float colorModificationFactor = 0.0;
+   if (time != 0.0) {
+      // Calculate a factor based on time to gradually change the color
+      colorModificationFactor = sin(time) * 0.5 + 0.5; // Adjust the amplitude and frequency as needed
+   }
+
+   // Modify diffuse material based on the time factor
+   vec3 diffuse_mat_modified = diffuse_mat;
+   diffuse_mat_modified.r += r_increment * colorModificationFactor;
+   diffuse_mat_modified.g += g_increment * colorModificationFactor;
+   diffuse_mat_modified.b += b_increment * colorModificationFactor;
+
+   // Clamp modified diffuse material to the range [0, 1]
+   diffuse_mat_modified = clamp(diffuse_mat_modified, 0.0, 1.0);
+
    //calculate the color via light sources
    vec3 color = vec3(0,0,0);
    // point lights loop
    for(int i = 0; i < 10; ++i){
       vec3 dir = normalize(point_lights[i][1] - fPos.xyz);
       color += specular_calc(point_lights[i][0], dir, specular_mat);
-      color += diffuse_calc(point_lights[i][0], dir, diffuse_mat);
+      color += diffuse_calc(point_lights[i][0], dir, diffuse_mat_modified);
    }
    // directional lights
    for(int i = 0; i < 10; ++i){
       vec3 dir = directional_lights[i][1];
       color += specular_calc(directional_lights[i][0], dir, specular_mat);
-      color += diffuse_calc(directional_lights[i][0], dir, diffuse_mat);
+      color += diffuse_calc(directional_lights[i][0], dir, diffuse_mat_modified);
    }
 
    //ambient lights
