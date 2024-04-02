@@ -15,8 +15,8 @@ in vec3 fDiffuse;
 in vec3 fAmbient;
 in vec3 fSpecular;
 in vec2 fTexture;
-uniform sampler2D ourNormalTexture;
 uniform sampler2D ourTexture;
+uniform sampler2D ourNormalTexture;
 
 in mat3 TBN;
 
@@ -49,7 +49,15 @@ void main()
    vec3 diffuse_mat = texture(ourTexture, fTexture).xyz;
    vec3 specular_mat = fSpecular;
 
-   vec3 normal = TBN * vec3(0,0,1);
+   vec3 normal = texture(ourNormalTexture, fTexture).rgb;
+   normal = normal * 2.0 - 1.0;  
+   normal = TBN * normal;
+   if(length(normal) < 0.1){
+      normal = fNormal;
+   }
+   else{
+      normal = normalize(normal); 
+   }
 
    if(!isZero(uniform_material)){
       ambient_mat = uniform_material[0];

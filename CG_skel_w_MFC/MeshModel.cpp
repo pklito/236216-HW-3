@@ -537,7 +537,7 @@ void MeshModel::draw(Renderer *renderer)
 		const int texture_id = hide_texture ? -1 : texture.m_RendererID;
 		const int normal_texture_id = hide_texture ? -1 : normal_texture.m_RendererID;
 		const Material material = (draw_complex_material) ? Material(vec3(0,0,0),vec3(0,0,0),vec3(0,0,0),0) : uniform_mat;
-		renderer->DrawMesh(vao, face_num, full_trans, full_norm_trans, normal_texture_id, texture_id, material); // TODO: calculate this transform on change
+		renderer->DrawMesh(vao, face_num, full_trans, full_norm_trans, texture_id ,normal_texture_id, material); // TODO: calculate this transform on change
 		
 	}
 	else
