@@ -62,11 +62,13 @@ vec2 vec2fFromStream(std::istream &aStream)
 	return vec2(x, y);
 }
 
-MeshModel::MeshModel(string fileName, string textureName) : MeshModel()
+MeshModel::MeshModel(string fileName, string textureName, string normalTextureName) : MeshModel()
 {
 	loadFile(fileName);
 	if(textureName.length() > 0)
 		texture.load(textureName);
+	if(normalTextureName.length() > 0)
+		normal_texture.load(normalTextureName);
 }
 
 MeshModel::~MeshModel(void)
@@ -484,8 +486,9 @@ void MeshModel::draw(Renderer *renderer)
 	if (!draw_wireframe)
 	{
 		const int texture_id = hide_texture ? -1 : texture.m_RendererID;
+		const int normal_texture_id = hide_texture ? -1 : normal_texture.m_RendererID;
 		const Material material = (draw_complex_material) ? Material(vec3(0,0,0),vec3(0,0,0),vec3(0,0,0),0) : uniform_mat;
-		renderer->DrawMesh(vao, face_num, full_trans, full_norm_trans, texture_id, material); // TODO: calculate this transform on change
+		renderer->DrawMesh(vao, face_num, full_trans, full_norm_trans, normal_texture_id, texture_id, material); // TODO: calculate this transform on change
 		
 	}
 	else
