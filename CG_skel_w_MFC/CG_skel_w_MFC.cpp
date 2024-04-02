@@ -56,6 +56,7 @@ enum MENU_STATES
 
 	ADD_TETRAHEDRON,
 	ADD_CUBE,
+	ADD_CUBE_MAP,
 
 	ADD_LIGHT_POINT,
 	ADD_LIGHT_DIRECTIONAL
@@ -525,6 +526,8 @@ void primMenu(int id)
 	case ADD_TETRAHEDRON:
 		model = new PrimMeshModel(PRIM_TETRAHEDRON);
 		break;
+	case ADD_CUBE_MAP:
+		model = new PrimMeshModel(PRIM_CUBE, "meshes/skybox");
 	default:
 		return;
 	}
@@ -653,6 +656,7 @@ void initMenu()
 	int primitivesMenu = glutCreateMenu(primMenu);
 	glutAddMenuEntry("Tetrahedron", ADD_TETRAHEDRON);
 	glutAddMenuEntry("Cube", ADD_CUBE);
+	glutAddMenuEntry("Cubemap", ADD_CUBE_MAP);
 
 	int lightsMenu = glutCreateMenu(lightMenu);
 	glutAddMenuEntry("Point", ADD_LIGHT_POINT);

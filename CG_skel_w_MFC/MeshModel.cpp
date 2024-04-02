@@ -2,11 +2,30 @@
 #include "MeshModel.h"
 #include "vec.h"
 #include <string>
+#include <filesystem>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include "GL/freeglut.h"
 #include "InitShader.h"
+
+#include <Windows.h>
+
+std::vector<std::string> getFilesInDirectory(const std::string& directory) {
+	std::vector<std::string> files;
+	WIN32_FIND_DATAA findFileData;
+	HANDLE hFind = FindFirstFileA((directory + "\\*").c_str(), &findFileData);
+
+	if (hFind != INVALID_HANDLE_VALUE) {
+		do {
+			if (!(findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+				files.push_back(directory + "\\" + findFileData.cFileName);
+			}
+		} while (FindNextFileA(hFind, &findFileData) != 0);
+		FindClose(hFind);
+	}
+	return files;
+}
 
 using namespace std;
 
@@ -477,7 +496,7 @@ void MeshModel::generateMaterialBuffer(int face_num, const vec3& ambient_color, 
 
 /// @brief
 /// @param renderer
-void MeshModel::draw(Renderer *renderer)
+void MeshModel::draw(Renderer *renderer, bool applyCubemap)
 {
 	mat4 full_trans = _world_transform * _model_transform;
 	mat4 full_norm_trans = _world_normal_transform * _model_normal_transform;
@@ -485,6 +504,16 @@ void MeshModel::draw(Renderer *renderer)
 	{
 		const int texture_id = hide_texture ? -1 : texture.m_RendererID;
 		const Material material = (draw_complex_material) ? Material(vec3(0,0,0),vec3(0,0,0),vec3(0,0,0),0) : uniform_mat;
+		if (applyCubemap) {
+			// Bind cubemap texture to texture unit 0
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture); // Assuming cubemapTexture is the ID of the loaded cubemap
+
+			// Set the cubemap texture uniform in the shader
+			glUniform1i(glGetUniformLocation(renderer->getCurrProgramID(), "skybox"), 0); // Assuming "skybox" is the uniform name in your shader program
+
+			// Pass the cubemap texture to the shader as a uniform, if needed
+		}
 		renderer->DrawMesh(vao, face_num, full_trans, full_norm_trans, texture_id, material); // TODO: calculate this transform on change
 		
 	}
@@ -620,7 +649,39 @@ void MeshModel::resetToCenter()
 // PRIM
 //------------
 
-void PrimMeshModel::Cube()
+unsigned int loadCubemap(vector<std::string> faces)
+{
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+	int width, height, nrChannels;
+	for (unsigned int i = 0; i < faces.size(); i++)
+	{
+		unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+				0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+			);
+			stbi_image_free(data);
+		}
+		else
+		{
+			std::cout << "Cubemap tex failed to load at path: " << faces[i] << std::endl;
+			stbi_image_free(data);
+		}
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	return textureID;
+}
+
+void PrimMeshModel::Cube(string textureName)
 {
 	const vec3 cube_points[] = {vec3(-0.5f, -0.5f, -0.5f), vec3(0.5f, -0.5f, -0.5f), vec3(0.5f, 0.5f, -0.5f), vec3(-0.5f, 0.5f, -0.5f), vec3(-0.5f, -0.5f, 0.5f), vec3(0.5f, -0.5f, 0.5f), vec3(0.5f, 0.5f, 0.5f), vec3(-0.5f, 0.5f, 0.5f)};
 	const int face_indices[] = {
@@ -648,8 +709,11 @@ void PrimMeshModel::Cube()
 			vertices_array[3 * i + coord] = cube_points[face_indices[i]][coord];
 		}
 	}
+	if (textureName.length() > 0) {
+		vector<std::string> faces = getFilesInDirectory(textureName);
 
-	generateBuffers(face_num, vertices_array, nullptr, nullptr, nullptr);
+		cubemapTexture = loadCubemap(faces);	
+	}
 }
 
 void PrimMeshModel::Tetrahedron()

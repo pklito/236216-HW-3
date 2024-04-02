@@ -15,7 +15,7 @@ protected:
 public:
 	Model() : data(0) {}
 	virtual ~Model() {}
-	void virtual draw(Renderer *renderer) = 0;
+	void virtual draw(Renderer *renderer, bool applyCubemap = false) = 0;
 	virtual void setShowNormals(bool change) = 0;
 	virtual void setShowNormalsToVertices(bool change) = 0;
 	virtual void setFillObj(bool fill) = 0;

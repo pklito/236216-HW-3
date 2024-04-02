@@ -47,6 +47,7 @@ protected:
 	bool draw_complex_material;
 	bool hide_texture;
 	Texture texture;
+	unsigned int cubemapTexture;
 
 	Material uniform_mat;
 
@@ -59,7 +60,7 @@ public:
 	MeshModel(string fileName, string textureName = "");
 	~MeshModel(void);
 	void loadFile(string fileName);
-	void draw(Renderer *renderer) override;
+	void draw(Renderer *renderer, bool applyCubemap = false) override;
 
 	// TODO UNIMPLEMENTED:
 	mat4 getFullTransformation();
@@ -89,20 +90,21 @@ typedef enum
 class PrimMeshModel : public MeshModel
 {
 protected:
-	void Cube();
+	void Cube(string textureName = "");
 	void Tetrahedron();
 
 public:
-	PrimMeshModel(PRIM_MODEL model)
+	PrimMeshModel(PRIM_MODEL model, string textureName = "")
 	{
 		switch (model)
 		{
 		case PRIM_CUBE:
-			Cube();
+			Cube(textureName);
 			break;
 		case PRIM_TETRAHEDRON:
 			Tetrahedron();
 			break;
 		}
 	}
+
 };
