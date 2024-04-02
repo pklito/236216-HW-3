@@ -84,8 +84,13 @@ class Renderer
 	std::vector<Light*>* lights;
 	AmbientLight ambient_light;
 
+	GLuint vao_symbol;
+	GLuint vbo_symbol;
+
 	void CreateBuffers(int width, int height);
+	void CreateSymbol();
 	
+	void _DrawSymbol(const vec3& pos, const vec3& color, int shape);
 	void _passLights(Program & program);
 	void _DrawTris(Program &program, GLuint vao, GLuint face_count, const mat4 &wm_transform, const mat4 &wm_normal_transform, const int textureID = -1,const Material& uniform_mat = Material(vec3(0,0,0),vec3(0,0,0),vec3(0,0,0),0));
 	//////////////////////////////
@@ -111,6 +116,9 @@ public:
 	void DrawMesh(GLuint vao, GLuint face_count, const mat4 &transform = mat4(), const mat4 &normal_transform = mat4(), const int textureID=-1,const Material& uniform_mat = Material(vec3(0,0,0),vec3(0,0,0),vec3(0,0,0),0));
 	void DrawWireframe(GLuint vao, GLuint face_count, const mat4 &wm_transform);
 	void DrawLines(GLuint lines_vao, GLuint lines_count, const mat4 &wm_transform, vec3 color = vec3(1, 0, 1));
+
+	void DrawLightSymbol(Light* light);
+	void DrawCameraSymbol(Camera* camera);
 
 	void SetCameraTransformInverse(const mat4 &cTransform);
 	void SetProjection(const mat4 &projection);
