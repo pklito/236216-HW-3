@@ -54,7 +54,7 @@ void main()
 { 
    //Decide if to take the materials from the vertices or from a uniform
    vec3 ambient_mat = fAmbient;
-   vec3 diffuse_mat = texture(ourTexture, fTexture).xyz + texture(ourNormalTexture, fTexture).xyz;
+   vec3 diffuse_mat = texture(ourTexture, fTexture).xyz;
    vec3 specular_mat = fSpecular;
 
    if(!isZero(uniform_material)){
