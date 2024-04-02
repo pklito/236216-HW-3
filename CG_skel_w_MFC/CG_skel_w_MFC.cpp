@@ -340,6 +340,9 @@ void keyboard(unsigned char key, int x, int y)
 		scene->getActiveCamera()->translate(0, 0, -0.1, scene->getWorldControl());
 		renderer->setCameraMatrixes(scene->getActiveCamera());
 		break;
+	case 'x':
+		renderer->changeUseTime();
+		break;
 	case 'z': // return model to center
 		scene->returnModelToCenter();
 		break;
@@ -760,7 +763,8 @@ int my_main(int argc, char **argv)
 	//scene->addLightSource(light2);
 
 	std::cout << "[ ] Reading mesh files... ";
-	MeshModel *demo_object = new MeshModel("meshes/shirt.obj","meshes/shirt4.jpg");
+	//MeshModel *demo_object = new MeshModel("meshes/shirt.obj","meshes/shirt4.jpg");
+	MeshModel *demo_object = new MeshModel("meshes/bunny.obj");
 
 	scene->addMeshModel(demo_object);
 	std::cout << " Done!" << std::endl;

@@ -64,6 +64,7 @@ public:
 class Renderer
 {
 	float time;
+	bool use_time;
 
 	float *m_outBuffer; // 3*width*height
 	float *m_zbuffer;	// width*height
@@ -119,6 +120,8 @@ public:
 
 	void DrawLightSymbol(Light* light);
 	void DrawCameraSymbol(Camera* camera);
+
+	void changeUseTime();
 
 	void SetCameraTransformInverse(const mat4 &cTransform);
 	void SetProjection(const mat4 &projection);
