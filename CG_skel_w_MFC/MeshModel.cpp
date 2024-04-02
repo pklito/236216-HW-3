@@ -145,8 +145,16 @@ void MeshModel::loadFile(string fileName)
 				vertices_array[k + coord] = vertices[it->v[i] - 1][coord];
 				if (vertex_normals.size() > 0)
 					vertex_normals_array[k + coord] = vertex_normals[it->vn[i] - 1][coord];
-				if (vertex_textures.size() > 0)
-					vertex_textures_array[k + coord] = vertex_textures[it->vt[i] - 1][coord]; // Take the face indexes from the vertix array BUG FIXED
+				if (vertex_textures.size() > 0 && it->vt[i] != -1)
+				{
+					// Use provided texture coordinates
+					vertex_textures_array[k + coord] = vertex_textures[it->vt[i] - 1][coord];
+				}
+				else
+				{
+					// Generate wood texture coordinates for vertices without texture coordinates
+					vertex_textures_array[k + coord] = vertices[it->v[i] - 1][coord]; // Adjust scaling as needed
+				}
 			}
 			// iterate to next face
 			k += 3;
@@ -613,7 +621,7 @@ void MeshModel::loadWoodTurbulenceTexture(int width, int height) {
 void MeshModel::changeToWoodTex(bool change) {
 	draw_wood = change;
 	if (draw_wood && !wood_texture_loaded) {
-		loadWoodTurbulenceTexture(2048, 2048);
+		loadWoodTurbulenceTexture(512, 512);
 	}
 }
 
