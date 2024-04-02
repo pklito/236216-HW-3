@@ -21,6 +21,27 @@ in vec3 vPos;
 // 0 when time is not used.
 uniform float time;
 
+vec3 getColorAnimation(vec3 diffuse_mat, float seed){
+   // Define color increments
+   float r_increment = abs(vPos.x/10);
+   float g_increment = abs(vPos.y/10);
+   float b_increment = abs(vPos.z/10);
+   float colorModificationFactor = 0.0;
+   if (time != 0.0) {
+      // Calculate a factor based on time to gradually change the color
+      colorModificationFactor = sin(0.3*time * (1+seed)) * (10 - seed) + 0.5; // Adjust the amplitude and frequency as needed
+   }
+
+   // Modify diffuse material based on the time factor
+   vec3 diffuse_mat_modified = diffuse_mat;
+   diffuse_mat_modified.r += r_increment * colorModificationFactor;
+   diffuse_mat_modified.g += g_increment * colorModificationFactor;
+   diffuse_mat_modified.b += b_increment * colorModificationFactor;
+
+   // Clamp modified diffuse material to the range [0, 1]
+   return clamp(diffuse_mat_modified, 0.0, 1.0);
+}
+
 //HSV, Taken from http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl. (https://stackoverflow.com/a/17897228)
 // All components are in the range [0…1], including hue.
 vec3 rgb2hsv(vec3 c)
@@ -75,24 +96,8 @@ void main()
       specular_mat = uniform_material[2];
    }
 
-   // Define color increments
-   float r_increment = abs(vPos.x/10);
-   float g_increment = abs(vPos.y/10);
-   float b_increment = abs(vPos.z/10);
-   float colorModificationFactor = 0.0;
-   if (time != 0.0) {
-      // Calculate a factor based on time to gradually change the color
-      colorModificationFactor = sin(0.3*time) * 10 + 0.5; // Adjust the amplitude and frequency as needed
-   }
-
-   // Modify diffuse material based on the time factor
-   vec3 diffuse_mat_modified = diffuse_mat;
-   diffuse_mat_modified.r += r_increment * colorModificationFactor;
-   diffuse_mat_modified.g += g_increment * colorModificationFactor;
-   diffuse_mat_modified.b += b_increment * colorModificationFactor;
-
-   // Clamp modified diffuse material to the range [0, 1]
-   diffuse_mat_modified = clamp(diffuse_mat_modified, 0.0, 1.0);
+   vec3 diffuse_mat_modified = getColorAnimation(diffuse_mat, 0);
+   vec3 ambient_mat_modified = getColorAnimation(ambient_mat, 1.5);
 
    //calculate the color via light sources
    vec3 color = vec3(0,0,0);
@@ -110,7 +115,7 @@ void main()
    }
 
    //ambient lights
-   color += ambient_light * ambient_mat;
+   color += ambient_light * ambient_mat_modified;
 
    fColor = vec4(color, 1);
 } 
