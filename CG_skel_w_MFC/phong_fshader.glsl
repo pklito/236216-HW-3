@@ -16,6 +16,8 @@ in vec3 fAmbient;
 in vec3 fSpecular;
 in vec2 fTexture;
 
+in vec3 vPos;
+
 // 0 when time is not used.
 uniform float time;
 
@@ -74,13 +76,13 @@ void main()
    }
 
    // Define color increments
-   float r_increment = 0.05;
-   float g_increment = 0.05;
-   float b_increment = 0.05;
+   float r_increment = abs(vPos.x/10);
+   float g_increment = abs(vPos.y/10);
+   float b_increment = abs(vPos.z/10);
    float colorModificationFactor = 0.0;
    if (time != 0.0) {
       // Calculate a factor based on time to gradually change the color
-      colorModificationFactor = sin(time) * 0.5 + 0.5; // Adjust the amplitude and frequency as needed
+      colorModificationFactor = sin(0.3*time) * 10 + 0.5; // Adjust the amplitude and frequency as needed
    }
 
    // Modify diffuse material based on the time factor
