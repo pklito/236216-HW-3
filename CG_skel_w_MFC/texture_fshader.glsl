@@ -18,6 +18,8 @@ in vec2 fTexture;
 uniform sampler2D ourTexture;
 uniform sampler2D ourNormalTexture;
 
+in mat3 TBN;
+
 //assuming matrix elements are non negative, I want to know if the matrix is all zeros, or close to it
 bool isZero(mat3 matrix){
    return dot(matrix*vec3(1,1,1), vec3(1,1,1)) < 0.01;

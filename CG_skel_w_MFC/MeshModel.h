@@ -21,6 +21,8 @@ protected:
 	GLuint vbo_mat_ambient;
 	GLuint vbo_mat_diffuse;
 	GLuint vbo_mat_specular;
+	GLuint vbo_tangent;
+	GLuint vbo_bitangent;
 
 
 
