@@ -299,7 +299,7 @@ void Renderer::DrawCameraSymbol(Camera* camera){
 	_DrawSymbol(camera->getCameraPosition(), vec3(1,0,1), 0);
 }
 void Renderer::CreateSymbol(){
-	const int scale = 0.05f;
+	const float scale = 0.05f;
 	const vec3 cube_points[] = {vec3(-scale, -scale, -scale), vec3(scale, -scale, -scale), vec3(scale, scale, -scale), vec3(-scale, scale, -scale), vec3(-scale, -scale, scale), vec3(scale, -scale, scale), vec3(scale, scale, scale), vec3(-scale, scale, scale)};
 	const int face_indices[] = {
 		2, 1, 0,
