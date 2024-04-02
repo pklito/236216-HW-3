@@ -491,13 +491,7 @@ void MeshModel::draw(Renderer *renderer)
 	mat4 full_norm_trans = _world_normal_transform * _model_normal_transform;
 	if (!draw_wireframe)
 	{
-		int texture_id;
-		if (draw_wood && wood_texture_loaded) {
-			texture_id = wood_texture.m_RendererID;
-		}
-		else {
-			texture_id = hide_texture ? -1 : texture.m_RendererID;
-		}
+		const int texture_id = hide_texture ? -1 : texture.m_RendererID;
 		const Material material = (draw_complex_material) ? Material(vec3(0,0,0),vec3(0,0,0),vec3(0,0,0),0) : uniform_mat;
 		renderer->DrawMesh(vao, face_num, full_trans, full_norm_trans, texture_id, material); // TODO: calculate this transform on change
 		
@@ -611,18 +605,6 @@ void MeshModel::setFillObj(bool fill)
 
 void MeshModel::setHideTexture(bool hide){
 	hide_texture = hide;
-}
-
-void MeshModel::loadWoodTurbulenceTexture(int width, int height) {
-	wood_texture.loadWoodTurbulenceTexture(width, height);
-	wood_texture_loaded = true;
-}
-
-void MeshModel::changeToWoodTex(bool change) {
-	draw_wood = change;
-	if (draw_wood && !wood_texture_loaded) {
-		loadWoodTurbulenceTexture(512, 512);
-	}
 }
 
 // TODO: Implement this function

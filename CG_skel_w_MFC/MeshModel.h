@@ -9,7 +9,7 @@ using namespace std;
 class MeshModel : public Model
 {
 protected:
-	MeshModel() : draw_wireframe(false), draw_vertex_normals(false), draw_bounding_box(false), draw_face_normals(false), draw_complex_material(false), hide_texture(false), draw_wood(false), wood_texture_loaded(false), uniform_mat(Material(vec3(0.2, 0.2, 0.2), vec3(0.8, 0.1, 0.3), vec3(0.3, 0.3, 0.3), 3)) {}
+	MeshModel() : draw_wireframe(false), draw_vertex_normals(false),draw_bounding_box(false), draw_face_normals(false), draw_complex_material(false), hide_texture(false), uniform_mat(Material(vec3(0.2,0.2,0.2),vec3(0.8,0.1,0.3),vec3(0.3,0.3,0.3),3)) {}
 	void generateBuffers( int face_num, const GLfloat *vertices_array, const GLfloat *vertex_normals_array, const GLfloat *vertex_textures_array, const GLfloat *vertex_material_array);
 	void generateMaterialBuffer(int face_num, const vec3&, const vec3&, const vec3&);
 
@@ -46,9 +46,6 @@ protected:
 
 	bool draw_complex_material;
 	bool hide_texture;
-	bool draw_wood;
-	bool wood_texture_loaded;
-	Texture wood_texture;
 	Texture texture;
 
 	Material uniform_mat;
@@ -75,8 +72,6 @@ public:
 	void setShowBox(bool change) override;
 	void setFillObj(bool fill);
 	void setHideTexture(bool hide);
-	void loadWoodTurbulenceTexture(int width, int height);
-	void changeToWoodTex(bool change);
 
 	void changeColor();
 
